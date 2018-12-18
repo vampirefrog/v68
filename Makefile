@@ -28,7 +28,7 @@ test-mem: test-mem.o v68.o v68mem.o v68human.o v68opm.o v68io.o v68doscall.o v68
 	gcc -g -Wall -c $< -o $@
 
 clean:
-	rm -f *.o musashi/*.o $(patsubst %.c,musashi/%.c,$(MUSASHIGENCFILES)) ay.js *.wasm *.map test
+	rm -f v68 xinfo sjis2utf8 *.o musashi/*.o $(patsubst %.c,musashi/%.c,$(MUSASHIGENCFILES)) ay.js *.wasm *.map test
 
 main.o: main.c v68.h okim6258.h mamedef.h ym2151.h v68io.h cmdline.h \
  tools.h
