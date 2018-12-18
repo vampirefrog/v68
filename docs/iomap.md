@@ -12,10 +12,10 @@
 となる.
 
         X = 通常の設定モードでの X 座標
-        Y = 〃                    Y 座標
+        Y = 〃                   Y 座標
         P = プレーン番号
         ADR = 65536 色表示モードで (X,Y) 点をアクセスする時のアドレス
-        BIT = 〃                                      ビット位置
+        BIT = 〃                                     ビット位置
 
 実画面512×512ドット、65536色表示:
         有効ビット   下位 16 ビット
@@ -67,37 +67,37 @@ VRAM が割り当てられている. ドットの表現は水平型で、1 ワ�
 
 ==============================================================================
 
-・CRT コントローラ
+・CRT controller
 
-  基本的にはワードサイズのポートだが、バイトサイズでのアクセスも可能である.
+  Basically it is a word size port, but access by byte size is also possible.
 
 
 address size    R/W
-$e80000 1.w       W     R00     水平トータル            ┐
-$e80002 1.w       W     R01     水平同期終了位置        │水平タイミング制御
+$e80000 1.w       W     R00     Horizontal total        ┐
+$e80002 1.w       W     R01     水平同期終了位置        │Horizontal timing control
 $e80004 1.w       W     R02     水平表示開始位置        │
 $e80006 1.w       W     R03     水平表示終了位置        ┘
 $e80008 1.w       W     R04     垂直トータル            ┐
-$e8000a 1.w       W     R05     垂直同期終了位置        │垂直タイミング制御
+$e8000a 1.w       W     R05     垂直同期終了位置        │Vertical timing control
 $e8000c 1.w       W     R06     垂直表示開始位置        │
 $e8000e 1.w       W     R07     垂直表示終了位置        ┘
-$e80010 1.w       W     R08     外部同期水平アジャスト     : 水平位置微調整
-$e80012 1.w       W     R09     ラスタ番号           : ラスタ割り込み用
-$e80014 1.w       W     R10     X 位置                    ┐テキスト画面
-$e80016 1.w       W     R11     Y 位置                    ┘       スクロール
+$e80010 1.w       W     R08     外部同期水平アジャスト  : Horizontal position fine adjustment
+$e80012 1.w       W     R09     Raster number           : For raster interrupt
+$e80014 1.w       W     R10     X 位置                  ┐Text screen
+$e80016 1.w       W     R11     Y 位置                  ┘scrolling
 $e80018 1.w       W     R12     X0                      ┐
 $e8001a 1.w       W     R13     Y0                      │
 $e8001c 1.w       W     R14     X1                      │
-$e8001e 1.w       W     R15     Y1                      │グラフィック画面
-$e80020 1.w       W     R16     X2                      │      スクロール
+$e8001e 1.w       W     R15     Y1                      │Graphic screen
+$e80020 1.w       W     R16     X2                      │scrolling
 $e80022 1.w       W     R17     Y2                      │
 $e80024 1.w       W     R18     X3                      │
 $e80026 1.w       W     R19     Y3                      ┘
-$e80028 1.w     R/W     R20     メモリモード/表示モード制御
-$e8002a 1.w     R/W     R21     同時アクセス/ラスタコピー/高速クリアプレーン撰択
-$e8002c 1.w       W     R22     ラスタコピー動作用       : ラスタ番号
-$e8002e 1.w       W     R23     テキスト画面アクセスマスクパターン
-$e80480 1.w     R/W     動作      画像取り込み/高速クリア/ラスタコピー制御
+$e80028 1.w     R/W     R20     Memory mode / display mode control
+$e8002a 1.w     R/W     R21     Simultaneous access / raster copy / fast clear plane selection
+$e8002c 1.w       W     R22     For raster copy operation : raster number
+$e8002e 1.w       W     R23     Text screen access mask pattern
+$e80480 1.w     R/W     Behavior Image capture / fast clear / raster copy control
 
 
 CRTC R00($e80000):
@@ -182,12 +182,12 @@ CRTC R08($e80010):
 CRTC R09($e80012):
         bit 15                  10   9                                   0
           ┌───────────┬───────────────────┐
-          │                      │                          ラスタ番号  │
+          │                      │                       Raster number  │
           └───────────┴───────────────────┘
-                垂直同期パルス幅＋垂直バックポーチ
-        R09 = ─────────────────── ＋ラスタ番号
-                水平同期期間
-            = R06 +1 ＋ラスタ番号
+                Vertical sync pulse width + vertical back porch
+        R09 = ───────────────────────── ＋Raster number
+                Horizontal synchronization period
+            = R06 +1 ＋Raster number
 
 CRTC R10($e80014):
         bit 15                  10   9                                   0
@@ -353,14 +353,14 @@ CRTC 動作ポート($e80480):
 
 ==============================================================================
 
-・ビデオコントローラ
+・Video controller
 
 address size
-$e82000 256.w   --      グラフィックパレット
-$e82200 256.w   --      テキストパレット、スプライト＋BG パレット
-$e82400 1.w     R0      画面モード
-$e82500 1.w     R1      プライオリティ制御
-$e82600 1.w     R2      ON/OFF 制御/特殊プライオリティ
+$e82000 256.w   --      Graphics Palette
+$e82200 256.w   --      Text Palette, Sprite + BG Palette
+$e82400 1.w     R0      screen mode
+$e82500 1.w     R1      priority control
+$e82600 1.w     R2      ON / OFF control/special priority
 
 
 グラフィックパレット($e82000):
@@ -383,9 +383,9 @@ $e82600 1.w     R2      ON/OFF 制御/特殊プライオリティ
                 トに分割され、それぞれ独立して決定されたのち、合成される.
 
                 PH = G-VRAM のデータの上位バイト
-                PL = 〃                下位〃
+                PL = 〃               下位〃
                 CH = 出力されるカラーコードの上位バイト
-                CL = 〃                       下位〃
+                CL = 〃                      下位〃
 
                 CH = *(unsigned char)($e82002＋PH×2−PH＆1)
                 CL = *(unsigned char)($e82000＋PL×2−PL＆1)
@@ -576,10 +576,10 @@ DMAC CSR(+$00):
 
         bit 7   COC     Channel operation completion
                         %0 : Channel operation incomplete
-                        %1 : 〃             complete
+                        %1 : 〃            complete
         bit 6   BTC     Block transfer completion
                         %0 : Block transfer operation incomplete
-                        %1 : 〃               complete
+                        %1 : 〃              complete
         bit 5   NDT     Normal device termination
                         %0 : It is not a device stop due to the DONE signal
                         %1 : Normal device stop by DONE signal
@@ -595,7 +595,7 @@ DMAC CSR(+$00):
                         ___
         bit 1   PCT     PCL transition
                         %0 : There is no trailing edge of PCL (change from High to Low)
-                        %1 : 〃                                   There has occurred
+                        %1 : 〃                                  There has occurred
                         ___
         bit 0   PCS     PCL line status
                         %0 : PCL = Low
@@ -674,7 +674,7 @@ DMAC OCR(+$05):
                         % 11: Link array chaining
         bit 1 to 0 REQG request generation method
                         % 00: Auto request limit speed
-                        % 01: 〃 Maximum speed
+                        % 01: 〃Maximum speed
                         % 10: External request transfer (by REQ line)
                         % 11: The first transfer is an auto request
                               External request transfer from the second onward
@@ -689,12 +689,12 @@ DMAC SCR(+$06):
         bit 3〜2 MAC     Memory address count
                         %00 : The memory address register is not changed
                         %01 : Increase memory address register each time transfer is done
-                        %10 : 〃                                   Decrease
+                        %10 : 〃                                  Decrease
                         %11 : (unused)
         bit 1〜0 DAC     Device address count
                         %00 : Device address register is not changed
                         %01 : Increase device address register each time transfer is done
-                        %10 : 〃                                     Decrease
+                        %10 : 〃                                    Decrease
                         %11 : (unused)
 
 DMAC CCR(+$07):
@@ -708,7 +708,7 @@ DMAC CCR(+$07):
                          % 1: Start operation
          bit 6 CNT Continue Operation
                          % 0: No continuous operation
-                         % 1: 〃 There
+                         % 1: 〃There
          bit 5 HLT halt operation
                          % 0: Cancel pause
                          % 1: Channel operation pause
@@ -717,7 +717,7 @@ DMAC CCR(+$07):
                          * It is always 0 when reading.
          bit 3 INT Interrupt Enable
                          % 0: Disable interrupt generation
-                         % 1: 〃 permission
+                         % 1: 〃permission
 
 DMAC MTC(+$0a):
         Specify the number of transfer operands.
@@ -826,14 +826,14 @@ offset size
 
 ==============================================================================
 
-・エリアセット
+・Area set
 
   Register for selecting user area / supervisor area of main memory.
   All byte size write-only port, can not read.
 
 address size    R/W
-$e86001 1.b       W     エリアセットレジスタ
-$eaff81 1.b       W     拡張エリアセットレジスタ 0($200000〜$3fffff に対応)
+$e86001 1.b       W     Area set register
+$eaff81 1.b       W     Extended area set register 0($200000〜$3fffff に対応)
 $eaff83 1.b       W     〃                        1($400000〜$5fffff 〃)
 $eaff85 1.b       W     〃                        2($600000〜$7fffff 〃)
 $eaff87 1.b       W     〃                        3($800000〜$9fffff 〃)
@@ -871,39 +871,39 @@ $eaff89 1.b       W     〃                        4($a00000〜$bfffff 〃)
 アルポート(USART)、8 ビット分の汎用 I/O ポート(GPIP)を持っている.
   X680x0/Human68k での割り当ては以下のようになっている.
 
-        タイマ     A       V-DISP(垂直表示期間)信号による割り込み
-        〃       B       シリアルポートのクロック生成
-        〃       C       カーソル点滅/FDD 制御等の割り込み
-        〃       D       BG プロセス切り換え用の割り込み
+        タイマ   A       V-DISP(垂直表示期間)信号による割り込み
+        〃      B       シリアルポートのクロック生成
+        〃      C       カーソル点滅/FDD 制御等の割り込み
+        〃      D       BG プロセス切り換え用の割り込み
         シリアルポート キーボード入出力
         汎用 I/O ポート      各種信号による割り込み
 
 
 address size    R/W
-$e88001 1.b     R       GPIP    汎用 I/O レジスタ             ┐
-$e88003 1.b     R/W     AER     アクティブエッジレジスタ    │GPIP 制御
-$e88005 1.b     R/W     DDR     データ方向レジスタ               ┘
-$e88007 1.b     R/W     IERA    割り込みイネーブルレジスタ A ┐
-$e88009 1.b     R/W     IERB    〃                          B    │
-$e8800b 1.b     R/W     IPRA    割り込みペンディングレジスタ A        │
-$e8800d 1.b     R/W     IPRB    〃                            B  │
-$e8800f 1.b     R/W     ISRA    割り込みインサービスレジスタ A        │割り込み制御
-$e88011 1.b     R/W     ISRB    〃                            B  │
-$e88013 1.b     R/W     IMRA    割り込みマスクレジスタ A   │
-$e88015 1.b     R/W     IMRB    〃                      B        │
-$e88017 1.b     R/W     VR      ベクタレジスタ                 ┘
-$e88019 1.b     R/W     TACR    タイマ A コントロールレジスタ        ┐
-$e8801b 1.b     R/W     TBCR    タイマ B 〃                 │
-$e8801d 1.b     R/W     TCDCR   タイマ C&D コントロールレジスタ      │
-$e8801f 1.b     R/W     TADR    タイマ A データレジスタ           │タイマ制御
-$e88021 1.b     R/W     TBDR    タイマ B 〃                 │
-$e88023 1.b     R/W     TCDR    タイマ C 〃                 │
-$e88025 1.b     R/W     TDDR    タイマ D 〃                 ┘
-$e88027 1.b     R/W     SCR     SYNC キャラクタレジスタ          ┐
-$e88029 1.b     R/W     UCR     USART コントロールレジスタ        │
-$e8802b 1.b     R/W     RSR     レシーバステータスレジスタ   │USART 制御
+$e88001 1.b     R       GPIP    汎用 I/O レジスタ               ┐
+$e88003 1.b     R/W     AER     アクティブエッジレジスタ        │GPIP control
+$e88005 1.b     R/W     DDR     データ方向レジスタ              ┘
+$e88007 1.b     R/W     IERA    割り込みイネーブルレジスタ    A ┐
+$e88009 1.b     R/W     IERB    〃                           B │
+$e8800b 1.b     R/W     IPRA    割り込みペンディングレジスタ  A │
+$e8800d 1.b     R/W     IPRB    〃                           B │
+$e8800f 1.b     R/W     ISRA    割り込みインサービスレジスタ  A │Interrupt control
+$e88011 1.b     R/W     ISRB    〃                           B │
+$e88013 1.b     R/W     IMRA    割り込みマスクレジスタ        A │
+$e88015 1.b     R/W     IMRB    〃                           B │
+$e88017 1.b     R/W     VR      ベクタレジスタ                  ┘
+$e88019 1.b     R/W     TACR    タイマ A コントロールレジスタ   ┐
+$e8801b 1.b     R/W     TBCR    タイマ B 〃                    │
+$e8801d 1.b     R/W     TCDCR   タイマ C&D コントロールレジスタ │
+$e8801f 1.b     R/W     TADR    タイマ A データレジスタ         │Timer control
+$e88021 1.b     R/W     TBDR    タイマ B 〃                    │
+$e88023 1.b     R/W     TCDR    タイマ C 〃                    │
+$e88025 1.b     R/W     TDDR    タイマ D 〃                    ┘
+$e88027 1.b     R/W     SCR     SYNC キャラクタレジスタ         ┐
+$e88029 1.b     R/W     UCR     USART コントロールレジスタ      │
+$e8802b 1.b     R/W     RSR     レシーバステータスレジスタ      │USART control
 $e8802d 1.b     R/W     TSR     トランスミッタステータスレジスタ│
-$e8802f 1.b     R/W     UDR     USART データレジスタ           ┘
+$e8802f 1.b     R/W     UDR     USART データレジスタ            ┘
 
 
 MFP GPIP($e88001):
@@ -924,24 +924,24 @@ MFP GPIP($e88001):
 
         bit 7 H-SYNC    CRTC の H-SYNC 信号
                         %0 : 'L'(水平帰線期間)
-                        %1 : 'H'( 〃 同期 〃 )
+                        %1 : 'H'( 〃同期 〃)
         bit 6 CIRQ      CRTC の割り込み要求信号(ラスタ割り込み)
                         %0 : 割り込み要求中
-                        %1 : 〃           なし
+                        %1 : 〃          なし
         bit 5 (未使用)     常に %1
         bit 4 V-DISP    CRTC の V-DISP 信号
                         %0 : 'L'(垂直帰線期間)
-                        %1 : 'H'( 〃 表示 〃 )
+                        %1 : 'H'( 〃表示 〃)
         bit 3 FMIRQ     FM 音源 IC の割り込み要求信号
                         %0 : 割り込み要求中
-                        %1 : 〃           なし
+                        %1 : 〃          なし
         bit 2 POW SW    本体前面の電源スイッチの状態
                         %0 : 電源スイッチ ON(通常)
-                        %1 : 〃            OFF
+                        %1 : 〃           OFF
         bit 1 EXPON     EXPON 信号
                         %0 : 'L'
                         %1 : 'H'(通常)
-        bit 0 ALARM     RTC の ALARM 信号
+        bit 0 ALARM     RTC ALARM signal
                         %0 : 'L'
                         %1 : 'H'(通常)
 
@@ -978,14 +978,14 @@ MFP IERA($e88007):
         bit 6   CRTC ラスタ割り込み
         bit 5   タイマ A
         bit 4   MPSC 受信バッファフル(受信データ読み取り要求)
-        bit 3   〃   受信エラー
-        bit 2   〃   送信バッファエンプティ(送信データ書き込み要求)
-        bit 1   〃   送信エラー
+        bit 3   〃  受信エラー
+        bit 2   〃  送信バッファエンプティ(送信データ書き込み要求)
+        bit 1   〃  送信エラー
         bit 0   タイマ B
 
         各割り込みの発生の許可/禁止を設定する.
         %0 : 割り込み発生禁止
-        %1 : 〃           許可
+        %1 : 〃          許可
 
 MFP IERB($e88009):
         bit  7   6   5   4   3   2   1   0
@@ -1009,7 +1009,7 @@ MFP IPRA($e8800b):
           割り込み要求がペンディング(保留)されていることを示す. 割り込み要求が
         発生すれば %1 になり、割り込み要求が受け取られたら %0 に戻る.
         %0 : 割り込み要求はペンディングされていない
-        %1 : 〃                         されている
+        %1 : 〃                        されている
         ※IERA/IERB によって割り込みが禁止されるか、IPRA/IPRB に %0 を書き込む
           事によっても %0 に戻る.
 
@@ -1026,7 +1026,7 @@ MFP ISRA($e8800f):
         むと %0 に戻る.
           自動 EOI モードでは、割り込みを伝えた時点で自動的に %0 に戻る.
         %0 : 割り込み要求は処理中ではない
-        %1 : 〃                   である
+        %1 : 〃                  である
 
 MFP ISRB($e88011):
         (IERB と同様)
@@ -1037,7 +1037,7 @@ MFP IMRA($e88013):
 
           割り込みのマスク制御を設定する.
         %0 : 割り込み要求をマスクする  (割り込み発生不可)
-        %1 : 〃                   しない(〃      可  )
+        %1 : 〃                  しない(〃     可  )
         ※IERA/IERB は割り込みの発生を抑制するが、IMRA/IMRB は割り込み要因が発
           生しても割り込み要求を出力しないだけである.
 
@@ -1057,7 +1057,7 @@ MFP VR($e88017):
                         決定される(優先度の高い順から %1111〜%0000).
         bit 3           インサービスレジスタイネーブル
                         %0 : オート EOI モード            (インサービスレジスタ無効)
-                        %1 : ソフトウェア EOI モード(〃                    有効)
+                        %1 : ソフトウェア EOI モード(〃                   有効)
 
 MFP TACR($e88019):
         bit  7       5   4   3   2   1   0
@@ -1075,20 +1075,20 @@ MFP TACR($e88019):
                         タイマの動作モード
                         %0000 : タイマストップ
                         %0001 : ディレイモード         (÷  4 プリスケーラ)
-                        %0010 : 〃                       (÷ 10 〃    )
-                        %0011 : 〃                       (÷ 16 〃    )
-                        %0100 : 〃                       (÷ 50 〃    )
-                        %0101 : 〃                       (÷ 64 〃    )
-                        %0110 : 〃                       (÷100 〃    )
-                        %0111 : 〃                       (÷200 〃    )
+                        %0010 : 〃                      (÷ 10 〃   )
+                        %0011 : 〃                      (÷ 16 〃   )
+                        %0100 : 〃                      (÷ 50 〃   )
+                        %0101 : 〃                      (÷ 64 〃   )
+                        %0110 : 〃                      (÷100 〃   )
+                        %0111 : 〃                      (÷200 〃   )
                         %1000 : イベントカウントモード
                         %1001 : パルス幅測定モード       (÷  4 プリスケーラ)
-                        %1010 : 〃                       (÷ 10 〃    )
-                        %1011 : 〃                       (÷ 16 〃    )
-                        %1100 : 〃                       (÷ 50 〃    )
-                        %1101 : 〃                       (÷ 64 〃    )
-                        %1110 : 〃                       (÷100 〃    )
-                        %1111 : 〃                       (÷200 〃    )
+                        %1010 : 〃                      (÷ 10 〃   )
+                        %1011 : 〃                      (÷ 16 〃   )
+                        %1100 : 〃                      (÷ 50 〃   )
+                        %1101 : 〃                      (÷ 64 〃   )
+                        %1110 : 〃                      (÷100 〃   )
+                        %1111 : 〃                      (÷200 〃   )
 
 MFP TBCR($e8801b):
         bit  7       5   4   3   2   1   0
@@ -1111,12 +1111,12 @@ MFP TCDCR($e8801d):
                         タイマ C 動作モード
                         %000 : タイマストップ
                         %001 : ディレイモード  (÷  4 プリスケーラ)
-                        %010 : 〃                (÷ 10 〃    )
-                        %011 : 〃                (÷ 16 〃    )
-                        %100 : 〃                (÷ 50 〃    )
-                        %101 : 〃                (÷ 64 〃    )
-                        %110 : 〃                (÷100 〃    )
-                        %111 : 〃                (÷200 〃    )
+                        %010 : 〃               (÷ 10 〃   )
+                        %011 : 〃               (÷ 16 〃   )
+                        %100 : 〃               (÷ 50 〃   )
+                        %101 : 〃               (÷ 64 〃   )
+                        %110 : 〃               (÷100 〃   )
+                        %111 : 〃               (÷200 〃   )
         bit 2〜0 DC2〜DC0
                         タイマ D 動作モード
                         (CC2〜CC0 と同様)
@@ -1145,7 +1145,7 @@ MFP UCR($e88029):
 
         bit 7    CLK    送受信速度
                         %0  : 入力クロック周波数と同一
-                        %1  : 〃         の 1/16
+                        %1  : 〃        の 1/16
         bit 6〜5 WL1〜WL0
                         データ長
                         %00 : 8bit
@@ -1156,12 +1156,12 @@ MFP UCR($e88029):
                         同期モード/スタートビット長/ストップビット長
                                         スタートビット ストップビット
                         %00 : 同期        0               0
-                        %01 : 〃 1               1
-                        %10 : 〃 1               1.5
+                        %01 : 〃1               1
+                        %10 : 〃1               1.5
                         %11 : 非同期       1               2
         bit 2    PE     パリティ有効/無効
                         %0  : パリティ無効
-                        %1  : 〃      有効
+                        %1  : 〃     有効
         bit 1    E/O    パリティ偶数/奇数
                         %0  : 奇数パリティ
                         %1  : 偶数〃
@@ -1180,7 +1180,7 @@ MFP RSR($e8802b):
 
         bit 7   BF      バッファフル
                         %0 : 受信バッファは空
-                        %1 : 〃           にデータが入っている
+                        %1 : 〃          にデータが入っている
         bit 6   OE      オーバーランエラー
                         %0 : 正常動作
                         %1 : オーバーランエラーが発生した
@@ -1202,13 +1202,13 @@ MFP RSR($e8802b):
         bit 2   M/CIP   マッチ/文字処理中
                           同期モード時:
                                 %0 : 受信ワードは SCR と一致していない
-                                %1 : 〃                      している
+                                %1 : 〃                     している
         bit 1   SS      シンクロナスストップ
                         %0 : SCR と一致するキャラクタは取り込まない
-                        %1 : 〃                       も取り込む
+                        %1 : 〃                      も取り込む
         bit 0   RE      レシーバイネーブル
                         %0 : レシーバディセーブル
-                        %1 : 〃      イネーブル
+                        %1 : 〃     イネーブル
 
 MFP TSR($e8802d):
         bit  7   6   5   4   3   2   1   0
@@ -1219,7 +1219,7 @@ MFP TSR($e8802d):
 
         bit 7    BE     バッファエンプティ
                         %0 : 送信バッファにデータが入っている
-                        %1 : 〃           は空
+                        %1 : 〃          は空
         bit 6    UE     アンダーランエラー
                         %0 : 正常動作
                         %1 : アンダーランが発生した
@@ -1230,19 +1230,19 @@ MFP TSR($e8802d):
                              クリアされる)
         bit 4    END
                         %0 : トランスミッタはイネーブルになっている
-                        %1 : 〃               ディセーブルされている
+                        %1 : 〃              ディセーブルされている
         bit 3    B      ブレーク
                         %0 : 通常動作
                         %1 : SO 端子(送信データ端子)をブレーク状態にする
                         ※非同期モード時のみ有効.
         bit 2〜1 H〜L     High/Low
                         %00 : TE = %0 の時、SO 端子 = ハイインピーダンス
-                        %01 : 〃             = Low
-                        %10 : 〃             = High
+                        %01 : 〃            = Low
+                        %10 : 〃            = High
                         %11 : ループバックモード
         bit 0    TE     トランスミッタイネーブル
                         %0 : トランスミッタディセーブル
-                        %1 : 〃             イネーブル
+                        %1 : 〃            イネーブル
 
 MFP UDR read($e8802f):
         bit  7   6                       0
@@ -1256,7 +1256,7 @@ MFP UDR read($e8802f):
 
         bit 7   Make/Break
                 %0 : キーが押された
-                %1 : 〃    離された
+                %1 : 〃   離された
 
 MFP UDR write($e8802f):
         bit  7   6   5   4   3   2   1   0
@@ -1277,7 +1277,7 @@ MFP UDR write($e8802f):
 
 ==============================================================================
 
-・キーボード制御コマンド
+・Keyboard control command
 
         bit  7   6   5   4               0
           ┌─┬─┬─┬─────────┐
@@ -1290,8 +1290,8 @@ MFP UDR write($e8802f):
                 コード      名称             機能                              キー
                 %00000 : ---            (無効)
                 %00001 : Vol.up         音量 up                           [↑]
-                %00010 : Vol.down       〃   down                        [↓]
-                %00011 : Vol.normal     〃   標準                  [,]
+                %00010 : Vol.down       〃  down                        [↓]
+                %00011 : Vol.normal     〃  標準                  [,]
                 %00100 : Call           チャンネルコール                [CLR]
                 %00101 : CS down        テレビ画面(初期化)
                 %00110 : Mute           消音                              [0]
@@ -1301,23 +1301,23 @@ MFP UDR write($e8802f):
                 %01001 : BR down        テレビ/外部入力切り替え(トグル)       [=]
                 %01010 : BR 1/2         コントラストノーマル
                 %01011 : CH up          チャンネル up                        [→]
-                %01100 : CH down        〃          down                 [←]
+                %01100 : CH down        〃         down                 [←]
                 %01101 : ---            (無効)
                 %01110 : Power ON/OFF   電源 ON/OFF(トグル)
                 %01111 : CS 1/2         スーパーインポーズ ON/OFF(トグル)
                                         コントラストダウン               [+]
                 %10000 : CH 1           チャンネル 1                 [1]
-                %10001 : CH 2           〃          2                    [2]
-                %10010 : CH 3           〃          3                    [3]
-                %10011 : CH 4           〃          4                    [4]
-                %10100 : CH 5           〃          5                    [5]
-                %10101 : CH 6           〃          6                    [6]
-                %10110 : CH 7           〃          7                    [7]
-                %10111 : CH 8           〃          8                    [8]
-                %11000 : CH 9           〃          9                    [9]
-                %11001 : CH 10          〃          10                   [/]
-                %11010 : CH 11          〃          11                   [*]
-                %11011 : CH 12          〃          12                   [-]
+                %10001 : CH 2           〃         2                    [2]
+                %10010 : CH 3           〃         3                    [3]
+                %10011 : CH 4           〃         4                    [4]
+                %10100 : CH 5           〃         5                    [5]
+                %10101 : CH 6           〃         6                    [6]
+                %10110 : CH 7           〃         7                    [7]
+                %10111 : CH 8           〃         8                    [8]
+                %11000 : CH 9           〃         9                    [9]
+                %11001 : CH 10          〃         10                   [/]
+                %11010 : CH 11          〃         11                   [*]
+                %11011 : CH 12          〃         12                   [-]
                 %11100 : CH 13          テレビ画面                   [=]
                 %11101 : CH 14          コンピュータ画面                [.]
                 %11110 : CH 15          スーパーインポーズ ON/OFF(トグル)
@@ -1336,7 +1336,7 @@ MFP UDR write($e8802f):
 
         bit 0   MSCTRL
                 %0 : MSCTRL を 'Low' にする
-                %1 : 〃        'High' 〃
+                %1 : 〃       'High' 〃
 
         bit  7   6   5   4   3   2   1   0
           ┌─┬─┬─┬─┬─┬───┬─┐
@@ -1349,12 +1349,12 @@ MFP UDR write($e8802f):
 
         bit 0   KEY EN
                 %0 : キーデータ送出禁止
-                %1 : 〃             許可
+                %1 : 〃            許可
 
         bit  7   6   5   4   3   2   1   0
           ┌─┬─┬─┬─┬─┬─┬─┬─┐
           │ 0│ 1│ 0│ 1│ 0│ 0│  │  │
-          └─┴─┴─┴─┴─┴─┴─┴─┘     __
+          └─┴─┴─┴─┴─┴─┴─┴─┘    __
                                         └ X68K/X1
 
         ディスプレイコントロールキーモードを選択する.
@@ -1393,7 +1393,7 @@ MFP UDR write($e8802f):
 
         bit 0   CTRL EN
                 %0 : 本体からのディスプレイ制御無効
-                %1 : 〃                         有効
+                %1 : 〃                        有効
 
         bit  7   6   5   4   3   2   1   0
           ┌─┬─┬─┬─┬─┬─┬─┬─┐
@@ -1405,7 +1405,7 @@ MFP UDR write($e8802f):
 
         bit 0   OPT.2 EN
                 %0 : OPT.2 キーによるディスプレイ制御禁止
-                %1 : 〃                               許可
+                %1 : 〃                              許可
 
         bit  7   6   5   4   3           0
           ┌─┬─┬─┬─┬───────┐
@@ -1475,48 +1475,46 @@ MFP UDR write($e8802f):
 
 ・RTC
 
-  RTC(リアルタイムクロック RP5C15)のレジスタは二つのバンクが同一アドレスに割り
-当てられており、どちらのバンクをアクセスするかは MODE レジスタのビット 0 で設
-定する. なお、時間を設定するレジスタは全て BCD フォーマットとなっている.
+  Two banks are allocated to the same address in RTC (real-time clock RP5C15) registers, and which bank is accessed is set by bit 0 of the MODE register.
+  All the registers that set the time are in the BCD format.
 
-
-address size    BANK 0                  BANK 1
-$e8a001 1.b      1 秒カウンタ                CLKOUT セレクトレジスタ
-$e8a003 1.b     10 秒    〃               Adjust
-$e8a005 1.b      1 分    〃               アラーム  1 分レジスタ
-$e8a007 1.b     10 分    〃               〃        10 分   〃
-$e8a009 1.b      1 時間   〃               〃         1 時間〃
-$e8a00b 1.b     10 時間   〃               〃        10 時間〃
-$e8a00d 1.b     曜日      〃               〃        曜日     〃
-$e8a00f 1.b      1 日    〃               〃         1 日   〃
-$e8a011 1.b     10 日    〃               〃        10 日   〃
-$e8a013 1.b      1 月    〃               (未使用)
-$e8a015 1.b     10 月    〃               12/24 時間セレクタ
-$e8a017 1.b      1 年    〃               閏年カウンタ
-$e8a019 1.b     10 年    〃               (未使用)
-$e8a01b 1.b     MODE レジスタ               MODE レジスタ
+address size    BANK 0                    BANK 1
+$e8a001 1.b      1 second counter         CLKOUT select register
+$e8a003 1.b     10 seconds 〃            Adjust
+$e8a005 1.b      1 minute  〃            Alarm 1 minute register
+$e8a007 1.b     10 minutes 〃            〃   10 minutes 〃
+$e8a009 1.b      1 hour    〃            〃   1 hour     〃
+$e8a00b 1.b     10 hours   〃            〃   10 hours   〃
+$e8a00d 1.b     Weekday    〃            〃   Weekday    〃
+$e8a00f 1.b      1 day     〃            〃   1 day      〃
+$e8a011 1.b     10 days    〃            〃   10 days    〃
+$e8a013 1.b      1 month   〃            (unused)
+$e8a015 1.b     10 months  〃            12/24 hour selector
+$e8a017 1.b      1 year    〃            Leap year counter
+$e8a019 1.b     10 years   〃            (unused)
+$e8a01b 1.b     MODE register             MODE register
 $e8a01d 1.b     TEST 〃                  TEST 〃
-$e8a01f 1.b     RESET コントローラ    RESET コントローラ
+$e8a01f 1.b     RESET controller          RESET controller
 
 
-RTC CLKOUT セレクトレジスタ($e8a001,BANK 1):
+RTC CLKOUT select register ($e8a001,BANK 1):
         bit  7               3   2       0
           ┌─────────┬─────┐
           │                  │  CLKOUT  │
           └─────────┴─────┘
 
         bit 2〜0 CLKOUT
-                        CLKOUT 端子の出力波形選択
+                        Select output frequency of CLKOUT pin
                         %000 : ハイインピーダンス('H')(点灯)
                         %001 : 16384Hz(点滅)
-                        %010 :  1024Hz( 〃 )
-                        %011 :   128Hz( 〃 )
-                        %100 :    16Hz( 〃 )
-                        %101 :     1Hz( 〃 )
-                        %110 :  1/60Hz( 〃 )
+                        %010 :  1024Hz( 〃)
+                        %011 :   128Hz( 〃)
+                        %100 :    16Hz( 〃)
+                        %101 :     1Hz( 〃)
+                        %110 :  1/60Hz( 〃)
                         %111 : 'L' レベル固定(消灯)
-                        ※%101 : 立ち上がりで秒カウンタが進む
-                          %110 : 〃           分〃
+                      ※%101 : 立ち上がりで秒カウンタが進む
+                        %110 : 〃          分〃
 
 RTC アジャストレジスタ($e8a003,BANK 1):
         bit  7                       1   0
@@ -1570,11 +1568,11 @@ RTC MODE レジスタ($e8a01b):
         bit 3   タイマ EN
                         タイマ動作許可/禁止
                         %0 : タイマ動作禁止(秒以降のカウンタは停止)
-                        %1 : 〃        許可(通常動作)
+                        %1 : 〃       許可(通常動作)
         bit 2   アラーム EN
                         アラーム動作許可/禁止
                         %0 : アラーム動作禁止
-                        %1 : 〃           許可
+                        %1 : 〃          許可
                         ※実際にはどちらに設定してもアラーム割り込みは発生し、
                           また %1 を書き込むと逆に割り込みが発生しない機種も存
                           在するようである.
@@ -1606,29 +1604,29 @@ RTC RESET コントローラ($e8a01f):
         bit 3    1Hz ON
                         Alarm 端子からの 1Hz パルス出力制御
                         %0 : 出力 ON
-                        %1 : 〃   OFF
+                        %1 : 〃  OFF
         bit 2   16Hz ON
                         Alarm 端子からの 16Hz パルス出力制御
                         %0 : 出力 ON
-                        %1 : 〃   OFF
+                        %1 : 〃  OFF
         bit 1   タイマ RESET
                         秒未満の桁のカウンタのリセット/解除
                         %0 : 通常動作
                         %1 : カウンタリセット
         bit 0   アラーム RESET
                         %0 : アラームリセット解除
-                        %1 : 〃               する
+                        %1 : 〃              する
 
         ※このレジスタは書き込み専用で、読み込んだ場合は全てのビットが 0 にな
           った値が読み出されるので注意すること.
 
 ==============================================================================
 
-・プリンタ
+・Printer
 
 address size    R/W
-$e8c001 1.b       W     プリンタデータ
-$e8c003 1.b       W     プリンタストローブ
+$e8c001 1.b       W     Printer data
+$e8c003 1.b       W     Printer strobe
 
 
 プリンタデータ($e8c001):
@@ -1643,11 +1641,11 @@ $e8c003 1.b       W     プリンタストローブ
 
         bit 0   STR0    STROBE 信号
                         %0 : STROBE 信号を Low  レベルにする
-                        %1 : 〃             High 〃
+                        %1 : 〃            High 〃
 
 ==============================================================================
 
-・システムポート
+・System port
 
 address size    R/W
 $e8e001 1.b     R/W     #1      コンピュータ画面コントラスト
@@ -1683,16 +1681,16 @@ System Port #2($e8e003):
         bit 3   TV CTRL
                         (書き込み時)
                         %0 : ディスプレイ制御信号を 0 にする
-                        %1 : 〃                      1 〃
+                        %1 : 〃                     1 〃
                         (読み込み時)
                         %0 : ディスプレイの電源は ON
-                        %1 : 〃                    OFF
+                        %1 : 〃                   OFF
         bit 1   3D-L
                         %0 : 3D スコープ左シャッター CLOSE
-                        %1 : 〃                       OPEN
+                        %1 : 〃                      OPEN
         bit 0   3D-R
                         %0 : 3D スコープ右シャッター CLOSE
-                        %1 : 〃                       OPEN
+                        %1 : 〃                      OPEN
 
 System Port #3($e8e005):
         bit  7       5   4               0
@@ -1717,17 +1715,17 @@ System Port #4($e8e007):
         bit 3   KEY CTRL
                         (書き込み時)
                         %0 : キーデータ送信不可
-                        %1 : 〃             可
+                        %1 : 〃            可
                         (読み込み時)
                         %0 : キーボードコネクタが抜かれている
-                        %1 : 〃                   差し込まれている
+                        %1 : 〃                  差し込まれている
         bit 2   NMI RESET
                         %0 : NMI リセットしない
-                        %1 : 〃           する
+                        %1 : 〃          する
                         ※NMI の処理が終了した時点で %1 を書き込む
         bit 1   HRL     高解像度モード時のドットクロック切り替え
                         %0 : 分周比を 1/2、1/3、1/6 にする(通常)
-                        %1 : 〃       1/2、1/4、1/8 〃
+                        %1 : 〃      1/2、1/4、1/8 〃
 
 System Port #5($e8e009):
         bit  7           4   3           0
@@ -1800,7 +1798,7 @@ System Port #8($e8e00f):
 address size    R/W
 $e90001 1.b       W     レジスタ番号設定ポート
 $e90003 1.b     R       ステータスレジスタ
-〃       〃         W     データポート
+〃      〃        W     データポート
 
 
 レジスタ番号設定ポート($e90001):
@@ -1829,13 +1827,13 @@ $e90003 1.b     R       ステータスレジスタ
 
         bit 7   B       書き込み BUSY フラグ
                         %0 : 通常動作            (次のデータは書き込み可  )
-                        %1 : データ書き込み中(〃           不可)
+                        %1 : データ書き込み中(〃          不可)
         bit 1   1ST(B)
                         %0 : タイマ B はオーバーフローしていない
-                        %1 : 〃       オーバーフロー発生
+                        %1 : 〃      オーバーフロー発生
         bit 0   1ST(A)
                         %0 : タイマ A はオーバーフローしていない
-                        %1 : 〃       オーバーフロー発生
+                        %1 : 〃      オーバーフロー発生
 
 
 OPM レジスタ一覧
@@ -1848,7 +1846,7 @@ $08             KON レジスタ
 $09〜$0e ---
 $0f             ノイズジェネレータ制御レジスタ
 $10             タイマ A 設定レジスタ(上位)
-$11             〃                    (下位)
+$11             〃                   (下位)
 $12             タイマ B 設定レジスタ
 $13             ---
 $14             タイマ制御レジスタ
@@ -1892,16 +1890,16 @@ $08(KON レジスタ):
 
         bit 6           C2
                         %0 : C2 出力 OFF
-                        %1 : 〃      ON
+                        %1 : 〃     ON
         bit 5           C1
                         %0 : C1 出力 OFF
-                        %1 : 〃      ON
+                        %1 : 〃     ON
         bit 4           M2
                         %0 : M2 出力 OFF
-                        %1 : 〃      ON
+                        %1 : 〃     ON
         bit 3           M1
                         %0 : M1 出力 OFF
-                        %1 : 〃      ON
+                        %1 : 〃     ON
         bit 2〜0 CH No.
                         チャンネル番号選択
                         %000 : チャンネル 1
@@ -1916,7 +1914,7 @@ $0f(ノイズジェネレータ制御レジスタ):
 
         bit 7    NE     ノイズイネーブル
                         %0 : ノイズ出力 OFF
-                        %1 : 〃          ON
+                        %1 : 〃         ON
         bit 4〜0 NFRQ    ノイズ周波数
                                                   4000
                         ノイズ周波数 Ｆnoise = ───── (kHz)
@@ -1977,16 +1975,16 @@ $14(タイマ制御レジスタ):
                         %1 : タイマ A オーバーフローフラグリセット
         bit 3   IRQEN(B)
                         %0 : タイマ B 割り込みディセーブル
-                        %1 : 〃                イネーブル
+                        %1 : 〃               イネーブル
         bit 2   IRQEN(A)
                         %0 : タイマ A 割り込みディセーブル
-                        %1 : 〃                イネーブル
+                        %1 : 〃               イネーブル
         bit 1   LOAD(B)
                         %0 : タイマ B 動作停止
-                        %1 : 〃            開始
+                        %1 : 〃           開始
         bit 0   LOAD(A)
                         %0 : タイマ A 動作停止
-                        %1 : 〃            開始
+                        %1 : 〃           開始
 
 $18(LFO 周波数設定レジスタ):
         bit  7                           0
@@ -2039,10 +2037,10 @@ $20〜$27(チャンネル構成/出力制御レジスタ):
 
         bit 7    R-CH EN
                         %0 : 右チャンネルへの出力 OFF
-                        %1 : 〃                    ON
+                        %1 : 〃                   ON
         bit 6    L-CH EN
                         %0 : 左チャンネルへの出力 OFF
-                        %1 : 〃                    ON
+                        %1 : 〃                   ON
         bit 5〜3 FL      M1 スロットのフィードバック率
                         %000 : 0(フィードバック OFF)
                         %001 :  π/16
@@ -2175,7 +2173,7 @@ $a0〜$bf(AMS-EN/D1R 設定レジスタ):
         bit 7    AMS-EN
                         LFO による出力レベル変調
                         %0 : 変調をかけない
-                        %1 : 〃    かける
+                        %1 : 〃   かける
         bit 4〜0 D1R     ファーストディケイ時間
                         ファーストディケイからセカンドディケイに移るまでの時間.
 
@@ -2187,9 +2185,9 @@ $c0〜$df(DT2/D2R 設定レジスタ):
 
         bit 7〜6 DT2     KC、KF で与えた周波数をさらにずらす量
                         %00 : +  0 セント(×1.00 倍)
-                        %01 : +600 〃     (×1.41 倍)
-                        %10 : +781 〃     (×1.57 倍)
-                        %11 : +950 〃     (×1.73 倍)
+                        %01 : +600 〃    (×1.41 倍)
+                        %10 : +781 〃    (×1.57 倍)
+                        %11 : +950 〃    (×1.73 倍)
         bit 4〜9 D2R     セカンドディケイ時間
                         セカンドディケイから完全な消音までの時間.
 
@@ -2213,7 +2211,7 @@ $e0〜$ff(D1L/RR 設定レジスタ):
 
 address size    R/W
 $e92001 1.b     R       ADPCM status
-〃       〃         W     ADPCM command
+〃     〃       W     ADPCM command
 $e92003 1.b     R/W     Data input / output
 $e9a005 1.b     R/W     ADPCM sample rate / output control
 
@@ -2281,10 +2279,10 @@ ADPCM Sample rate / output control ($e9a005):
                         %1 : 操作禁止
         bit 3〜2 Sampling Rate
                         ADPCM サンプリングレート切り替え
-                                                         4MHz    8MHz
+                                                        4MHz    8MHz
                         %00 : 基本クロックの 1/1024    (3.9k    7.8k)
-                        %01 : 〃      1/768      (5.2k   10.4k)
-                        %10 : 〃      1/512      (7.8k   15.6k)
+                        %01 : 〃             1/768     (5.2k   10.4k)
+                        %10 : 〃             1/512     (7.8k   15.6k)
                         %11 : (未使用)
         bit 1〜0 PCM PAN
                         ADPCM 出力制御
@@ -2300,11 +2298,11 @@ ADPCM Sample rate / output control ($e9a005):
 
 address size    R/W
 $e94001 1.b     R       FDC ステータスレジスタ
-〃       〃         W     FDC コマンドレジスタ
+〃      〃        W     FDC コマンドレジスタ
 $e94003 1.b     R       FDC データレジスタ
-〃       〃         W     FDC コマンドレジスタ
+〃      〃        W     FDC コマンドレジスタ
 $e94005 1.b     R       ドライブステータス
-〃       〃         W     ドライブオプション信号制御
+〃      〃        W     ドライブオプション信号制御
 $e94007 1.b       W     アクセスドライブセレクト等
 
 
@@ -2317,13 +2315,13 @@ FDC ステータスレジスタ($e94001):
 
         bit 7    RQM    Request for Master
                         %0 : FDC のデータ転送準備が出来ていない
-                        %1 : 〃                           いる
+                        %1 : 〃                          いる
         bit 6    DIO    Data Input/Output
                         %0 : ホストから FDC への転送
                         %1 : FDC からホストへの転送
         bit 5    NDM    Non-DMA Mode
                         %0 : Non-DMA モードでのデータ転送中でない
-                        %1 : 〃                             である
+                        %1 : 〃                            である
                         ※C-PHASE、R-PHASE では常に %0.
         bit 4    CB     FDC Busy
                         %0 : FDC 動作中でない
@@ -2332,7 +2330,7 @@ FDC ステータスレジスタ($e94001):
         bit 3〜0 D3B〜D0B
                         FDn Busy
                         %0 : ドライブはシーク中/シーク完了割り込み保留中でない
-                        %1 : 〃                                          である
+                        %1 : 〃                                         である
 
 FDC コマンドレジスタ($e94001):
         初期化等のコマンド(SET STANDBY、RESET STANDBY、SOFTWARE RESET の指定を
@@ -2354,7 +2352,7 @@ IOC ドライブステータス($e94005):
 
         bit 7   DISK IN
                 %0 : ディスク非挿入状態
-                %1 : 〃      挿入状態
+                %1 : 〃     挿入状態
         bit 6   ERROR DISK
                 %0 : ディスク誤挿入ではない
                 %1 : ディスク誤挿入(bit 7 も %1 になる)
@@ -2374,14 +2372,14 @@ IOC ドライブオプション信号制御($e94005):
 
         bit 7   LED CTRL
                 %0 : FD アクセスランプを消灯する
-                %1 : 〃                  点滅する
+                %1 : 〃                 点滅する
                 ※メディア非挿入状態のときのみ有効.
         bit 6   EJECT MASK
                 %0 : イジェクトボタン有効(イジェクトボタン上の LED が 点灯)
-                %1 : 〃               無効(〃                             消灯)
+                %1 : 〃              無効(〃                            消灯)
         bit 5   EJECT ON/OFF
                 %0 : メディアをイジェクトしない
-                %1 : 〃                   する
+                %1 : 〃                  する
         bit 3〜0
                 DRIVE #3〜#0
                 %1 → %0 の変化時、bit 7〜5 で選択したオプション機能が働く.
@@ -2398,8 +2396,8 @@ IOC アクセスドライブセレクト等($e94007):
         bit 7   MOTOR ON
                 %0 : ドライブセレクトディセーブル/モータ OFF
                                                 (アクセスランプは緑色になる)
-                %1 : 〃               イネーブル  /モータ ON
-                                                (〃               赤色〃    )
+                %1 : 〃              イネーブル  /モータ ON
+                                                (〃              赤色〃   )
         bit 4   2HD/2DD
                 %0 : 2HD ディスク
                 %1 : 2DD/2D ディスク
@@ -2415,7 +2413,7 @@ IOC アクセスドライブセレクト等($e94007):
 address size    R/W
 $e96001 1.b     R/W     SASI データ入出力
 $e96003 1.b     R       SASI ステータス入力
-〃       〃         W     SEL 信号 H
+〃      〃        W     SEL 信号 H
 $e96005 1.b       W     データ任意
 $e96007 1.b       W     SEL 信号 L
 
@@ -2433,16 +2431,16 @@ SASI ステータス入力($e96003):
 
         bit 4   MSG     Message
                         %0 : DATA ラインの内容はメッセージバイトではない
-                        %1 : 〃                                  である
+                        %1 : 〃                                 である
         bit 3   C/D     Command/Data
                         %0 : DATA ラインの内容はデータ
-                        %1 : 〃                  コマンド/ステータス
+                        %1 : 〃                 コマンド/ステータス
         bit 2   I/O     Input/Output
                         %0 : ホスト→コントローラ(Output)
                         %1 : コントローラ→ホスト(Input)
         bit 1   BSY     BUSY
                         %0 : BUSY 状態ではない
-                        %1 : 〃       である
+                        %1 : 〃      である
         bit 0   REQ     Request
                         %0 : 通常動作
                         %1 : コントローラがホストにデータ転送を要求している
@@ -2462,20 +2460,20 @@ SEL 信号 H($e96007):
 
 address size    R/W
 $e96021 1.b     R       BDID (Bus Device ID)
-〃       〃         W     〃
+〃      〃        W     〃
 $e96023 1.b     R/W     SCTL (SPC Control)
 $e96025 1.b     R/W     SCMD (SPC Command)
 $e96029 1.b     R       INTS (Interrupt Sense)
-〃       〃         W     〃
+〃      〃        W     〃
 $e9602b 1.b     R       PSNS (Phase Sense)
-〃       〃         W     SDGC (SPC Diag Control)
+〃      〃        W     SDGC (SPC Diag Control)
 $e9602d 1.b     R       SSTS (SPC Status)
 $e9602f 1.b     R       SERR (SPC Error Status)
 $e96031 1.b     R/W     PCTL (Phase Control)
 $e96033 1.b     R       MBC  (Modified Byte Counter)
 $e96035 1.b     R/W     DREG (Data Register)
 $e96037 1.b     R       TEMP (Temporary Register)
-〃       〃         W     〃
+〃      〃        W     〃
 $e96039 1.b     R/W     TCH  (Transfer Counter High)
 $e9603b 1.b     R/W     TCM  (Transfer Counter Mid)
 $e9603d 1.b     R/W     TCL  (Transfer Counter Low)
@@ -2533,19 +2531,19 @@ SCTL($e96023):
         bit 3   Parity Enable
                         SCSI バスのデータラインのパリティチェック
                         %0 : パリティチェックをしない
-                        %1 : 〃                 する
+                        %1 : 〃                する
         bit 2   Select Enable
                         セレクションへの応答制御
                         %0 : セレクションフェーズに応答しない
-                        %1 : 〃                         する
+                        %1 : 〃                        する
         bit 1   Reselect Enable
                         リセレクションへの応答制御
                         %0 : リセレクションフェーズに応答しない
-                        %1 : 〃                           する
+                        %1 : 〃                          する
         bit 0   Interrupt Enable
                         SPC 割り込み制御
                         %0 : 割り込み発生禁止
-                        %1 : 〃           許可
+                        %1 : 〃          許可
                         ※割り込み禁止状態でも、割り込み要因は INTS レジスタに
                           反映される.
 
@@ -2572,14 +2570,14 @@ SCMD($e96025):
         bit 4    RST Out
                         SCSI バスの RST(リセット)信号制御
                         %0 : RTS を %0(High レベル)にする(通常動作)
-                        %1 : 〃     %1(Low  〃    )にする
+                        %1 : 〃    %1(Low  〃   )にする
         bit 3    Intercept Transfer
                         マニュアル転送時のデータバッファ保持
                         %0 : バッファ内容は保持されない
-                        %1 : 〃                 される
+                        %1 : 〃                される
         bit 2    Program Transfer
                         %0 : DMA で転送を行う(DREQ は出力される  )
-                        %1 : CPU 〃           (〃  されない)
+                        %1 : CPU 〃          (〃 されない)
         bit 1    (未使用)
                         常に %0 にする.
         bit 0    Termination Mode
@@ -2651,28 +2649,28 @@ PSNS($e9602b):
 
         bit 7   REQ
                 %0 : REQ 信号は '0'(High レベル)
-                %1 : 〃          '1'(Low  〃    )
+                %1 : 〃         '1'(Low  〃   )
         bit 6   ACK
                 %0 : ACK 信号は '0'(High レベル)
-                %1 : 〃          '1'(Low  〃    )
+                %1 : 〃         '1'(Low  〃   )
         bit 5   ATN
                 %0 : ATN 信号は '0'(High レベル)
-                %1 : 〃          '1'(Low  〃    )
+                %1 : 〃         '1'(Low  〃   )
         bit 4   SEL
                 %0 : SEL 信号は '0'(High レベル)
-                %1 : 〃          '1'(Low  〃    )
+                %1 : 〃         '1'(Low  〃   )
         bit 3   BSY
                 %0 : BSY 信号は '0'(High レベル)
-                %1 : 〃          '1'(Low  〃    )
+                %1 : 〃         '1'(Low  〃   )
         bit 2   MSG
                 %0 : MSG 信号は '0'(High レベル)
-                %1 : 〃          '1'(Low  〃    )
+                %1 : 〃         '1'(Low  〃   )
         bit 1   C/D
                 %0 : C/D 信号は '0'(High レベル)
-                %1 : 〃          '1'(Low  〃    )
+                %1 : 〃         '1'(Low  〃   )
         bit 0   I/O
                 %0 : I/O 信号は '0'(High レベル)
-                %1 : 〃          '1'(Low  〃    )
+                %1 : 〃         '1'(Low  〃   )
 
 SDGC($e9602b):
         bit  7   6   5   4   3   2   1   0
@@ -2692,7 +2690,7 @@ SDGC($e9602b):
         bit 5   Xfer Enable
                 プログラム転送時
                 %0 : Data Request のかわりに割り込みを発生しない
-                %1 : 〃                                    する
+                %1 : 〃                                   する
 
 SSTS($e9602d):
         bit  7   6   5   4   3   2   1   0
@@ -2700,13 +2698,13 @@ SSTS($e9602d):
           │      │  │  │  │  │      │
           └───┴─┴─┴─┴─┴───┘
             │  │  │  │  │  │  │  └ DREG status Empty
-            │  │  │  │  │  │  └── 〃              Full
+            │  │  │  │  │  │  └── 〃             Full
             │  │  │  │  │  └ TC = 0
             │  │  │  │  └ SCSI ResetIn
             │  │  │  └ Transfer in progress
             │  │  └ SPC Busy
             │  └ Connected TARG
-            └── 〃            INIT
+            └── 〃           INIT
 
         bit 7〜6 Connected
                         SPC と SCSI の結合状態
@@ -2716,7 +2714,7 @@ SSTS($e9602d):
                         %11 : (未定義)
         bit 5    SPC Busy
                         %0 : コマンド実行中/実行待ち状態ではない
-                        %1 : 〃                          である
+                        %1 : 〃                         である
         bit 4    Transfer in progress
                         %0 : 通常動作
                         %1 : ハード転送実行中/SCSI で転送フェーズが要求されて
@@ -2724,10 +2722,10 @@ SSTS($e9602d):
         bit 3    SCSI ResetIn
                         SCSI バス上の RST 信号の状態
                         %0 : RST 信号は '0'(High レベル)
-                        %1 : 〃          '1'(Low  〃    )
+                        %1 : 〃         '1'(Low  〃   )
         bit 2    TC = 0
                         %0 : 転送バイトカウンタの内容がゼロではない
-                        %1 : 〃                             である
+                        %1 : 〃                            である
         bit 1〜0 DREG status
                         内部データバッファレジスタの状態
                         %00 : 1〜7 バイトのデータがある
@@ -2744,7 +2742,7 @@ SERR($e9602f):
             │  │  │      └ TC Parity Error
             │  │  └ Xfer Out
             │  └ Data Error SPC
-            └── 〃             SCSI
+            └── 〃            SCSI
 
         bit 7〜6 Data Error
                         %00 : パリティエラーは検出されなかった
@@ -2771,8 +2769,8 @@ PCTL($e96031):
           │  │           0  │          │
           └─┴───────┴─────┘
             │                  │  │  └ Transfer Phase MSG
-           Busfree INT Enable   │  └── 〃                 C/D
-                                └──── 〃           I/O
+           Busfree INT Enable   │  └── 〃                C/D
+                                └──── 〃          I/O
 
         bit 7    Busfree INT Enable
                 %0 : 通常動作
@@ -2856,9 +2854,9 @@ TCL($e9603d):
 
 address size
 $e98001 1.b     チャンネル B コマンドポート
-$e98003 1.b     〃            データポート
+$e98003 1.b     〃           データポート
 $e98005 1.b     チャンネル A コマンドポート
-$e98007 1.b     〃            データポート
+$e98007 1.b     〃           データポート
 
 
 WR0     CRC 初期化/SCC 初期化/アクセスレジスタ選択
@@ -2868,13 +2866,13 @@ WR3     受信動作パラメータ設定
 WR4     送受信動作関係のパラメータ設定
 WR5     送信動作パラメータ設定
 WR6     同期キャラクタ/SDLC アドレス設定
-WR7     〃             /SDLC フラグ設定
+WR7     〃            /SDLC フラグ設定
 WR8     送信バッファ($e98003/$e98007 と同一)
 WR9     割り込み発生制御/SCC リセット(チャンネル A/B で共通)
 WR10    トランスミッタ/レシーバ制御
 WR11    クロックモード制御
 WR12    ボーレートジェネレータ(下位)
-WR13    〃                     (上位)
+WR13    〃                    (上位)
 WR14    DPLL 動作モード設定
 WR15    外部/ステータス割り込み発生許可/禁止制御
 
@@ -2931,11 +2929,11 @@ WR1:
 
         bit 7    Wait/DREQ Enable
                         %0 : W/REQ 機能ディセーブル
-                        %1 : 〃        イネーブル
+                        %1 : 〃       イネーブル
                         ※X680x0 では %0 に設定する.
         bit 6    Wait/DREQ Function
                         %0 : W/REQ 端子は Wait 信号として動作する
-                        %1 : 〃            DMA 要求信号として動作する
+                        %1 : 〃           DMA 要求信号として動作する
         bit 5    Wait/DREQ on Rx/Tx
                         %0 : 送信動作で W/REQ 信号を使う
                         %1 : 受信〃
@@ -2949,13 +2947,13 @@ WR1:
         bit 2    Parity is Spec. Condition
                         パリティエラー
                         %0 : スペシャル Rx コンディションにしない
-                        %1 : 〃                             する
+                        %1 : 〃                            する
         bit 1    Tx INT Enable
                         %0 : 送信割り込み禁止
-                        %1 : 〃           許可
+                        %1 : 〃          許可
         bit 0    E/S INT Enable
                         %0 : 外部ステータス割り込み禁止
-                        %1 : 〃                     許可
+                        %1 : 〃                    許可
 
 WR2:
         bit  7                           0
@@ -2995,7 +2993,7 @@ WR3:
                              するキャラクタが入力されるまで待つ)
         bit 3    Rx CRC Enable
                         %0 : 受信キャラクタの CRC 計算を行わない
-                        %1 : 〃                          行う
+                        %1 : 〃                         行う
         bit 2    Address Search Mode
                         SDLC モード時:
                         %0 : 通常動作
@@ -3010,7 +3008,7 @@ WR3:
                         %1 : WR6 と一致するキャラクタは受信しない
         bit 0    Rx Enable
                         %0 : 受信動作禁止
-                        %1 : 〃      許可
+                        %1 : 〃     許可
 
 WR4:
         bit  7   6   5   4   3   2   1   0
@@ -3030,21 +3028,21 @@ WR4:
                 %11 : ×64 〃
         bit 5〜4 SYNC Mode
                 %00 :  8 ビット同期キャラクタ(Monosync)
-                %01 : 16 〃                   (Bisync)
+                %01 : 16 〃                  (Bisync)
                 %10 : SDLC モード('01111110' がフラグ)
                 %11 : 外部同期モード(External Sync、X680x0 では使用不可)
                 ※STOP Bit = %00 の時のみ有効.
         bit 3〜2 STOP Bit
                 %00 : ストップビット なし(同期モード)
-                %01 : 〃      1   ビット(非同期モード)
-                %10 : 〃      1.5 〃    (〃            )
-                %11 : 〃      2   〃    (〃            )
+                %01 : 〃     1   ビット(非同期モード)
+                %10 : 〃     1.5 〃   (〃           )
+                %11 : 〃     2   〃   (〃           )
         bit 1    Parity Even/Odd
                 %0 : 奇数
                 %1 : 偶数
         bit 0    Parity Enable
                 %0 : パリティなし
-                %1 : 〃      あり
+                %1 : 〃     あり
 
         ※X680x0 ではチャンネル B はマウスとの通信に使用されているため、非同期
           1/16 クロックモード、データ長 8 ビット、ストップビット 2、パリティ無
@@ -3065,7 +3063,7 @@ WR5:
 
         bit 7    DTR
                         %0 : DTR 信号を 'H' にする
-                        %1 : 〃          'L' 〃
+                        %1 : 〃         'L' 〃
         bit 6〜5 Tx Bit/char.
                         送信キャラクタのビット長を指定する.
                         %00 : 5 ビット/キャラクタ
@@ -3077,7 +3075,7 @@ WR5:
                         %1 : ブレークを送出する(TxD を '0' のままにする)
         bit 3    Tx Enable
                         %0 : 送信動作禁止
-                        %1 : 〃      許可
+                        %1 : 〃     許可
         bit 2    SDLC/CRC-16
                         使用する CRC 生成多項式を選択する
                         %0 : CRC-CCITT
@@ -3085,10 +3083,10 @@ WR5:
                         ※SDLC 使用時は %0 にすること.
         bit 1    RTS         ___
                         %0 : RTS 端子を 'H' にする
-                        %1 : 〃          'L' 〃
+                        %1 : 〃         'L' 〃
         bit 0    Tx CRC Enable
                         %0 : 送信キャラクタの CRC 計算を行わない
-                        %1 : 〃                          行う
+                        %1 : 〃                         行う
 
 WR6:
         bit  7                           0
@@ -3141,13 +3139,13 @@ WR9:
                         %1 : bit 4〜6
         bit 3    MIE
                         %0 : SCC の割り込み発生禁止
-                        %1 : 〃                 許可
+                        %1 : 〃                許可
         bit 2    DLC
                         %0 : 下位チェーン禁止
-                        %1 : 〃           許可
+                        %1 : 〃          許可
         bit 1    NV
                         %0 : 割り込み応答時、ベクタを出力する
-                        %1 : 〃                           しない
+                        %1 : 〃                          しない
         bit 0    VIS
                         %0 : ベクタ番号は固定
                         %1 : 割り込み要因によってベクタを変化させる
@@ -3167,7 +3165,7 @@ WR10:
 
         bit 7    CRC Preset 1/0
                         %0 : CRC ジェネレータ、CRC チェッカの初期値は All'0'
-                        %1 : 〃                                           '1'
+                        %1 : 〃                                          '1'
         bit 6〜5 Data Encording
                         TxD の変調モード
                         %00 : NRZ
@@ -3181,11 +3179,11 @@ WR10:
         bit 3    Mark/Flag Idle
                         SDLC モード時
                         %0 : アイドル時、フラグ(フラグアイドル)を送信する
-                        %1 : 〃           TxD を '1'(マーク状態)にする
+                        %1 : 〃          TxD を '1'(マーク状態)にする
         bit 2    Abort/Flag on Underrun
                         SDLC モード時
                         %0 : 送信アンダーラン発生時、CRC を送る
-                        %1 : 〃                       アボートとフラグを送る
+                        %1 : 〃                      アボートとフラグを送る
         bit 1    Loop Mode
                         SDLC モード、同期モード時
                         %0 : 通常動作
@@ -3193,10 +3191,10 @@ WR10:
         bit 0    6bit/8bit Sync
                         Monosync モード時:
                         %0 : 同期キャラクタは 8bit
-                        %1 : 〃                6bit
+                        %1 : 〃               6bit
                         Bisync モード時:
                         %0 : 受信同期キャラクタは 16bit
-                        %1 : 〃                    12bit
+                        %1 : 〃                   12bit
 
 WR11:
         bit  7   6   5   4   3   2   1   0
@@ -3227,7 +3225,7 @@ WR11:
                         送信クロック選択(Receive Clock と同様)
         bit 2    TRxc Out/In ____
                         %0 : TRxC 端子は入力端子
-                        %1 : 〃          出力端子
+                        %1 : 〃         出力端子
         bit 1〜0 TRxC Output
                         ____
                         TRxC 端子から出力される信号源
@@ -3293,7 +3291,7 @@ WR14:
                         %1 : SCC の PCLK(X680x0 では 5MHz)
         bit 0    BRG Enable
                         %0 : ボーレートジェネレータ停止
-                        %1 : 〃                     動作
+                        %1 : 〃                    動作
 
 WR15:
         bit  7   6   5   4   3   2   1   0
@@ -3309,26 +3307,26 @@ WR15:
 
         bit 7   Break/Abort IE
                 %0 : ブレーク/アボート状態検出で割り込みを発生しない
-                %1 : 〃                                        する
+                %1 : 〃                                       する
         bit 6   Tx Underrun/EOM IE
                 %0 : 送信アンダーラン/送信終了で割り込みを発生しない
-                %1 : 〃                                        する
+                %1 : 〃                                       する
         bit 5   CTS IE
                      ___
                 %0 : CTS 端子の変化で割り込みを発生しない
-                %1 : 〃                             する
+                %1 : 〃                            する
         bit 4   Sync/Hunt IE
                 非同期モード時:
                      ____
                 %0 : SYNC 端子の変化で割り込みを発生しない
-                %1 : 〃                              する
+                %1 : 〃                             する
                 同期モード/SDLC モード時:
                 %0 : 同期の確立/喪失の変化で割り込みを発生しない
-                %1 : 〃                                    する
+                %1 : 〃                                   する
         bit 3   DCD IE
                      ___
                 %0 : DCD 端子の状態変化で割り込みを発生しない
-                %1 : 〃                                 する
+                %1 : 〃                                する
         bit 1   Zero Count IE
                 %0 : ゼロカウント割り込みは発生しない
                 %1 : ボーレートジェネレータのカウント値 =0 で外部ステータス割
@@ -3352,7 +3350,7 @@ RR0:
         bit 7   Break/Abort
                         非同期モード時:
                         %0 : ブレーク状態から回復した/通常動作
-                        %1 : 〃           を検出した
+                        %1 : 〃          を検出した
                         SDLC モード時:
                         %0 : アボートシーケンスが終了した/通常動作
                         %1 : アボートシーケンス(7 個以上 '1' が連続する)を
@@ -3365,22 +3363,22 @@ RR0:
         bit 5   CTS     CTS 端子の状態を示す
                              ___
                         %0 : CTS 端子は 'H' レベル(送信禁止状態)
-                        %1 : 〃          'L' 〃     (〃  許可〃  )
+                        %1 : 〃         'L' 〃    (〃 許可〃 )
         bit 4   SYNC/Hunt
                         非同期モード時:
                              ____
                         %0 : SYNC 端子は 'H' レベル
-                        %1 : 〃           'L' 〃
+                        %1 : 〃          'L' 〃
                         同期モード/SDLC モード時:
                         %0 : 同期が確立した
                         %1 : 同期は確立していない(Hunt モード)
         bit 3   DCD     DCD 端子の状態を示す
                              ___
                         %0 : DCD 端子は 'H' レベル(キャリア検出していない)
-                        %1 : 〃          'L' 〃     (〃       検出した  )
+                        %1 : 〃         'L' 〃    (〃      検出した  )
         bit 2   Tx buffer Empty
                         %0 : 送信バッファにキャラクタがある
-                        %1 : 〃           が空になった
+                        %1 : 〃          が空になった
         bit 1   Zero Count
                         %0 : 通常動作
                         %1 : ボーレートジェネレータのカウント値が 0 になった
@@ -3458,13 +3456,13 @@ RR2(チャンネル B):
         bit 3〜1
                 割り込み要因
                 %000 : チャンネル B 送信バッファ空
-                %001 : 〃            外部ステータス変化
-                %010 : 〃            受信キャラクタ有効
-                %011 : 〃            スペシャル Rx コンディション
+                %001 : 〃           外部ステータス変化
+                %010 : 〃           受信キャラクタ有効
+                %011 : 〃           スペシャル Rx コンディション
                 %100 : チャンネル B 送信バッファ空
-                %101 : 〃            外部ステータス変化
-                %110 : 〃            受信キャラクタ有効
-                %111 : 〃            スペシャル Rx コンディション
+                %101 : 〃           外部ステータス変化
+                %110 : 〃           受信キャラクタ有効
+                %111 : 〃           スペシャル Rx コンディション
         ※WR9 VIS が %1 の時は bit 3〜1 ではなく bit 4〜6 が変化する.
 
 RR3:
@@ -3570,22 +3568,22 @@ $e9a007 1.b       W     8255 コントロールワード(動作モード/ビッ�
 
         bit 6   TRG B
                 %0 : トリガ B ボタンは押されている
-                %1 : 〃                押されていない
+                %1 : 〃               押されていない
         bit 5   TRG A
                 %0 : トリガ A ボタンは押されている
-                %1 : 〃                押されていない
+                %1 : 〃               押されていない
         bit 3   RIGHT
                 %0 : 右スイッチは押されている
-                %1 : 〃           押されていない
+                %1 : 〃          押されていない
         bit 2   LEFT
                 %0 : 左スイッチは押されている
-                %1 : 〃           押されていない
+                %1 : 〃          押されていない
         bit 1   BACK
                 %0 : 下スイッチは押されている
-                %1 : 〃           押されていない
+                %1 : 〃          押されていない
         bit 0   FORWARD
                 %0 : 上スイッチは押されている
-                %1 : 〃           押されていない
+                %1 : 〃          押されていない
 
 ジョイスティック #2($e9a003):
         (ジョイスティック #1 と同様)
@@ -3648,25 +3646,25 @@ $e9a007 1.b       W     8255 コントロールワード(動作モード/ビッ�
         bit 6〜5 Group A Mode
                         グループ A(ポート A とポート C 上位)の動作モード
                         %00 : モード 0
-                        %01 : 〃     1
-                        %10 : 〃     2
-                        %11 : 〃     2
+                        %01 : 〃    1
+                        %10 : 〃    2
+                        %11 : 〃    2
         bit 4    PORT A IN/OUT
                         %0 : ポート A は出力
-                        %1 : 〃          入力
+                        %1 : 〃         入力
         bit 3    PORT C(High) IN/OUT
                         %0 : ポート C(上位) は出力
-                        %1 : 〃                入力
+                        %1 : 〃               入力
         bit 2    Group B Mode
                         グループ B(ポート B とポート C 下位)の動作モード
                         %0 : モード 0
-                        %1 : 〃     1
+                        %1 : 〃    1
         bit 1    PORT B IN/OUT
                         %0 : ポート B は出力
-                        %1 : 〃          入力
+                        %1 : 〃         入力
         bit 0    PORT C(Low) IN/OUT
                         %0 : ポート C(下位) は出力
-                        %1 : 〃                入力
+                        %1 : 〃               入力
         ※最上位ビットが %1 の値を書き込むと、動作モード設定を行う.
 
 ==============================================================================
@@ -3675,7 +3673,7 @@ $e9a007 1.b       W     8255 コントロールワード(動作モード/ビッ�
 
 address size    R/W
 $e9c001 1.b     R       割り込みステータス
-〃       〃         W     割り込みマスク
+〃      〃        W     割り込みマスク
 $e9c003 1.b       W     割り込みベクタ
 
 
@@ -3695,28 +3693,28 @@ IOC 割り込みステータス($e9c001):
 
         bit 7   FDC INT
                         %0 : FDC 割り込みは発生していない
-                        %1 : 〃                 している
+                        %1 : 〃                している
         bit 6   FDD INT
                         %0 : FDD 割り込みは発生していない
-                        %1 : 〃                 している
+                        %1 : 〃                している
         bit 5   PRT INT
                         %0 : プリンタ BUSY 信号 = High(BUSY 状態)
-                        %1 : 〃                  = Low (READY 状態)
+                        %1 : 〃                 = Low (READY 状態)
         bit 4   HDD INT
                         %0 : HDD 割り込みは発生していない
-                        %1 : 〃                 している
+                        %1 : 〃                している
         bit 3   HDDI EN
                         %0 : HDD 割り込み禁止中
-                        %1 : 〃           許可中
+                        %1 : 〃          許可中
         bit 2   FDCI EN
                         %0 : FDC 割り込み禁止中
-                        %1 : 〃           許可中
+                        %1 : 〃          許可中
         bit 1   FDDI EN
                         %0 : FDD 割り込み禁止中
-                        %1 : 〃           許可中
+                        %1 : 〃          許可中
         bit 0   PRTI EN
                         %0 : プリンタ割り込み禁止中
-                        %1 : 〃               許可中
+                        %1 : 〃              許可中
 
 IOC 割り込みマスク($e9c001):
         bit  7           4   3   2   1   0
@@ -3730,16 +3728,16 @@ IOC 割り込みマスク($e9c001):
 
         bit 3   HDDI EN
                         %0 : HDD 割り込み禁止
-                        %1 : 〃           許可
+                        %1 : 〃          許可
         bit 2   FDCI EN
                         %0 : FDC 割り込み禁止
-                        %1 : 〃           許可
+                        %1 : 〃          許可
         bit 1   FDDI EN
                         %0 : FDD 割り込み禁止
-                        %1 : 〃           許可
+                        %1 : 〃          許可
         bit 0   PRTI EN
                         %0 : プリンタ割り込み禁止
-                        %1 : 〃               許可
+                        %1 : 〃              許可
 
 IOC 割り込みベクタ($e9c003):
         bit  7                   2   1   0
@@ -3851,9 +3849,9 @@ address size
 $eb0000 512.w   スプライトスクロールレジスタ
 
 $eb0800 1.w     BG0 スクロールレジスタ X
-$eb0802 1.w     〃                      Y
+$eb0802 1.w     〃                     Y
 $eb0804 1.w     BG1 スクロールレジスタ X
-$eb0806 1.w     〃                      Y
+$eb0806 1.w     〃                     Y
 $eb0808 1.w     BG コントロール
 $eb080a 1.w     水平トータル ┐
 $eb080c 1.w     水平表示位置 │画面モードレジスタ
@@ -3861,9 +3859,9 @@ $eb080e 1.w     垂直表示位置 │
 $eb0810 1.w     解像度設定   ┘
 
 $eb8000 8192.b  PCG エリア(16×16ドット/8×8ドット共用)
-$eba000 8192.b  〃         (16×16ドット専用)
+$eba000 8192.b  〃        (16×16ドット専用)
 $ebc000 8192.b  BG データエリア(BG0) 若しくは PCG(16×16ドット専用)
-$ebe000 8192.b  〃              (BG1) 〃
+$ebe000 8192.b  〃             (BG1) 〃
 
 
 スプライトスクロールレジスタ($eb0000):
@@ -3935,22 +3933,22 @@ BG コントロール($eb0808):
 
         bit 9    DISP/CPU
                         %0 : スプライト/BG 表示オフ
-                        %1 : 〃                 オン
+                        %1 : 〃                オン
                         ※表示をオフにすると PCG やレジスタへのアクセスが速く
                           なります.
         bit 5〜4 BG1 TXSEL
                         %00 : BG データエリア 0 を使用
-                        %01 : 〃       1 〃
+                        %01 : 〃      1 〃
                         %10 : (未定義)
-                        %11 : (  〃  )
+                        %11 : (  〃 )
         bit 3    BG1 ON
                         %0 : BG1 表示オフ
                         %1 : BG1 表示オン
         bit 2〜1 BG0 TXSEL
                         %00 : BG データエリア 0 を使用
-                        %01 : 〃       1 〃
+                        %01 : 〃      1 〃
                         %10 : (未定義)
-                        %11 : (  〃  )
+                        %11 : (  〃 )
         bit 0    BG0 ON
                         %0 : BG0 表示オフ
                         %1 : BG0 表示オン
@@ -3994,15 +3992,15 @@ BG コントロール($eb0808):
 
         bit 4    L/H freq
                         %0 : 水平同期周波数 15.98kHz
-                        %1 :    〃           31.5kHz
+                        %1 :    〃          31.5kHz
         bit 3〜2 V-RES
                         %00 : 垂直 256 ラインモード
-                        %01 : 〃   512 〃
+                        %01 : 〃  512 〃
                         %10 : 未定義
                         %11 : 未定義
         bit 1〜0 H-RES
                         %00 : 水平 256 ドットモード
-                        %01 : 〃   512 〃
+                        %01 : 〃  512 〃
                         %10 : 未定義
                         %11 : 未定義
 
@@ -4021,7 +4019,7 @@ PCG エリア($eb8000):
         _DMAMOV_L では必ずバイトサイズで転送が行われるので注意すること.
 
         OFS = スプライト N の (X,Y) 点をアクセスする時のオフセット
-        BIT = 〃                                 ビット位置
+        BIT = 〃                                ビット位置
 
         OFS = $eb8000＋Y×4 (ロングワード単位)
         BIT = (28−X×4) 〜 (31−X×4) の 4 ビット
