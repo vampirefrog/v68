@@ -1,0 +1,158 @@
+	.nlist
+*
+* fefunc.h X68k XC Compiler v2.00 Copyright 1990 SHARP/Hudson
+*
+* 浮動小数点演算パッケージ呼び出しマクロ
+*
+* Ｃコンパイラの関数として呼び出してはいけません
+*
+* リンク時には、以下の場合に合わせてＦＬＯＡＴ用ライブラリをリンクして下さい
+*
+* ＦＬＯＡＴ？．Ｘを使用しない場合 ＦＬＯＡＴＥＭＬ．Ｌ
+* ＦＬＯＡＴ？．Ｘを使用する場合   ＦＬＯＡＴＦＮＣ．Ｌ
+*
+FPACK	macro	callname
+	.ifndef	callname
+	.xref	callname
+	.endif
+	jsr	callname
+	endm
+*
+* 使用できるパッケージには、以下のものがあります
+*	.xref	__LMUL		*$FE00
+*	.xref	__LDIV		*$FE01
+*	.xref	__LMOD		*$FE02
+*	.xref	__UMUL		*$FE04
+*	.xref	__UDIV		*$FE05
+*	.xref	__UMOD		*$FE06
+*	.xref	__IMUL		*$FE08
+*	.xref	__IDIV		*$FE09
+*	.xref	__RANDOMIZE	*$FE0C
+*	.xref	__SRAND		*$FE0D
+*	.xref	__RAND		*$FE0E
+*	.xref	__STOL		*$FE10
+*	.xref	__LTOS		*$FE11
+*	.xref	__STOH		*$FE12
+*	.xref	__HTOS		*$FE13
+*	.xref	__STOO		*$FE14
+*	.xref	__OTOS		*$FE15
+*	.xref	__STOB		*$FE16
+*	.xref	__BTOS		*$FE17
+*	.xref	__IUSING	*$FE18
+*	.xref	__LTOD		*$FE1A
+*	.xref	__DTOL		*$FE1B
+*	.xref	__LTOF		*$FE1C
+*	.xref	__FTOL		*$FE1D
+*	.xref	__FTOD		*$FE1E
+*	.xref	__DTOF		*$FE1F
+*	.xref	__VAL		*$FE20
+*	.xref	__USING		*$FE21
+*	.xref	__STOD		*$FE22
+*	.xref	__DTOS		*$FE23
+*	.xref	__ECVT		*$FE24
+*	.xref	__FCVT		*$FE25
+*	.xref	__GCVT		*$FE26
+*	.xref	__DTST		*$FE28
+*	.xref	__DCMP		*$FE29
+*	.xref	__DNEG		*$FE2A
+*	.xref	__DADD		*$FE2B
+*	.xref	__DSUB		*$FE2C
+*	.xref	__DMUL		*$FE2D
+*	.xref	__DDIV		*$FE2E
+*	.xref	__DMOD		*$FE2F
+*	.xref	__DABS		*$FE30
+*	.xref	__DCEIL		*$FE31
+*	.xref	__DFIX		*$FE32
+*	.xref	__DFLOOR	*$FE33
+*	.xref	__DFRAC		*$FE34
+*	.xref	__DSGN		*$FE35
+*	.xref	__SIN		*$FE36
+*	.xref	__COS		*$FE37
+*	.xref	__TAN		*$FE38
+*	.xref	__ATAN		*$FE39
+*	.xref	__LOG		*$FE3A
+*	.xref	__EXP		*$FE3B
+*	.xref	__SQR		*$FE3C
+*	.xref	__PI		*$FE3D
+*	.xref	__NPI		*$FE3E
+*	.xref	__POWER		*$FE3F
+*	.xref	__RND		*$FE40
+*	.xref	__DFREXP	*$FE49
+*	.xref	__DLDEXP	*$FE4A
+*	.xref	__DADDONE	*$FE4B
+*	.xref	__DSUBONE	*$FE4C
+*	.xref	__DDIVTWO	*$FE4D
+*	.xref	__DIEECNV	*$FE4E
+*	.xref	__IEEDCNV	*$FE4F
+*	.xref	__FVAL		*$FE50
+*	.xref	__FUSING	*$FE51
+*	.xref	__STOF		*$FE52
+*	.xref	__FTOS		*$FE53
+*	.xref	__FECVT		*$FE54
+*	.xref	__FFCVT		*$FE55
+*	.xref	__FGCVT		*$FE56
+*	.xref	__FTST		*$FE58
+*	.xref	__FCMP		*$FE59
+*	.xref	__FNEG		*$FE5A
+*	.xref	__FADD		*$FE5B
+*	.xref	__FSUB		*$FE5C
+*	.xref	__FMUL		*$FE5D
+*	.xref	__FDIV		*$FE5E
+*	.xref	__FMOD		*$FE5F
+*	.xref	__FABS		*$FE60
+*	.xref	__FCEIL		*$FE61
+*	.xref	__FFIX		*$FE62
+*	.xref	__FFLOOR	*$FE63
+*	.xref	__FFRAC		*$FE64
+*	.xref	__FSGN		*$FE65
+*	.xref	__FSIN		*$FE66
+*	.xref	__FCOS		*$FE67
+*	.xref	__FTAN		*$FE68
+*	.xref	__FATAN		*$FE69
+*	.xref	__FLOG		*$FE6A
+*	.xref	__FEXP		*$FE6B
+*	.xref	__FSQR		*$FE6C
+*	.xref	__FPI		*$FE6D
+*	.xref	__FNPI		*$FE6E
+*	.xref	__FPOWER	*$FE6F
+*	.xref	__FRND		*$FE70
+*	.xref	__FFREXP	*$FE79
+*	.xref	__FLDEXP	*$FE7A
+*	.xref	__FADDONE	*$FE7B
+*	.xref	__FSUBONE	*$FE7C
+*	.xref	__FDIVTWO	*$FE7D
+*	.xref	__FIEECNV	*$FE7E
+*	.xref	__IEEFCNV	*$FE7F
+*	.xref	__CLMUL		*$FEE0
+*	.xref	__CLDIV		*$FEE1
+*	.xref	__CLMOD		*$FEE2
+*	.xref	__CUMUL		*$FEE3
+*	.xref	__CUDIV		*$FEE4
+*	.xref	__CUMOD		*$FEE5
+*	.xref	__CLTOD		*$FEE6
+*	.xref	__CDTOL		*$FEE7
+*	.xref	__CLTOF		*$FEE8
+*	.xref	__CFTOL		*$FEE9
+*	.xref	__CFTOD		*$FEEA
+*	.xref	__CDTOF		*$FEEB
+*	.xref	__CDCMP		*$FEEC
+*	.xref	__CDADD		*$FEED
+*	.xref	__CDSUB		*$FEEE
+*	.xref	__CDMUL		*$FEEF
+*	.xref	__CDDIV		*$FEF0
+*	.xref	__CDMOD		*$FEF1
+*	.xref	__CFCMP		*$FEF2
+*	.xref	__CFADD		*$FEF3
+*	.xref	__CFSUB		*$FEF4
+*	.xref	__CFMUL		*$FEF5
+*	.xref	__CFDIV		*$FEF6
+*	.xref	__CFMOD		*$FEF7
+*	.xref	__CDTST		*$FEF8
+*	.xref	__CFTST		*$FEF9
+*	.xref	__CDINC		*$FEFA
+*	.xref	__CFINC		*$FEFB
+*	.xref	__CDDEC		*$FEFC
+*	.xref	__CFDEC		*$FEFD
+*	.xref	__FEVARG	*$FEFE
+*	.xref	__FEVECS	*$FEFF
+	.list
