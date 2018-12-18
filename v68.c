@@ -93,7 +93,7 @@ int v68_fill_buffer(int32_t *bufL, int32_t *bufR, int samples) {
 		printf("executed cycles %d / %d\n", executed_cycles, next_int);
 		v68.cpu_ended_timeslice = 0;
 
-		v68_render_tstates(executed_cycles);
+		v68_render_tstates(executed_cycles - v68.prev_sound_cycles);
 		printf("timer A cycles = %d, timer B cycles = %d flags=%02x\n", v68.opm_timera_cycles, v68.opm_timerb_cycles, v68.opm_flags);
 		v68_periph_advance_timers(executed_cycles);
 		remaining_tstates -= executed_cycles;
