@@ -10,7 +10,6 @@
 
 #include "v68.h"
 #include "v68io.h"
-#include "cmdline.h"
 #include "tools.h"
 
 #define BUF_SIZE 4096
