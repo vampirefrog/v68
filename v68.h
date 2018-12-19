@@ -37,12 +37,12 @@
 
 #define RAS_INTERVAL    10000   /* ラスタ割り込みの間隔 */
 
-#define verbose(v, fmt, ...) { if(v68.verbosity >= v) printf(fmt, __VA_ARGS__); }
-#define verbose1(fmt, ...) verbose(1, fmt, __VA_ARGS__);
-#define verbose2(fmt, ...) verbose(2, fmt, __VA_ARGS__);
-#define verbose3(fmt, ...) verbose(3, fmt, __VA_ARGS__);
-#define verbose4(fmt, ...) verbose(4, fmt, __VA_ARGS__);
-#define logcall(fmt, ...) { if(v68.log_calls) printf(fmt, __VA_ARGS__); }
+#define verbose(v, fmt...) { if(v68.verbosity >= v) printf(fmt); }
+#define verbose1(fmt...) verbose(1, fmt);
+#define verbose2(fmt...) verbose(2, fmt);
+#define verbose3(fmt...) verbose(3, fmt);
+#define verbose4(fmt...) verbose(4, fmt);
+#define logcall(fmt...) { if(v68.log_calls) printf(fmt); }
 
 struct v68 {
 	uint8_t *ram;

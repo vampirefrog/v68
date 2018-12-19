@@ -16,7 +16,7 @@ int v68_init(int clock, int ram_size, int sample_rate) {
 	memset(&v68, 0, sizeof(v68));
 
 	v68.log_dasm = 0;
-	v68.verbosity = 1;
+	v68.verbosity = 0;
 
 	v68.ram_size = ram_size;
 	v68.cpu_clock = clock;
@@ -49,13 +49,14 @@ int v68_render_tstates(int tstates) {
 	if(samples > v68.buf_remaining)
 		samples = v68.buf_remaining;
 	v68.samples_remainder = x - samples * v68.cpu_clock;
-	printf("render tstates %d buf_remaining=%d samples=%ld\n", tstates, v68.buf_remaining, samples);
+	verbose1("render tstates %d buf_remaining=%d samples=%ld\n", tstates, v68.buf_remaining, samples);
 
 	if(samples > 0) {
 		v68_periph_render(v68.bufL, v68.bufR, samples);
 #ifndef __EMSCRIPTEN__
-		if(v68.logger)
+		if(v68.logger) {
 			vgm_logger_wait(v68.logger, samples);
+		}
 #endif
 
 		v68.bufL += samples;
@@ -81,25 +82,25 @@ int v68_fill_buffer(int32_t *bufL, int32_t *bufR, int samples) {
 
 	int remaining_tstates = cpu_tstates;
 	while(remaining_tstates > 0) {
-		printf("remaining tstates %d flags=%02x\n", remaining_tstates, v68.opm_flags);
+		verbose1("remaining tstates %d flags=%02x\n", remaining_tstates, v68.opm_flags);
 		int next_int = v68_periph_next_int(remaining_tstates);
 
-		printf("executing %d\n", next_int);
+		verbose1("executing %d\n", next_int);
 		v68.cpu_ended_timeslice = 0;
 		v68.prev_sound_cycles = 0;
 		int cycles = m68k_execute(next_int, v68.log_dasm);
 		int executed_cycles = v68.cpu_ended_timeslice ? next_int - m68ki_initial_cycles : cycles;
-		printf("ended=%d cycles=%d remaining=%d initial=%d executed=%d run=%d next_int=%d calculated=%d\n", v68.cpu_ended_timeslice, cycles, remaining_tstates, m68ki_initial_cycles, executed_cycles, m68k_cycles_run(), next_int, next_int - m68ki_initial_cycles);
-		printf("executed cycles %d / %d\n", executed_cycles, next_int);
+		verbose1("ended=%d cycles=%d remaining=%d initial=%d executed=%d run=%d next_int=%d calculated=%d\n", v68.cpu_ended_timeslice, cycles, remaining_tstates, m68ki_initial_cycles, executed_cycles, m68k_cycles_run(), next_int, next_int - m68ki_initial_cycles);
+		verbose1("executed cycles %d / %d\n", executed_cycles, next_int);
 		v68.cpu_ended_timeslice = 0;
 
 		v68_render_tstates(executed_cycles - v68.prev_sound_cycles);
-		printf("timer A cycles = %d, timer B cycles = %d flags=%02x\n", v68.opm_timera_cycles, v68.opm_timerb_cycles, v68.opm_flags);
-		v68_periph_advance_timers(executed_cycles);
+		verbose1("timer A cycles = %d, timer B cycles = %d flags=%02x\n", v68.opm_timera_cycles, v68.opm_timerb_cycles, v68.opm_flags);
+		v68_periph_advance(executed_cycles);
 		remaining_tstates -= executed_cycles;
 	}
 
-	printf("filled buffer buf_remaining=%d\n", v68.buf_remaining);
+	verbose1("filled buffer buf_remaining=%d\n", v68.buf_remaining);
 
 	return 0;
 }

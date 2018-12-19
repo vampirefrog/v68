@@ -18,7 +18,7 @@
 #define V68_RAM 2*1024*1024
 
 int opt_utf8 = 0;
-int opt_verbosity = 1;
+int opt_verbosity = 0;
 int opt_log_calls = 0;
 int opt_dasm = 0;
 

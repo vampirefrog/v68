@@ -207,7 +207,7 @@ uint32_t v68_mem_remaining() {
 
 void v68_mem_dump() {
 	for(uint32_t cur = HUMAN_HEAD; cur; cur = m68k_read_memory_32(cur + 0x0c)) {
-		printf("block @%06x addr=%06x prev=%06x parent=%06x end=%06x len=%d next=%06x\n",
+		verbose1("block @%06x addr=%06x prev=%06x parent=%06x end=%06x len=%d next=%06x\n",
 			cur, cur + 16,
 			m68k_read_memory_32(cur),
 			m68k_read_memory_32(cur + 0x04),

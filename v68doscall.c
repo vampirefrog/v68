@@ -449,10 +449,11 @@ int v68_dos_call(uint16_t instr) {
 			}
 			break;
 		case DOS_CALL_SETBLOCK: {
-				v68_mem_dump();
 				uint32_t memptr = m68k_read_memory_32(m68k_get_reg(0, M68K_REG_A7));
 				uint32_t len = m68k_read_memory_32(m68k_get_reg(0, M68K_REG_A7) + 4);
-				// printf("SETBLOCK memptr=%08x len=%d\n", memptr, len);
+				logcall("memptr=0x%08x len=%d\n", memptr, len);
+				v68_mem_dump();
+				logcall("Shrinking mem\n");
 				v68_mem_shrink(memptr, len);
 				v68_mem_dump();
 			}
@@ -462,7 +463,7 @@ int v68_dos_call(uint16_t instr) {
 				uint32_t remaining = v68_mem_remaining();
 				if(len > remaining) len = remaining;
 				uint32_t m = v68_mem_alloc(len, v68.cur_prog_addr);
-				// printf("MALLOC len=%08x -> %08x\n", len, m);
+				logcall("len=0x%08x (%d) result=0x%08x\n", len, len, m);
 				m68k_set_reg(M68K_REG_D0, m);
 				v68_mem_dump();
 			}
@@ -565,7 +566,7 @@ int v68_dos_call(uint16_t instr) {
 				uint32_t len = m68k_read_memory_32(m68k_get_reg(0, M68K_REG_A7) + 6);
 
 				int r = v68_io_write(fd, &v68.ram[buffer], len);
-				logcall("fd=%d len=%d r=%d\n", fd, len, r);
+				logcall("fd=%d buffer=%08x len=%d r=%d\n", fd, buffer, len, r);
 
 				m68k_set_reg(M68K_REG_D0, r);
 			}
@@ -576,7 +577,7 @@ int v68_dos_call(uint16_t instr) {
 				uint32_t len = m68k_read_memory_32(m68k_get_reg(0, M68K_REG_A7) + 6);
 
 				int r = v68_io_read(fd, &v68.ram[buffer], len);
-				logcall("fd=%d len=%d r=%d\n", fd, len, r);
+				logcall("fd=%d buffer=%08x len=%d r=%d\n", fd, buffer, len, r);
 
 				m68k_set_reg(M68K_REG_D0, r);
 			}
