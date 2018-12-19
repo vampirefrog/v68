@@ -18,6 +18,7 @@ all: \
     ontime.x \
     opm.x \
     print.x \
+    process.x \
     proginfo.x \
     sjis.x \
     super1.x \
@@ -43,6 +44,7 @@ oki2.x: oki2.o
 oki3.x: oki3.o
 opm.x: opm.o
 print.x: print.o
+process.x: process.o
 proginfo.x: proginfo.o
 sjis.x: sjis.o
 super1.x: super1.o
