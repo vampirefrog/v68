@@ -73,13 +73,20 @@ struct v68 {
 	/* OPM */
 	struct ym2151 opm;
 	uint8_t opm_addr_latch;
-	int opm_clka, opm_clkb, opm_flags;
+	int opm_clka, opm_clkb, opm_flags, opm_ct;
 	int opm_timera_cycles, opm_timerb_cycles;
 	int opm_timera_counter, opm_timerb_counter;
-	int opm_timers_altered;
+	int periph_timers_altered;
 
 	/* ADPCM */
 	struct okim6258 oki;
+	int oki_sample_counter, oki_sample_cycles;
+
+	/* 8255 PPI */
+	uint8_t ppi_regs[4];
+
+	/* DMAC */
+	uint8_t dmac_regs[0x100];
 
 	/* VGM logging */
 	struct vgm_logger *logger;
