@@ -256,7 +256,7 @@ unsigned int v68_read_periph_8(unsigned int addr) {
 }
 
 void v68_write_periph_32(unsigned int addr, unsigned int data) {
-	printf("periph %x cycles=%d remaining=%d\n", addr, m68k_cycles_run(), m68k_cycles_remaining());
+	verbose2("periph %x cycles=%d remaining=%d\n", addr, m68k_cycles_run(), m68k_cycles_remaining());
 	int render_chippies = 0;
 	if(addr < 0xe82000) {        /* ＣＲＴコントローラ ◆ CRT controller */
 	} else if(addr < 0xe84000) { /* ビデオコントローラ ◆ Video controller */
@@ -289,13 +289,13 @@ void v68_write_periph_32(unsigned int addr, unsigned int data) {
 	}
 
 	if(render_chippies) {
-		printf("render chippies %d - %d = %d\n", m68k_cycles_run(), v68.prev_sound_cycles, m68k_cycles_run() - v68.prev_sound_cycles);
+		verbose2("render chippies %d - %d = %d\n", m68k_cycles_run(), v68.prev_sound_cycles, m68k_cycles_run() - v68.prev_sound_cycles);
 		v68_render_tstates(m68k_cycles_run() - v68.prev_sound_cycles);
 		v68.prev_sound_cycles = m68k_cycles_run();
 	}
 
 	if(v68.periph_timers_altered) {
-		printf("\033[32mtimers altered at %d cycles, %d remaining\033[0m\n", m68k_cycles_run(), m68k_cycles_remaining());
+		verbose1("\033[32mtimers altered at %d cycles, %d remaining\033[0m\n", m68k_cycles_run(), m68k_cycles_remaining());
 		v68.periph_timers_altered = 0;
 		v68.cpu_ended_timeslice = 1;
 		m68k_end_timeslice();

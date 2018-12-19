@@ -1935,7 +1935,7 @@ void m68ki_exception_interrupt(uint int_level)
 
 	/* Acknowledge the interrupt */
 	vector = m68ki_int_ack(int_level);
-	printf("m68ki_exception_interrupt level=%d vector=%x\n", int_level, vector);
+	// printf("m68ki_exception_interrupt level=%d vector=%x\n", int_level, vector);
 
 	/* Get the interrupt vector */
 	if(vector == M68K_INT_ACK_AUTOVECTOR)
@@ -1989,7 +1989,6 @@ void m68ki_exception_interrupt(uint int_level)
 /* ASG: Check for interrupts */
 INLINE void m68ki_check_interrupts(void)
 {
-	printf("m68ki_check_interrupts CPU_INT_LEVEL=0x%02x FLAG_INT_MASK=0x%02x\n", CPU_INT_LEVEL, FLAG_INT_MASK);
 	if(CPU_INT_LEVEL > FLAG_INT_MASK)
 		m68ki_exception_interrupt(CPU_INT_LEVEL>>8);
 }

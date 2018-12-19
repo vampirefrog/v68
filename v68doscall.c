@@ -476,7 +476,7 @@ int v68_dos_call(uint16_t instr) {
 				if(fileno == 2) {
 					sjis_print_utf8(str_ptr, l);
 				} else {
-					printf("FPUTS mesptr=%08x \"%s\" fileno=%d\n", mesptr, v68.ram + mesptr, fileno);
+					logcall("FPUTS mesptr=%08x \"%s\" fileno=%d\n", mesptr, v68.ram + mesptr, fileno);
 				}
 			}
 			break;
@@ -514,7 +514,7 @@ int v68_dos_call(uint16_t instr) {
 				uint8_t *str_ptr = &v68.ram[file];
 				size_t l = strnlen((char *)str_ptr, v68.ram_size - file - 1);
 				str_ptr[l] = 0;
-				// printf("Create %s %04x\n", str_ptr, attr);
+				// logcall("Create %s %04x\n", str_ptr, attr);
 				logcall("Create %s attr=%04x\n", str_ptr, attr);
 				int fd = v68_io_create((char *)str_ptr, attr);
 				m68k_set_reg(M68K_REG_D0, fd);
@@ -630,7 +630,7 @@ int v68_dos_call(uint16_t instr) {
 						}
 						break;
 					default:
-						printf("conctrl md=%d\n", md);
+						logcall("conctrl md=%d\n", md);
 				}
 			}
 			break;
@@ -641,7 +641,7 @@ int v68_dos_call(uint16_t instr) {
 			}
 			break;
 		default:
-			printf("V68 DOS CALL %04x %s\n", instr, dos_call_names[call]);
+			logcall("V68 DOS CALL %04x %s\n", instr, dos_call_names[call]);
 			break;
 	}
 

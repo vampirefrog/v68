@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/sysinfo.h>
 #include "v68.h"
 #include "musashi/m68k.h"
@@ -500,7 +501,7 @@ int v68_iocs_call(uint16_t instr) {
 			}
 			break;
 		default:
-			printf("V68 IOCS CALL %04x %s\n", instr, iocs_call_names[call]);
+			logcall("Unimplemented V68 IOCS CALL %04x %s\n", instr, iocs_call_names[call]);
 	}
 
 	return 0;

@@ -199,7 +199,7 @@ int v68_trap(int which) {
 			}
 			break;
 		default:
-			printf("v68_trap %d\n", which);
+			verbose2("v68_trap %d\n", which);
 	}
 	return 1;
 }
