@@ -144,6 +144,8 @@ int v68_run_command(char *cmd) {
 			return -1;
 		}
 
+		v68_mem_dump();
+
 		// Read text and data
 		v68_io_read(fd, &v68.ram[m + 240], text_size + data_size);
 
@@ -218,7 +220,7 @@ int v68_run_command(char *cmd) {
 
 		// set registers
 		m68k_set_reg(M68K_REG_A0, m - 16); // memory management ptr
-		m68k_set_reg(M68K_REG_A1, m + 240 + o); // end of loaded program + 1
+		m68k_set_reg(M68K_REG_A1, m + 240 + o + bss_size); // end of loaded program + 1
 		m68k_set_reg(M68K_REG_A2, STACK_TOP); // cmdline
 		m68k_set_reg(M68K_REG_A3, ENV_TOP); // env vars
 		uint32_t pc = entry_point + reloc_adj;
