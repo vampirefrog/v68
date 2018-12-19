@@ -46,12 +46,12 @@ YM2151_CLK_CTRL  equ $14
 	bsr.w WriteOPM
 
 	move.w	#$12, d1    ; OPM reg $10, Timer B
-	move.w	#$00, d2
+	move.w	#$fd, d2
 	bsr.w WriteOPM
 
 	* start the timer A and enable interrupts
 	move.b #$14, d1     ; OPM reg $14, Timer bits
-	move.b #$05, d2     ; Load A, IRQEN A
+	move.b #$0a, d2     ; Load B, IRQEN B
 	bsr.w WriteOPM
 
 	* Initialize instrument 0
@@ -155,6 +155,7 @@ YM2151_CLK_CTRL  equ $14
 
 	move.l #$00, (tick_cntr)
 	move.l #$00, (note_cntr)
+	move.l #$00, (tempo_cntr)
 
 	andi.w  #$f8ff,sr
 
@@ -191,19 +192,15 @@ OPMInt:
 
 	* ACK ISR
 	move.b #$14, d1
-	move.b #$15, d2
+	move.b #$2a, d2
 	bsr.w WriteOPM
 
 	* Every few ticks, write a note
 	move.l (tick_cntr), d3
 	add.l #1, d3
-	cmp.l #30, d3
+	cmp.l #48, d3
 	ble skipPrint
 	move.l #0, d3
-
-;	pea.l (opmstr)
-;	DOS _PRINT
-;	addq.l #4, sp
 
 	* Note off
 	move.w #$08, d1
@@ -220,6 +217,20 @@ OPMInt:
 	add.l #1, d4
 	andi.l #$07, d4
 	move.l d4, (note_cntr)
+
+	tst.l d4
+	bne @f
+	move.l (tempo_cntr), d5
+
+	lea.l (tempo_tbl), a4
+	move.b #$12, d1
+	move.b (d5,a4), d2
+	bsr.w WriteOPM
+
+	add.l #1, d5
+	andi.l #$07, d5
+	move.l d5, (tempo_cntr)
+@@:
 
 	* Note On
 	move.b #$08, d1
@@ -257,10 +268,16 @@ tick_cntr:
 .ds.l 1
 note_cntr:
 .ds.l 1
+tempo_cntr:
+.ds.l 1
 
 .data
 note_tbl:
 .dc.b $30, $32, $35, $36, $39, $3b, $3e, $40
+
+tempo_tbl:
+.dc.b $fd, $fc, $fb, $fa, $f9, $f8, $f7, $f6
+.dc.b $fd, $f0, $d0, $b6, $91, $6d, $48, $24
 
 descstr:
 .dc.b 'OPM Test', $0d, $0a, $00

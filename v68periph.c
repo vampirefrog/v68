@@ -80,11 +80,17 @@ void v68_opm_write_addr(uint8_t addr) {
 }
 
 static uint32_t v68_opm_calc_timera() {
-	return (uint64_t)(1024 - v68.opm_clka) * v68.cpu_clock / 62500;
+	uint64_t x = 1024 * v68.opm_clka;
+	x *= v68.cpu_clock;
+	x /= 62500;
+	return x;
 }
 
 static uint32_t v68_opm_calc_timerb() {
-	return 4 * (uint64_t)(256 - v68.opm_clka) * v68.cpu_clock / 15625;
+	uint64_t x = 1024 * (256 - v68.opm_clkb);
+	x *= v68.cpu_clock;
+	x /= 4000000;
+	return x;
 }
 
 void v68_opm_write_data(uint8_t data) {
@@ -101,6 +107,7 @@ void v68_opm_write_data(uint8_t data) {
 			clka &= 0x0003;
 			clka |= data << 2;
 			if(v68.opm_clka != clka) {
+				v68.opm_clka = clka;
 				v68.opm_timera_cycles = v68_opm_calc_timera();
 				v68.periph_timers_altered = 1;
 			}
@@ -109,6 +116,7 @@ void v68_opm_write_data(uint8_t data) {
 			clka &= 0x03fc;
 			clka |= data & 0x03;
 			if(v68.opm_clka != clka) {
+				v68.opm_clka = clka;
 				v68.opm_timera_cycles = v68_opm_calc_timera();
 				v68.periph_timers_altered = 1;
 			}
@@ -116,6 +124,7 @@ void v68_opm_write_data(uint8_t data) {
 		case 0x12:
 			clkb = data;
 			if(v68.opm_clkb != clkb) {
+				v68.opm_clkb = clkb;
 				v68.opm_timerb_cycles = v68_opm_calc_timerb();
 				v68.periph_timers_altered = 1;
 			}
