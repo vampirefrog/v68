@@ -10,8 +10,11 @@ all: \
     filewrite.x \
     fwritetsr.x \
     ioctrl.x \
+    mxdrv17.x \
+    mxp.x \
     oki1.x \
     oki2.x \
+    oki3.x \
     ontime.x \
     opm.x \
     print.x \
@@ -31,10 +34,13 @@ datetime.x: datetime.o
 filewrite.x: filewrite.o
 fwritetsr.x: fwritetsr.o
 ioctrl.x: ioctrl.o
+mxdrv17.x: mxdrv17.o
+mxp.x: mxp.o
 nameck.x: nameck.o
 ontime.x: ontime.o
 oki1.x: oki1.o
 oki2.x: oki2.o
+oki3.x: oki3.o
 opm.x: opm.o
 print.x: print.o
 proginfo.x: proginfo.o
