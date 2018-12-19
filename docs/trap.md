@@ -16,7 +16,7 @@ trap	#7	〃
 
 trap	#8	ブレークポイント(ROM デバッガ)
 trap	#9	〃		(db、scd)
-trap	#10	リセット／電原オフ処理
+trap	#10	Reset / field off processing
 trap	#11	BREAK キー処理
 trap	#12	COPY キー処理
 trap	#13	CTRL+C 処理
@@ -29,7 +29,7 @@ trap	#15	IOCS call
 
 ==============================================================================
 
-・trap #10	リセット／電原オフ処理
+・trap #10	Reset / field off processing
 
 引数	d0.l =	$58363801('X68'<<8+1)	フロントスイッチによる電源オフ
 		$58363802('X68'<<8+2)	外部スイッチによる電源オフ

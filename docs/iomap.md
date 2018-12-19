@@ -884,21 +884,21 @@ $e88001 1.b     R       GPIP    汎用 I/O レジスタ               ┐
 $e88003 1.b     R/W     AER     アクティブエッジレジスタ        │GPIP control
 $e88005 1.b     R/W     DDR     データ方向レジスタ              ┘
 $e88007 1.b     R/W     IERA    割り込みイネーブルレジスタ    A ┐
-$e88009 1.b     R/W     IERB    〃                           B │
+$e88009 1.b     R/W     IERB    〃                            B │
 $e8800b 1.b     R/W     IPRA    割り込みペンディングレジスタ  A │
-$e8800d 1.b     R/W     IPRB    〃                           B │
+$e8800d 1.b     R/W     IPRB    〃                            B │
 $e8800f 1.b     R/W     ISRA    割り込みインサービスレジスタ  A │Interrupt control
-$e88011 1.b     R/W     ISRB    〃                           B │
+$e88011 1.b     R/W     ISRB    〃                            B │
 $e88013 1.b     R/W     IMRA    割り込みマスクレジスタ        A │
-$e88015 1.b     R/W     IMRB    〃                           B │
+$e88015 1.b     R/W     IMRB    〃                            B │
 $e88017 1.b     R/W     VR      ベクタレジスタ                  ┘
 $e88019 1.b     R/W     TACR    タイマ A コントロールレジスタ   ┐
-$e8801b 1.b     R/W     TBCR    タイマ B 〃                    │
+$e8801b 1.b     R/W     TBCR    タイマ B 〃                     │
 $e8801d 1.b     R/W     TCDCR   タイマ C&D コントロールレジスタ │
 $e8801f 1.b     R/W     TADR    タイマ A データレジスタ         │Timer control
-$e88021 1.b     R/W     TBDR    タイマ B 〃                    │
-$e88023 1.b     R/W     TCDR    タイマ C 〃                    │
-$e88025 1.b     R/W     TDDR    タイマ D 〃                    ┘
+$e88021 1.b     R/W     TBDR    タイマ B 〃                     │
+$e88023 1.b     R/W     TCDR    タイマ C 〃                     │
+$e88025 1.b     R/W     TDDR    タイマ D 〃                     ┘
 $e88027 1.b     R/W     SCR     SYNC キャラクタレジスタ         ┐
 $e88029 1.b     R/W     UCR     USART コントロールレジスタ      │
 $e8802b 1.b     R/W     RSR     レシーバステータスレジスタ      │USART control
@@ -3548,13 +3548,13 @@ RR15:
 ・Joystick interface
 
 address size    R/W
-$e9a001 1.b     R       8255 ポート A(ジョイスティック #1)
-$e9a003 1.b     R       8255 ポート B(ジョイスティック #2)
+$e9a001 1.b     R       8255 Port A (Joystick #1)
+$e9a003 1.b     R       8255 Port B (Joystick #2)
 $e9a005 1.b     R/W     8255 Port C (Joystick control)
-$e9a007 1.b       W     8255 コントロールワード(動作モード/ビット操作)
+$e9a007 1.b       W     8255 Control word (operation mode / bit manipulation)
 
 
-ジョイスティック #1($e9a001):
+Joystick #1 ($e9a001):
         bit  7   6   5   4   3   2   1   0
           ┌─┬─┬─┬─┬─┬─┬─┬─┐
           │  │  │  │  │  │  │  │  │
@@ -3567,28 +3567,28 @@ $e9a007 1.b       W     8255 コントロールワード(動作モード/ビッ�
                 └ TRG B
 
         bit 6   TRG B
-                %0 : トリガ B ボタンは押されている
-                %1 : 〃               押されていない
+                %0 : Trigger B button is pressed
+                %1 : 〃              not pressed
         bit 5   TRG A
-                %0 : トリガ A ボタンは押されている
-                %1 : 〃               押されていない
+                %0 : Trigger A button is pressed
+                %1 : 〃              not pressed
         bit 3   RIGHT
-                %0 : 右スイッチは押されている
-                %1 : 〃          押されていない
+                %0 : The right switch is pressed
+                %1 : 〃              not pressed
         bit 2   LEFT
-                %0 : 左スイッチは押されている
-                %1 : 〃          押されていない
+                %0 : The left switch is pressed
+                %1 : 〃             not pressed
         bit 1   BACK
-                %0 : 下スイッチは押されている
-                %1 : 〃          押されていない
+                %0 : The down switch is pressed
+                %1 : 〃             not pressed
         bit 0   FORWARD
-                %0 : 上スイッチは押されている
-                %1 : 〃          押されていない
+                %0 : The up switch is pressed
+                %1 : 〃           not pressed
 
-ジョイスティック #2($e9a003):
-        (ジョイスティック #1 と同様)
+Joystick #2($e9a003):
+        (Same as Joystick #1)
 
-ジョイスティックコントロール($e9a005):
+Joystick control ($e9a005):
         bit  7   6   5   4   3   2   1   0
           ┌─┬─┬─┬─┬───┬───┐
           │  │  │  │  │      │      │
@@ -3601,23 +3601,23 @@ $e9a007 1.b       W     8255 コントロールワード(動作モード/ビッ�
             └ IOC7
 
         bit 7    IOC7
-                        %0 : 通常動作
-                        %1 : ジョイスティック #1 オプション機能 B 動作
+                        %0 : Normal operation
+                        %1 : Joystick # 1 Option Function B Operation
         bit 6    IOC6
-                        %0 : 通常動作
-                        %1 : ジョイスティック #1 オプション機能 A 動作
+                        %0 : Normal operation
+                        %1 : Joystick # 1 Option Function A Operation
         bit 5    IOC5
-                        %0 : 通常動作
-                        %1 : ジョイスティック #2 操作無効
+                        %0 : Normal operation
+                        %1 : Joystick # 2 operation disabled
         bit 4    IOC4
-                        %0 : 通常動作
-                        %1 : ジョイスティック #1 操作無効
+                        %0 : Normal operation
+                        %1 : Joystick # 1 inoperative
         bit 3〜2 Sampling Rate
                         ADPCM sampling rate switching
         bit 1〜0 PCM PAN
                         ADPCM output switching
 
-コントロールワード ビットセット/リセット($e9a007):
+Control word bit set / reset ($e9a007):
         bit  7   6       4   3       1   0
           ┌─┬─────┬─────┬─┐
           │ 0│          │  BITSEL  │  │
@@ -3625,13 +3625,12 @@ $e9a007 1.b       W     8255 コントロールワード(動作モード/ビッ�
                                         DATA
 
         bit 3〜1 BITSEL
-                        操作するビット位置(7〜0)を指定する.
+                        Specify the bit position (7 to 0) to be manipulated.
         bit 0    DATA
-                        セットするデータを指定する.
-        ※最上位ビットが %0 の値を書き込むと、ポート C の任意のビットを操作す
-          る(コントロールワードのビットではない).
+                        Specify the data to be set.
+        ※ If the most significant bit writes a value of %0, it manipulates any bit of port C (not a bit of the control word).
 
-コントロールワード モード設定($e9a007):
+Control word mode setting ($e9a007):
         bit  7   6   5   4   3   2   1   0
           ┌─┬───┬─┬─┬─┬─┬─┐
           │ 1│      │  │  │  │  │  │
@@ -3644,28 +3643,28 @@ $e9a007 1.b       W     8255 コントロールワード(動作モード/ビッ�
                 └ Group A Mode
 
         bit 6〜5 Group A Mode
-                        グループ A(ポート A とポート C 上位)の動作モード
-                        %00 : モード 0
-                        %01 : 〃    1
-                        %10 : 〃    2
-                        %11 : 〃    2
+                        Operation mode of group A (port A and port C upper)
+                        %00 : Mode 0
+                        %01 : 〃   1
+                        %10 : 〃   2
+                        %11 : 〃   2
         bit 4    PORT A IN/OUT
-                        %0 : ポート A は出力
-                        %1 : 〃         入力
+                        %0 : Port A outputs
+                        %1 : 〃     inputs
         bit 3    PORT C(High) IN/OUT
-                        %0 : ポート C(上位) は出力
-                        %1 : 〃               入力
+                        %0 : Port C (upper) outputs
+                        %1 : 〃             inputs
         bit 2    Group B Mode
-                        グループ B(ポート B とポート C 下位)の動作モード
-                        %0 : モード 0
-                        %1 : 〃    1
+                        Operation mode of group B (port B and port C low order)
+                        %0 : Mode 0
+                        %1 : 〃   1
         bit 1    PORT B IN/OUT
-                        %0 : ポート B は出力
-                        %1 : 〃         入力
+                        %0 : Port B outputs
+                        %1 : 〃     inputs
         bit 0    PORT C(Low) IN/OUT
-                        %0 : ポート C(下位) は出力
-                        %1 : 〃               入力
-        ※最上位ビットが %1 の値を書き込むと、動作モード設定を行う.
+                        %0 : Port C (lower order) is output
+                        %1 : 〃                      input
+        ※ When the most significant bit writes the value of %1, it sets the operation mode.
 
 ==============================================================================
 
