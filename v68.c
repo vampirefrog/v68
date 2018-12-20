@@ -49,7 +49,7 @@ int v68_render_tstates(int tstates) {
 	if(samples > v68.buf_remaining)
 		samples = v68.buf_remaining;
 	v68.samples_remainder = x - samples * v68.cpu_clock;
-	verbose1("render tstates %d buf_remaining=%d samples=%ld\n", tstates, v68.buf_remaining, samples);
+	verbose2("v68_render_tstates tstates=%d buf_remaining=%d samples=%ld\n", tstates, v68.buf_remaining, samples);
 
 	if(samples > 0) {
 		v68_periph_render(v68.bufL, v68.bufR, samples);

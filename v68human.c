@@ -224,7 +224,7 @@ int v68_run_command(char *cmd) {
 		m68k_set_reg(M68K_REG_A2, STACK_TOP); // cmdline
 		m68k_set_reg(M68K_REG_A3, ENV_TOP); // env vars
 		uint32_t pc = entry_point + reloc_adj;
-		verbose3("Entry point: 0x%08x + 0x%08x = 0x%08x\n", entry_point, reloc_adj, pc);
+		verbose2("Entry point: 0x%08x + 0x%08x = 0x%08x\n", entry_point, reloc_adj, pc);
 		m68k_set_reg(M68K_REG_PC, pc);
 		m68k_set_reg(M68K_REG_A4, pc); // program start addr
 		m68k_set_reg(M68K_REG_A7, STACK_TOP + STACK_SIZE);

@@ -87,7 +87,7 @@ uint32_t v68_mem_alloc(int size, uint32_t parent_addr) {
 
 	// Check if there is room at the top of the heap
 	if(v68.heap_top + size + 16 > v68.ram_size) {
-		verbose1("Could not allocate %08x bytes ram_size=%08x heap_top=%08x\n", size, v68.ram_size, v68.heap_top);
+		verbose1("Could not allocate %08x bytes ram_size=%08lx heap_top=%08x\n", size, v68.ram_size, v68.heap_top);
 		return -2;
 	}
 

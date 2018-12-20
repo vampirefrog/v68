@@ -418,7 +418,9 @@ int v68_dos_call(uint16_t instr) {
 		case DOS_CALL_KEEPPR: {
 				uint32_t prglen = m68k_read_memory_32(m68k_get_reg(0, M68K_REG_A7));
 				uint16_t code = m68k_read_memory_16(m68k_get_reg(0, M68K_REG_A7) + 4);
-				logcall("KEEPPR prglen=%08x (%dkB) code=%04x\n", prglen, prglen/1024, code);
+				logcall("prglen=%d (%dkB) code=%04x\n", prglen, prglen/1024, code);
+				v68_mem_dump();
+				logcall("shrinking mem 0x%08x\n", v68.cur_prog_addr);
 				v68_mem_shrink(v68.cur_prog_addr, prglen);
 				v68_mem_dump();
 				v68_queue_next_command();
@@ -427,7 +429,7 @@ int v68_dos_call(uint16_t instr) {
 		case DOS_CALL_SUPER: {
 				uint32_t sp = m68k_get_reg(0, M68K_REG_A7);
 				uint32_t stack = m68k_read_memory_32(sp);
-				logcall("SUPER %08x\n", stack);
+				logcall("stack=%08x\n", stack);
 				FLAG_S = 1;
 				m68k_set_reg(M68K_REG_SR, m68k_get_reg(0, M68K_REG_SR) | 0x2000);
 				m68k_set_reg(M68K_REG_A7, sp);
