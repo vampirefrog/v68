@@ -2211,12 +2211,12 @@ $e0〜$ff(D1L/RR 設定レジスタ):
 
 address size    R/W
 $e92001 1.b     R       ADPCM status
-〃     〃       W     ADPCM command
+〃      〃        W     ADPCM command
 $e92003 1.b     R/W     Data input / output
 $e9a005 1.b     R/W     ADPCM sample rate / output control
 
 
-ADPCM ステータス($e92001):
+ADPCM status ($e92001):
         bit  7   6   5                   0
           ┌─┬─┬───────────┐
           │  │ 1│                   0  │
@@ -2227,7 +2227,7 @@ ADPCM ステータス($e92001):
                 %0 : 再生中
                 %1 : 録音中/スタンバイ中
 
-ADPCM コマンド($e92001):
+ADPCM command ($e92001):
         bit  7               3   2   1   0
           ┌─────────┬─┬─┬─┐
           │               0  │  │  │SP│
@@ -2245,7 +2245,7 @@ ADPCM コマンド($e92001):
                 %0 : 通常動作
                 %1 : 録音/再生動作停止
 
-データ入出力($e92003):
+Data input / output ($e92003):
         bit  7           4   3           0
           ┌───────┬───────┐
           │    Data n+1  │      Data n  │
