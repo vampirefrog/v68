@@ -70,13 +70,15 @@ struct v68 {
 	/* CPU timing */
 	int cpu_clock, cpu_cycle_remainder, cpu_ended_timeslice;
 
+	/* Peripheral timing */
+	int periph_timers_altered;
+
 	/* OPM */
 	struct ym2151 opm;
 	uint8_t opm_addr_latch;
 	int opm_clka, opm_clkb, opm_flags, opm_ct;
 	int opm_timera_cycles, opm_timerb_cycles;
 	int opm_timera_counter, opm_timerb_counter;
-	int periph_timers_altered;
 
 	/* ADPCM */
 	struct okim6258 oki;
