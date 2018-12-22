@@ -641,6 +641,10 @@ int v68_dos_call(uint16_t instr) {
 				strncpy((char *)&v68.ram[buffer], (char *)&v68.ram[filename], 91);
 			}
 			break;
+		case DOS_CALL_GETPDB: {
+				m68k_set_reg(M68K_REG_D0, v68.cur_prog_addr);
+			}
+			break;
 		default:
 			logcall("V68 DOS CALL %04x %s\n", instr, dos_call_names[call]);
 			break;
