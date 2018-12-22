@@ -172,6 +172,7 @@ int v68_io_create(char *filename, int attribs) {
 }
 
 int v68_io_close(int fd) {
+	verbose2("v68_io_close fd=%d\n", fd);
 	CHECKFD(fd);
 
 	int r = close(dosfiles[fd].fd);
@@ -181,7 +182,7 @@ int v68_io_close(int fd) {
 	dosfiles[fd].mode = 0;
 	dosfiles[fd].name[0] = 0;
 
-	return close(fd);
+	return 0;
 }
 
 int v68_io_read(int fd, void *buf, size_t count) {
