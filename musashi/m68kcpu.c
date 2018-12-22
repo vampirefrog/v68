@@ -681,9 +681,9 @@ int m68k_execute(int num_cycles, int dasm)
 					REG_D[0], REG_D[1], REG_D[2], REG_D[3], REG_D[4], REG_D[5], REG_D[6], REG_D[7]);
 				printf("A0-A7=%08X,%08X,%08X,%08X,%08X,%08X,%08X,%08X\n",
 					REG_A[0], REG_A[1], REG_A[2], REG_A[3], REG_A[4], REG_A[5], REG_A[6], REG_A[7]);
-				printf("  PC=%08X    SR=%04X\n",
+				printf("   PC=%08X  SR=%04X\n",
 					REG_PC, m68k_get_reg(0, M68K_REG_SR));
-				printf("$%X: %s\n\n", REG_PC, dasmbuf);
+				printf(" %s\n\n", dasmbuf);
 			}
 
 			/* Record previous program counter */
