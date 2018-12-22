@@ -12,8 +12,8 @@ $(patsubst %.c,musashi/%.c,$(MUSASHIGENCFILES)): musashi/m68kmake musashi/m68k_i
 musashi/m68kmake: musashi/m68kmake.o
 	gcc $^ -o $@
 
-v68: main.o tools.o v68.o v68mem.o v68io.o v68periph.o v68human.o v68doscall.o v68iocscall.o v68fecall.o sjis.o sjis_unicode.o ym2151.o okim6258.o vgm.o $(MUSASHIOBJS) $(MUSASHIGENOBJS)
-	gcc $^ -lao -lm -o $@
+v68: main.o tools.o v68.o v68io.o v68periph.o v68human.o v68doscall.o v68iocscall.o v68fecall.o sjis.o sjis_unicode.o ym2151.o okim6258.o vgm.o $(MUSASHIOBJS) $(MUSASHIGENOBJS)
+	gcc $^ $(shell pkg-config --libs ao)  -lm -o $@
 
 xinfo: xinfo.o md5.o cmdline.o
 	gcc $^ -o $@
@@ -21,11 +21,11 @@ xinfo: xinfo.o md5.o cmdline.o
 sjis2utf8: sjis2utf8.o sjis.o sjis_unicode.o
 	gcc $^ -o $@
 
-test-mem: test-mem.o v68.o v68mem.o v68human.o v68opm.o v68io.o v68doscall.o v68fecall.o v68iocscall.o okim6258.o ym2151.o vgm.o sjis.o sjis_unicode.o $(MUSASHIOBJS) $(MUSASHIGENOBJS)
+test-mem: test-mem.o v68.o v68human.o v68opm.o v68io.o v68doscall.o v68fecall.o v68iocscall.o okim6258.o ym2151.o vgm.o sjis.o sjis_unicode.o $(MUSASHIOBJS) $(MUSASHIGENOBJS)
 	gcc $^ -lao -lm -o $@
 
 %.o: %.c
-	gcc -g -Wall -c $< -o $@
+	gcc -g -Wall $(shell pkg-config --cflags ao) -c $< -o $@
 
 clean:
 	rm -f v68 xinfo sjis2utf8 *.o musashi/*.o $(patsubst %.c,musashi/%.c,$(MUSASHIGENCFILES)) ay.js *.wasm *.map test

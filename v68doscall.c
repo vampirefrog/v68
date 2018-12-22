@@ -5,7 +5,6 @@
 
 #include "v68.h"
 #include "v68io.h"
-#include "v68mem.h"
 #include "musashi/m68k.h"
 #include "musashi/m68kcpu.h"
 #include "sjis.h"

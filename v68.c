@@ -6,7 +6,6 @@
 
 #include "v68.h"
 #include "v68io.h"
-#include "v68mem.h"
 #include "v68periph.h"
 #include "musashi/m68kcpu.h"
 
@@ -22,14 +21,13 @@ int v68_init(int clock, int ram_size, int sample_rate) {
 	v68.cpu_clock = clock;
 	v68.sample_rate = sample_rate;
 
-	v68.ram = malloc(v68.ram_size);
+	v68.ram = calloc(v68.ram_size, 1);
 	if(!v68.ram) return errno;
 
 	m68k_init();
 	m68k_set_cpu_type(M68K_CPU_TYPE_68000);
 	m68k_pulse_reset();
 
-	v68_mem_init();
 	v68_periph_init();
 	v68_io_init();
 	v68_human_init();
@@ -112,7 +110,9 @@ unsigned int  m68k_read_memory_8(unsigned int addr) {
 		verbose2("Could not read RAM at 0x%08x\n", addr);
 		return 0;
 	}
-	return v68.ram[addr];
+	unsigned int i = v68.ram[addr];
+	verbose3("READ8  @0x%08x = 0x%02x\n", addr, i);
+	return i;
 }
 
 unsigned int  m68k_read_memory_16(unsigned int addr) {
@@ -121,7 +121,9 @@ unsigned int  m68k_read_memory_16(unsigned int addr) {
 		verbose2("Could not read RAM at 0x%08x\n", addr);
 		return 0;
 	}
-	return (v68.ram[addr] << 8) | v68.ram[addr + 1];
+	unsigned int i = (v68.ram[addr] << 8) | v68.ram[addr + 1];
+	verbose3("READ16 @0x%08x = 0x%04x\n", addr, i);
+	return i;
 }
 
 unsigned int  m68k_read_memory_32(unsigned int addr) {
@@ -130,7 +132,9 @@ unsigned int  m68k_read_memory_32(unsigned int addr) {
 		verbose2("Could not read RAM at 0x%08x\n", addr);
 		return 0;
 	}
-	return (v68.ram[addr] << 24) | (v68.ram[addr+1] << 16) | (v68.ram[addr+2] << 8) | v68.ram[addr+3];
+	unsigned int i = (v68.ram[addr] << 24) | (v68.ram[addr+1] << 16) | (v68.ram[addr+2] << 8) | v68.ram[addr+3];
+	verbose3("READ32 @0x%08x = 0x%08x\n", addr, i);
+	return i;
 }
 
 void m68k_write_memory_8(unsigned int addr, unsigned int data) {
@@ -175,17 +179,14 @@ void m68k_write_memory_32(unsigned int addr, unsigned int data) {
 }
 
 unsigned int m68k_read_disassembler_8  (unsigned int addr) {
-	verbose3("READ8  @0x%08x\n", addr);
 	return m68k_read_memory_8(addr);
 }
 
 unsigned int m68k_read_disassembler_16 (unsigned int addr) {
-	verbose3("READ16 @0x%08x\n", addr);
 	return m68k_read_memory_16(addr);
 }
 
 unsigned int m68k_read_disassembler_32 (unsigned int addr) {
-	verbose3("READ32 @0x%08x\n", addr);
 	return m68k_read_memory_32(addr);
 }
 
