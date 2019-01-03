@@ -2224,8 +2224,8 @@ ADPCM status ($e92001):
           PLAY/REC
 
         bit 7   PLAY/REC
-                %0 : 再生中
-                %1 : 録音中/スタンバイ中
+                %0 : Playback
+                %1 : Recording / standby
 
 ADPCM command ($e92001):
         bit  7               3   2   1   0

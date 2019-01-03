@@ -46,14 +46,14 @@ $000090	  $24	〃   #4
 $000094	  $25	〃   #5
 $000098	  $26	〃   #6
 $00009c	  $27	〃   #7
-$0000a0	  $28	〃   #8  (システム予約)
-$0000a4	  $29	〃   #9  (OS デバッガ用)
+$0000a0	  $28	〃   #8  (System reserved)
+$0000a4	  $29	〃   #9  (For OS debugger)
 $0000a8	  $2a	〃   #10 (リセット／電原オフ処理)
 $0000ac	  $2b	〃   #11 (BREAK キー処理)
 $0000b0	  $2c	〃   #12 (COPY キー処理)
 $0000b4	  $2d	〃   #13 (CTRL+C 処理)
 $0000b8	  $2e	〃   #14 (エラー処理)
-$0000bc	  $2f	〃   #15 (IOCS コール)
+$0000bc	  $2f	〃   #15 (IOCS call)
 $0000c0	  $30	FPU BSUN	(Branch/Set on Unordered) 例外処理
 $0000c4	  $31	〃  INEX1,INEX2	(Inexact Decimal Input,Inexact Operation)
 $0000c8	  $32	〃  DZ		(Divide by Zero)
