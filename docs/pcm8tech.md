@@ -1,432 +1,434 @@
 ```
 ===============================================================================
 
-	Real time・ＡＤＰＣＭ multiple playback driver ー  "ＰＣＭ８"  version 0.48
+  Real time・ＡＤＰＣＭ multiple playback driver ー  "ＰＣＭ８"  version 0.48
 
-				(( technical data ))
-							(C) 江藤　啓 1991,92
+                                (( technical data ))
+                                                         (C) 江藤　啓 1991,92
 
 ===============================================================================
 
 - About PCM data format -------------------------------------------- ---------
 
 
-	The format of PCM data handled by PCM 8 is the following three types.
+        The format of PCM data handled by PCM 8 is the following three types.
 
 
-	· ADPCM format
+        · ADPCM format
 
-	A format that can be handled by ordinary ADPCM driver, IOCS, etc.
-	Five types of playback frequencies can be selected.
+        A format that can be handled by ordinary ADPCM driver, IOCS, etc.
+        Five types of playback frequencies can be selected.
 
-	· 16 bit PCM format
+        · 16 bit PCM format
 
-	The data format is signed short, and by PCM 2 PCM.X (by Yatsube.)
-	It is the same as the format generated.
+        The data format is signed short, and by PCM 2 PCM.X (by Yatsube.)
+        It is the same as the format generated.
 
-	In PCM 8, this type of data block is set from an even address, and
-	The length of the data also needs to be an even number.
+        In PCM 8, this type of data block is set from an even address, and
+        The length of the data also needs to be an even number.
 
-	It requires four times the data amount of ADPCM format data of the same tone length.
-	The playback frequency is fixed at 15.6 kHz.
+        It requires four times the data amount of ADPCM format data of the same tone length.
+        The playback frequency is fixed at 15.6 kHz.
 
-	· 8 bit PCM format
+        · 8 bit PCM format
 
-	The data format is signed char, the D / A conversion level is 16 bit PCM and
-	Are the same.
+        The data format is signed char, the D / A conversion level is 16 bit PCM and
+        Are the same.
 
-	It requires twice the data amount of ADPCM format data of the same tone length.
-	The playback frequency is fixed at 15.6 kHz.
+        It requires twice the data amount of ADPCM format data of the same tone length.
+        The playback frequency is fixed at 15.6 kHz.
 
 
 -- PCM8 Function call ( TRAP #2 ) -----------------------------------
 
 
-	It is realized using TRAP # 2.
+        It is realized using TRAP # 2.
 
-	Set the function code in d0.w and issue TRAP # 2 after
-	setting appropriate values to other registers if necessary.
+        Set the function code in d0.w and issue TRAP # 2 after
+        setting appropriate values to other registers if necessary.
 
-	The return value is set to d0.l. All other registers are saved.
+        The return value is set to d0.l. All other registers are saved.
 
-	Note) The following contents are at the time of version 0.48.
-	In some earlier versions some behaviors may be different.
+        Note) The following contents are at the time of version 0.48.
+        In some earlier versions some behaviors may be different.
 
 ----------------------------------------
 Normal output        Function code $000x
 ----------------------------------------
 
-Func:	Output data of single memory area to ADPCM.
+Func:   Output data of single memory area to ADPCM.
 
-Call:	d0.w = $0000 + channel number(0〜7)
+Call:   d0.w = $0000 + channel number(0〜7)
 
-	d1.l = volume / frequency / localization
+        d1.l = volume / frequency / localization
 
-	    bit 23〜16 : Volume (-1,0〜15) (*1)
-		If -1 is specified, the previous value is retained.
-		Original volume is 8.
-		It corresponds to 1 step = 2 dB (-16dB〜+14dB)。
+            bit 23〜16 : Volume (-1,0〜15) (*1)
+                If -1 is specified, the previous value is retained.
+                Original volume is 8.
+                It corresponds to 1 step = 2 dB (-16dB〜+14dB)。
 
-	    bit 15〜 8 : frequency, data format (-1,0〜4,5,6)
-		If -1 is specified, the previous value is retained.
-		0〜4 are ADPCM, and the reproduction frequency is as follows.
-		    0 : 3.9KHz	3 : 10.4KHz
-		    1 : 5.2KHz	4 : 15.6KHz
-		    2 : 7.8KHz
-		5 is 16 bit PCM, and 6 is 8 bit PCM. (*2)
-		    Refer to "About PCM data format" for these.
+            bit 15〜 8 : frequency, data format (-1,0〜4,5,6)
+                If -1 is specified, the previous value is retained.
+                0〜4 are ADPCM, and the reproduction frequency is as follows.
+                    0 : 3.9KHz  3 : 10.4KHz
+                    1 : 5.2KHz  4 : 15.6KHz
+                    2 : 7.8KHz
+                5 is 16 bit PCM, and 6 is 8 bit PCM. (*2)
+                    Refer to "About PCM data format" for these.
 
-	    bit  7〜 0 : pan (-1,0〜3)
-		If -1 is specified, the previous value is retained.
-		Other values ​​are as follows.
-		    0 : Stop(*3)     2 : Right output
-		    1 : Left output	 3 : Stereo output
-		Note that the localization is common to all channels,
-		and the last specified value is valid except for 0.
+            bit  7〜 0 : pan (-1,0〜3)
+                If -1 is specified, the previous value is retained.
+                Other values ​​are as follows.
+                    0 : Stop(*3)     2 : Right output
+                    1 : Left output      3 : Stereo output
+                Note that the localization is common to all channels,
+                and the last specified value is valid except for 0.
 
-	d2.l = Data length
-	    Regardless of the data format, specify it in byte units.
-	    <0 : Query data length (equivalent to function code $008x)
-	    =0 : Channel stop (*4)
+        d2.l = Data length
+            Regardless of the data format, specify it in byte units.
+            <0 : Query data length (equivalent to function code $008x)
+            =0 : Channel stop (*4)
 
-	a1.l = Data block start address
+        a1.l = Data block start address
 
-Ret:	d0.l = 0	Successful completion
+Ret:    d0.l = 0        Successful completion
 
 Note:
-(* 1) In the single sound reproduction mode, regardless of the setting, it is output at the original volume.
-(* 2) It is not output in the single sound reproduction mode.
-(* 3) The volume / frequency is changed. Positioning is not changed.
-(* 4) Volume / frequency / localization is not changed.
+(*1) In the single sound reproduction mode, regardless of the setting, it is output at the original volume.
+(*2) It is not output in the single sound reproduction mode.
+(*3) The volume / frequency is changed. Positioning is not changed.
+(*4) Volume / frequency / localization is not changed.
 
 ----------------------------------------
 Array chain output Func code $001x
 ----------------------------------------
 
-Func:	チェインテーブルによって間接的に指定された複数メモリ領域のデータを
-	ＡＤＰＣＭに出力する。
+Func:   Data of a plurality of memory areas indirectly designated by the chain table is outputted to the ADPCM.
 
-Call:	d0.w = $0010 + Channel number(0〜7)
-	d1.l = Volume / frequency / localization
-	    >> Reference normal output ($000x)
-	d2.l = チェインテーブル個数
-	    <0 : データ長問い合わせ(Func code$008xと同等)
-	    =0 : チャネル停止(*4)
-	a1.l = チェインテーブル先頭アドレス
+Call:   d0.w = $0010 + Channel number(0〜7)
+        d1.l = Volume / frequency / localization
+            >> Reference normal output ($000x)
+        d2.l = Number of chain tables
+            <0 : Data length query(Equivalent to func code $008x)
+            =0 : Channel stop(*4)
+        a1.l = Chain table start address
 
-	*チェインテーブルについての説明は省略。
+        *Explanation about the chain table is omitted.
 
-Ret:	d0.l = 0	Success
+Ret:    d0.l = 0        Success
 
 ----------------------------------------
 Link chain output       Func code $002x
 ----------------------------------------
 
-Func:	And outputs data of a plurality of memory areas indirectly designated by the link chain table to the ADPCM.
+Func:   And outputs data of a plurality of memory areas indirectly designated by the link chain table to the ADPCM.
 
-Call:	d0.w = $0020 + Channel number(0〜7)
-	d1.l = Volume / frequency / localization
-	    >> Reference normal output ($000x)
-	a1.l = Link chain table start address
+Call:   d0.w = $0020 + Channel number(0〜7)
+        d1.l = Volume / frequency / localization
+            >> Reference normal output ($000x)
+        a1.l = Link chain table start address
 
-	* Explanation about the link chain table is omitted.
+        * Explanation about the link chain table is omitted.
 
-Ret:	d0.l = 0	Success
+Ret:    d0.l = 0        Success
 
 ----------------------------------------
 Operation mode change   Func code $007x
 ----------------------------------------
 
-Func:	Change the volume / frequency / pan of the active channel.
+Func:   Change the volume / frequency / pan of the active channel.
 
-Call:	d0.w = $0070 + Channel number(0〜7)
-	d1.l = Volume / frequency / localization
-	    >> Reference normal output ($000x)
+Call:   d0.w = $0070 + Channel number(0〜7)
+        d1.l = Volume / frequency / localization
+            >> Reference normal output ($000x)
 
-Ret:	d0.l = 0	Success
+Ret:    d0.l = 0        Success
 
 ----------------------------------------
 Data length query        Func code $008x
 ----------------------------------------
 
-Func:	Get the remaining data length of the active channel.
+Func:   Get the remaining data length of the active channel.
 
-Call:	d0.w = $0080 + Channel number(0〜7)
+Call:   d0.w = $0080 + Channel number(0〜7)
 
-Ret:	d0.l = 0	Channel is stopped
-	d0.l > 0	Indicates the remaining data length (byte) during normal output in the multiple reproduction mode.
-	d0.l = -1	Array chain outputting
-	d0.l = -2	Link chain outputting
-	d0.l = -3	In mono tone reproduction mode, normal output
+Ret:    d0.l = 0        Channel is stopped
+        d0.l > 0        Indicates the remaining data length (byte) during normal output in the multiple reproduction mode.
+        d0.l = -1       Array chain outputting
+        d0.l = -2       Link chain outputting
+        d0.l = -3       In mono tone reproduction mode, normal output
 
 ----------------------------------------
 Operational mode query   Func code $009x
 ----------------------------------------
 
-Func:	Get the volume / frequency / localization of the active channel.
+Func:   Get the volume / frequency / localization of the active channel.
 
-Call:	d0.w = $0090 + Channel number(0〜7)
+Call:   d0.w = $0090 + Channel number(0〜7)
 
-Ret:	d0.l = Volume / frequency / localization
-	    >> Reference normal output ($000x)
-	    Localization always takes values 1 to 3.
-	    Bits 31 to 24 are 0.
+Ret:    d0.l = Volume / frequency / localization
+            >> Reference normal output ($000x)
+            Localization always takes values 1 to 3.
+            Bits 31 to 24 are 0.
 
 ----------------------------------------
 End                      Func code $0100
 ----------------------------------------
 
-Func:	The chain operation of all the channels is canceled and the channel operation is stopped as soon as the output of the currently output data block is completed.
+Func:   The chain operation of all the channels is canceled and the channel operation is stopped as soon as the output of the currently output data block is completed.
 
-	If it is paused, immediately stop the operation of all channels.
+        If it is paused, immediately stop the operation of all channels.
 
-Call:	d0.w = $0100
+Call:   d0.w = $0100
 
-Ret:	d0.l = 0	Success
+Ret:    d0.l = 0        Success
 
-Note:	Note that it is not an immediate termination.
-	If you want to terminate completely immediately, issue this call after pause ($ 0101).
-	During single tone IOCS output, this call is ignored.
+Note:   Note that it is not an immediate termination.
+        If you want to terminate completely immediately, issue this call after pause ($ 0101).
+        During single tone IOCS output, this call is ignored.
 
 ----------------------------------------
 Pause                    Func code $0101
 ----------------------------------------
 
-Func:	The output of all channels is immediately stopped, and the pause state is started.
+Func:   The output of all channels is immediately stopped, and the pause state is started.
 
-	When channel output or termination is performed in the suspended state, the operation of all channels is aborted.
+        When channel output or termination is performed in the suspended state, the operation of all channels is aborted.
 
-Call:	d0.w = $0101
+Call:   d0.w = $0101
 
-Ret:	d0.l = 0	Success
+Ret:    d0.l = 0        Success
 
-Note:	During single tone IOCS output, this call is ignored.
+Note:   During single tone IOCS output, this call is ignored.
 
 ----------------------------------------
-Unpause  		Func code $0102
+Unpause                 Func code $0102
 ----------------------------------------
 
-Func:	一時停止状態を解除する。
+Func:   Cancel the paused state.
 
-	打ち切りの後は無効。
+        Invalid after discontinuation.
 
-Call:	d0.w = $0102
+Call:   d0.w = $0102
 
-Ret:	d0.l = 0	Success
+Ret:    d0.l = 0        Success
 
-Note:	単音IOCS出力中は、このコールは無視される。
+Note:   During single tone IOCS output, this call is ignored.
 
 ----------------------------------------
 MPU / MFP mask settings  Func code $01FB
 ----------------------------------------
 
-Func:	ＰＣＭ８割込中のＭＰＵ/ＭＦＰ割込マスクを設定する。
+Func:   PCM8 Sets MPU / MFP interrupt mask during interrupt.
 
-Call:	d0.w = $01FB
-	d1.l = Func/マスク値
-	    < 0 : マスク取得のみ
-	    >=0 : マスク設定
-		bit 18〜16 : MPU  マスク
-		bit 15〜 8 : IMRA マスク
-		bit  7〜 0 : IMRB マスク
+Call:   d0.w = $01FB
+        d1.l = Func/Mask value
+            < 0 : Mask query only
+            >=0 : Mask setting
+                bit 18〜16 : MPU mask
+                bit 15〜 8 : IMRA mask
+                bit  7〜 0 : IMRB mask
 
-Ret:	d0.l = (変更前の)マスク値
-		bit 31〜19 は 0 となる。
+Ret:    d0.l = (Previous) Mask value
+                bit 31〜19 are 0。
 
-Note:	一般のプログラムでは使ってはならない。
+Note:   It should not be used in general programs.
 
-	既定値は %011_11011111_00000000 。
-	マスクされていない割込処理内からは、ファンクションコールを行ってはならない。
+        Default value is %011_11011111_00000000 。
+        No function call should be made from within unmasked interrupt handling.
 
-	内容を十分理解してから使用すること。
-
-----------------------------------------
-Multiple / single tone mode setting	Func code $01FC
-----------------------------------------
-
-Func:	Enable / disable multiple playback.
-
-Call:	d0.w = $01FC
-	d1.w = Authorization flag
-	    -1 : Acquisition only
-	     0 : 禁止
-	     1 : 許可
-	     2 : ファンクションコールのみ許可
-
-Ret:	d0.l = 実際の許可状態
-	     0 : 禁止中
-	     1 : 許可中
-	     2 : ファンクションコールのみ許可中
-
-Note:	It should not be used in general programs.
-
-	While multiple playback is prohibited, the output by the function is effective afterward. Furthermore, the IOCS output has priority over the function output.
-
-	This call is independent of the permission / prohibition from the PCM 8 command line, and only when both settings are "permitted" it is set to the multiple reproduction mode.
-
-	The return value reflects both settings.
+        Please understand the contents before using it.
 
 ----------------------------------------
-(reserved)		Func code $01FD
+Multiple / single tone mode setting Func code $01FC
 ----------------------------------------
 
-	本コールは予約されています。
+Func:   Enable / disable multiple playback.
+
+Call:   d0.w = $01FC
+        d1.w = Authorization flag
+            -1 : Query only
+             0 : Ban
+             1 : Authorization
+             2 : Allow only function call
+
+Ret:    d0.l = Actual allowed state
+             0 : Prohibited
+             1 : Allowing
+             2 : Only function calls are permitted
+
+Note:   It should not be used in general programs.
+
+        While multiple playback is prohibited, the output by the function is effective afterward. Furthermore, the IOCS output has priority over the function output.
+
+        This call is independent of the permission / prohibition from the PCM 8 command line, and only when both settings are "permitted" it is set to the multiple reproduction mode.
+
+        The return value reflects both settings.
 
 ----------------------------------------
-Occupancy			Func code $01FE
+(reserved)              Func code $01FD
 ----------------------------------------
 
-Func:	ＰＣＭ８を占有し、常駐解除を禁止する。
-
-Call:	d0.w = $01FE
-
-Ret:	d0.l = 0	占有した
-	d0.l = -1	既に占有されている
-
-Note:	一般のプログラムでは使ってはならない。
+        This call is reserved.
 
 ----------------------------------------
-占有解除		Func code $01FF
+Occupancy                Func code $01FE
 ----------------------------------------
 
-Func:	ＰＣＭ８の占有を解除し、常駐解除を可能にする。
+Func:   Occupy PCM8 and prohibit resident release.
 
-Call:	d0.w = $01FF
+Call:   d0.w = $01FE
 
-Ret:	d0.l = 0	占有解除した
-	d0.l = -1	占有されていない
+Ret:    d0.l = 0        Occupied
+        d0.l = -1       Already occupied
 
-Note:	一般のプログラムでは使ってはならない。
+Note:   It should not be used in general programs.
 
 ----------------------------------------
-常駐解除		Func code $FFFF
+Obligation               Func code $01FF
 ----------------------------------------
 
-Func:	ＰＣＭ８の常駐を解除する。
+Func:   Unlock PCM8 and enable resident release.
 
-Call:	d0.w = $FFFF
+Call:   d0.w = $01FF
 
-Ret:	d0.l = 0	常駐解除が実行された
-	d0.l = -1	占有されており、解除出来なかった
-	d0.l = -2	PCM8で使用している割込ベクタ等が変更されており、解
-			除出来なかった
+Ret:    d0.l = 0        Dismissed
+        d0.l = -1       Not occupied
 
-Note:	一般のプログラムでは使ってはならない。
+Note:   It should not be used in general programs.
 
-	There are 7 vectors used in PCM8.
+----------------------------------------
+Resident reset           Func code $FFFF
+----------------------------------------
 
-	VECTOR=	ADDR===	Content==========
-	$022	$000088	TRAP #2
-	$06A	$0001A8	DMAC ch.3 Interrupt
-	$06B	$0001AC	DMAC ch.3 Error interrupt
-	$160	$000580	IOCS _ADPCMOUT
-	$162	$000588	IOCS _ADPCMAOT
-	$164	$000590	IOCS _ADPCMLOT
-	$167	$00059C	IOCS _ADPCMMOD
+Func:   Releasing the PCM 8 resident.
+
+Call:   d0.w = $FFFF
+
+Ret:    d0.l = 0        Resident cancellation was executed
+        d0.l = -1       It was occupied and could not be unlocked
+        d0.l = -2       The interrupt vector etc. used in PCM8 has been changed, and it can not be canceled
+
+Note:   It should not be used in general programs.
+
+        There are 7 vectors used in PCM8.
+
+        VECTOR= ADDR=== Content==========
+        $022    $000088 TRAP #2
+        $06A    $0001A8 DMAC ch.3 Interrupt
+        $06B    $0001AC DMAC ch.3 Error interrupt
+        $160    $000580 IOCS _ADPCMOUT
+        $162    $000588 IOCS _ADPCMAOT
+        $164    $000590 IOCS _ADPCMLOT
+        $167    $00059C IOCS _ADPCMMOD
 
 
 -- ＩＯＣＳ Call ( TRAP #15 )-------------------------------------------------
 
 
-	Apart from the PCM 8 function call, IOCS calls are prepared so that it can be used in almost the same procedure as before.
+        Apart from the PCM 8 function call, IOCS calls are prepared so that
+        it can be used in almost the same procedure as before.
 
 　Supported call:
 
-	$60 : _ADPCMOUT		チェインなし出力
-	$62 : _ADPCMAOT		アレイチェイン出力
-	$64 : _ADPCMLOT		リンクアレイチェイン出力
-	$67 : _ADPCMMOD		ＡＤＰＣＭ実行制御
+        $60 : _ADPCMOUT         Chainless output
+        $62 : _ADPCMAOT         Array chain output
+        $64 : _ADPCMLOT         Link array chain output
+        $67 : _ADPCMMOD         ADPCM execution control
 
-	上記以外のADPCM関連コール($61,$63,$65,$66)は、常駐前のままです。
+        ADPCM related calls ($61, $63, $65, $66) other than the above
+        remain as they were before being resident.
 
 　Difference from original IOCS:
 
 　　（Multiple playback mode）
 
-　　　・When outputting again within the sound being emitted, it synthesizes with the output of the other channels without waiting for output completion.
+　　　・When outputting again within the sound being emitted, it synthesizes
+        with the output of the other channels without waiting for output
+        completion.
 
-	In this case, use unused channels arbitrarily. The direction to search is from back to front (channels 8 · 7 · · · 1).
-	When there is no vacancy, the channel with the shortest remaining time among the channels without output is crushed and output.
-	Ignore the call if there is no corresponding channel.
+        In this case, use unused channels arbitrarily. The direction to search
+        is from back to front (channels 8 · 7 · · · 1).
+        When there is no vacancy, the channel with the shortest remaining time
+        among the channels without output is crushed and output.
+        Ignore the call if there is no corresponding channel.
 
 　　　・With a $60 call, we return immediately even if the length is over $FF00.
 
-　　　・パンは、最新の指定に従う。
+　　　・Bread will follow the latest designation.
 
-	先に出力中の残響も影響を受ける。但し、出力カットの指定は完全に無視。
+        Reverberation during output is also affected. However, designation of output cutting is completely ignored.
 
-　　　・$67コールの終了指定は、チェイン動作の終了となる。
+　　　・$67 End of call specification ends the chain operation.
 
-	現在出力中のデータブロックはそのまま出力される。即時終了する場合は、中止指定を行うこと。再開も可能。
+        The currently output data block is output as it is. To terminate immediately, designate cancellation. It is also possible to resume.
 
-	中止指定の後、終了指定または他の音の再生指定を行うと、元の出力は全てキャンセルされる。
+        After stopping designation, when designation of termination or reproduction of another sound is made, all the original outputs are canceled.
 
-　　（単音再生モード）
+　　（Single sound reproduction mode）
 
-　　　・前の音が鳴っている内に再度出力を行った場合、出力終了を待たず、前の音の出力を取り消して出力する。
+　　　・If outputting is performed again while the previous sound is being emitted,
+        the output of the preceding sound is canceled and outputted without waiting for output completion.
 
-　　　・$60コールで、長さが $FF00 以上でもすぐリターンする。
+　　　・With a $60 call, we return immediately even if the length is over $FF00.
 
-　その他:
+　Other:
 
-　　　・IOCS コールでは、16bit PCM , 8bit PCM の出力は出来ません。
-　　　・IOCS コールの音量は 8(原音) 固定です。
+　　　・For IOCS calls, 16 bit PCM, 8 bit PCM can not be output.
+　　　・The volume of the IOCS call is fixed at 8 (original sound).
 
 
 -- How to determine the resident status of PCM8 ------------------------------------
 
 
-	ＰＣＭ８ファンクションコールを使用する場合は、予め常駐判定を行っておく必要があります。
+        When PCM8 function call is used, it is necessary to make a resident judgment in advance.
 
-	常駐判定には、以下の方式を推奨します。
+        For resident judgment, the following method is recommended.
 
-　方法１: トラップベクタ取得方式
+　Method 1: Trap vector acquisition method
 
-	例外ベクタ$22 ( = ($0088).l ) の内容 ( = TRAP #2 エントリ ) の手前
-	８バイトを検査する。
+        Check the 8 bytes before the content of the exception vector $22 (= ($0088).l) (= TRAP #2 entry).
 
-	先頭から５バイトが 'PCM4/' または 'PCM8/' ならば常駐している。その
-	後の３バイトはバージョン。 ex) version 0.45 = 'PCM8/045'
+        If 5 bytes from the top are 'PCM4/' or 'PCM8/', it resides.
+        The following 3 bytes are versions. ex) version 0.45 = 'PCM8/045'
 
-	この判定方法は version 0.11 以上の PCM4/8 に対し有効です。
+        This judgment method is valid for PCM 4/8 with version 0.11 or higher.
 
-	PCM4 か PCM8 かを確実に判定したい場合は、バージョンで検査して下さい
-	( 030 未満は PCM4 )。なお、version 0.40 以降のヘッダは 'PCM8/???'の
-	形式に統一されています。
+        If you want to reliably determine whether it is PCM 4 or PCM 8, please check with the version (PCM 4 is less than 030).
+        The header after version 0.40 is unified to the format 'PCM8/???'.
 
-　方法２: ＩＯＣＳコール方式(簡略方式)
+　Method 2: IOCS call method (simplified method)
 
-	d1.l に 定数 'PCM8' を設定して、IOCS $67(_ADPCMMOD) を発行。戻り値
-	d0.l > 0 であれば PCM8 は常駐しており、バージョンは d0.l/100(10進)
-	である。
+        Set constant 'PCM8' to d1.l and issue IOCS $ 67 (_ADPCMMOD).
+        If the return value d0.l > 0, the PCM8 is resident and the version is d0.l/100 (decimal).
 
-	この判定方法は version 0.45 以上の PCM8 に対し有効です。
+        This judgment method is valid for PCM8 version 0.45 or higher.
 
 
--- その他、特記事項 -----------------------------------------------------------
+-- other noteworthy things ----------------------------------------------------
 
 
-　・OPM レジスタアクセスについて
+　・About OPM register access
 
-	PCM8 は、OPM レジスタをアクセスする場合があります。
+        PCM8 may access the OPM register.
 
-	アクセスレジスタは $1B で、システムワーク $09DA を参照して値を決定
-	しますので、他のアプリケーションではシステムワークと実際の設定内容
-	の喰い違いが起こらないようにする必要があります。
+        Since the access register is $1B and it decides the value by referring
+        to the system work $09DA, it is necessary for other applications to
+        avoid misunderstanding between system work and actual setting contents.
 
-　・PCM8 組み込み制御について
+　・About PCM 8 built-in control
 
-	音源ドライバが独自に ADPCM 処理を行う場合など、後から PCM8 が組み
-	込まれると都合が悪い場合は、TRAP #2 のエントリ ( = ($0088).l ) に
-	ダミーのアドレスを設定しておくと、PCM8 の組み込みを阻止する事が出
-	来ます。
+        If it is not convenient for the sound source driver to perform ADPCM
+        processing independently, if it is not convenient to incorporate the
+        PCM 8 later, if a dummy address is set in the entry ( = ($0088).l)
+        of TRAP #2, PCM8 You can prevent the incorporation of.
 
-　・PCM8 ヘッダの位置について
+　・About the position of the PCM8 header
 
-	version 0.48 現在、PCM8 の識別ヘッダはロードアドレス先頭にあります
-	が、これは将来変更する予定がありますので、例えばヘッダアドレスから
-	MCB/PSP を逆算するようなコーディングは避けるようにしてください。
-
+        As of version 0.48, the identification header of PCM8 is at the head
+        of the load address, but since it is planned to change in the future,
+        please avoid coding such as back calculation of MCB / PSP from header
+        address, for example.
 
 -------------------------------------------------------------------------------
 ```

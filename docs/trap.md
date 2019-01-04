@@ -173,7 +173,7 @@ Arg	d0.b	IOCS call number
 	  IOCS コールを高速化するには、以下のような方法でショートカット呼び出しを実行する.
 	  ただし、スーパーバイザ状態でなければならない.
 
-	movea.l	(IOCSコール番号*4+$400),a0
+	movea.l	(IOCS call number *4+$400),a0
 	jsr	(a0)
 
 	  IOCS の各機能は rts で帰るサブルーチンとして作成する.
