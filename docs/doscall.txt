@@ -4,7 +4,7 @@
 
 ・DOS コール一覧
 
-```
+
 $ff00   _EXIT       Program end
 $ff01   _GETCHAR    Keyboard input (with echo)
 $ff02   _PUTCHAR    Character display
@@ -3175,4 +3175,3 @@ $ffff	_CHANGE_PR	実行権を放棄
 	バックグラウンドタスクの自分の実行権を放棄する. 次のタスクに切り換わる.
 
 ==============================================================================
-```

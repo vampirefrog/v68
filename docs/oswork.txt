@@ -1,4 +1,4 @@
-```
+
 Memory management pointer
 
 offset  size
@@ -52,4 +52,3 @@ $c4(196) 24.b   File name of executable file
 $dc(220)  9.l   (unused)
 
 A 256-byte structure (including a memory management pointer) for holding process information, which is created at the beginning of the memory block for each process.
-```
