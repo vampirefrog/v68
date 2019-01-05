@@ -42,7 +42,7 @@ STACK_SIZE: .equ 32*1024
 	ori.w #$0700, sr
 	move.b #$10,($00E840C7.l)
 
-	move #$0002,-(sp)
+	move #$0000,-(sp)
 	pea	(adpcmFileStr)
 	DOS	_OPEN
 	addq.l	#6,sp
@@ -116,7 +116,7 @@ fileOpened:
 	* Seek to sample data
 	move.w	#$00,-(sp)
 	move.l (sampleOffset), d1
-	add.l #96, d1
+;	add.l #96, d1
 	move.l	d1,-(sp)
 	move.w	(pdxFd),-(sp)
 	DOS	_SEEK
@@ -124,7 +124,7 @@ fileOpened:
 
 	* Read sample data
 	move.l (sampleSize), -(sp)
-	pea (sampleBlock)
+	move.l (sampleBlock), -(sp)
 	move.w (pdxFd), -(sp)
 	DOS _READ
 	lea (10,sp),sp
@@ -142,12 +142,12 @@ fileOpened:
 	addq.l	#4,sp
 
 	* Init DMA channel 3 (ADPCM)
-	move.b  #$32,($00E840C5.l)
-	move.b  #$FF,($00E840C0.l)
-	lea  (sampleBlock), a6
-	move.l a6, ($00E840CC.l) * Address
+	move.b  #$32,($00E840C5.l) ; Channel 3, OCR
+	move.b  #$FF,($00E840C0.l) ; Channel 3, CSR
+	move.l  (sampleBlock), a6
+	move.l a6, ($00E840CC.l)   ; Channel 3, MAR
 	move.w  (sampleSize+2),($00E840CA.l) * Length
-	move.b  #$88,($00E840C7.l)
+	move.b  #$88,($00E840C7.l) ; Channel 3, CCR
 	* OKI ADPCM: 1/512 divisor, pan LR
 	* Write to UPD8255
 	move.b  #$08, ($e9a005.l)
@@ -162,7 +162,7 @@ fileOpened:
 	move.b  #$02, ($E92001.l)
 
 	* Check DMAC CER errors
-	move.b ($00E840C1), d2
+	move.b ($00E840C1), d2     ; Channel 3, CER
 	andi.b #$1f, d2
 
 	cmp.b #$01, d2
@@ -231,10 +231,16 @@ fileOpened:
 
 @@:
 
-	* Play sample!
+	* Wait for DMA transfer
+@@:
+	tst.w ($e840ca) ; MTC
+	bne @b
+
+	; OKI ADPCM: play stop
+	move.b  #$01, ($E92001.l)
 
 	* Free sample mem block
-	pea	(sampleBlock)
+	move.l (sampleBlock), -(sp)
 	DOS	_MFREE
 	addq.l	#4,sp
 

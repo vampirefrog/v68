@@ -116,7 +116,7 @@ fileOpened:
 	* Seek to sample data
 	move.w	#$00,-(sp)
 	move.l (sampleOffset), d1
-	add.l #96, d1
+;	add.l #96, d1
 	move.l	d1,-(sp)
 	move.w	(pdxFd),-(sp)
 	DOS	_SEEK
@@ -124,7 +124,7 @@ fileOpened:
 
 	* Read sample data
 	move.l (sampleSize), -(sp)
-	pea (sampleBlock)
+	move.l (sampleBlock), -(sp)
 	move.w (pdxFd), -(sp)
 	DOS _READ
 	lea (10,sp),sp
@@ -207,7 +207,7 @@ playSample:
 	* Init DMA channel 3 (ADPCM)
 	move.b  #$32,($00E840C5.l)
 	move.b  #$FF,($00E840C0.l)
-	lea  (sampleBlock), a6
+	move.l  (sampleBlock), a6
 	move.l a6, ($00E840CC.l) * Address
 	move.w  (sampleSize+2),($00E840CA.l) * Length
 	move.b  #$88,($00E840C7.l)
@@ -227,6 +227,9 @@ playSample:
 @@:
 	tst.w ($e840ca)
 	bne @b
+
+	; OKI ADPCM: play stop
+	move.b  #$01, ($E92001.l)
 
 	cmp.b #$01, d2
 	bne @f
