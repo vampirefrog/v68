@@ -3,20 +3,20 @@
 
 ==============================================================================
 
-・IOCS コール一覧
+・IOCS call list
 
-$00	_B_KEYINP	キーデータの読み込み
-$01	_B_KEYSNS	キーの入力検査
-$02	_B_SFTSNS	シフトキー状態の収得
-$03	_KEY_INIT	入力関係の初期化
-$04	_BITSNS		キー状態の収得
-$05	_SKEYSET	キー入力の発生
-$06	_LEDCTRL	キーボード LED の設定
+$00	_B_KEYINP	Read key data
+$01	_B_KEYSNS	Key input inspection
+$02	_B_SFTSNS	Acquisition of shift key state
+$03	_KEY_INIT	Initialization of input relation
+$04	_BITSNS		Acquisition of key states
+$05	_SKEYSET	Key input occurrence
+$06	_LEDCTRL	Keyboard LED setting
 $07	_LEDSET		キーボード LED をキー入力モードに合わせる
 $08	_KEYDLY		キーリピートの開始時間設定
 $09	_KEYREP		キーリピートの間隔設定
-$0a	(未公開)	OPT.2 によるテレビコントロール許可
-$0b	(未公開)	OPT.2 によるテレビコントロール禁止
+$0a	(Unused)	OPT.2 によるテレビコントロール許可
+$0b	(Unused)	OPT.2 によるテレビコントロール禁止
 $0c	_TVCTRL		テレビコントロール
 $0d	_LEDMOD		LED モードの設定
 $0e	_TGUSEMD	画面の使用状態の設定
@@ -34,73 +34,73 @@ $19	_FNTGET		フォント読み込み
 $1a	_TEXTGET	テキスト VRAM のドット単位読み込み
 $1b	_TEXTPUT	テキスト VRAM のドット単位書き込み
 $1c	_CLIPPUT	テキスト VRAM のドット単位書き込み(クリッピング処理あり)
-$1d	_SCROLL		表示座標の設定
-$1e	_B_CURON	カーソル一時停止解除
-$1f	_B_CUROFF	カーソル一時停止
+$1d	_SCROLL		Setting display coordinates
+$1e	_B_CURON	Cancel cursor temporary stop
+$1f	_B_CUROFF	Pause cursor
 $20	_B_PUTC		Text representation
-$21	_B_PRINT	文字列表示
-$22	_B_COLOR	表示色設定
-$23	_B_LOCATE	カーソル移動
-$24	_B_DOWN_S	カーソルを 1 行下に移動
-$25	_B_UP_S		カーソルを 1 行上に移動
-$26	_B_UP		カーソルを指定行数だけ上に移動
-$27	_B_DOWN		カーソルを指定行数だけ下に移動
-$28	_B_RIGHT	カーソルを指定桁数だけ右に移動
-$29	_B_LEFT		カーソルを指定桁数だけ左に移動
-$2a	_B_CLR_ST	画面の複数行消去
-$2b	_B_ERA_ST	現在行の複数桁消去
-$2c	_B_INS		複数行挿入
-$2d	_B_DEL		複数行削除
-$2e	_B_CONSOL	表示範囲設定
-$2f	_B_PUTMES	座標指定文字列表示
-$30	_SET232C	RS-232C パラメータ設定
-$31	_LOF232C	RS-232C 受信バッファのデータ数を求める
-$32	_INP232C	RS-232C 受信データを得る
-$33	_ISNS232C	RS-232C 受信データの検査
-$34	_OSNS232C	RS-232C データが送信可能か検査する
-$35	_OUT232C	RS-232C データ送信
-$36	(未公開)	マウスデータ受信時の処理アドレス設定
-$37	(未公開)	ESC[> 系エスケープシーケンスの拡張処理アドレス設定
-$38	_SETFNTADR	外字フォントアドレス設定
-$39	(未公開)	BEEP 音用 PCM のデータ設定
-$3a	(未公開)	プリンタパラメータ設定
-$3b	_JOYGET		ジョイスティック入力
-$3c	_INIT_PRN	プリンタ初期化
-$3d	_SNSPRN		プリンタに出力可能か検査する
-$3e	_OUTLPT		プリンタ直接出力
-$3f	_OUTPRN		プリンタ出力
-$40	_B_SEEK		ディスクのシーク
-$41	_B_VERIFY	ディスクのベリファイ
-$42	_B_READDI	ディスクの診断の為の読み出し
-$43	_B_DSKINI	ドライブの初期化
-$44	_B_DRVSNS	ドライブの状態検査
-$45	_B_WRITE	ディスクへの書き込み
-$46	_B_READ		ディスクからの読み込み
-$47	_B_RECALI	ディスクのリキャリブレイト
-$48	_B_ASSIGN	ハードディスクの代替トラック設定
-$49	_B_WRITED	2HD への破損データ書き込み
-$4a	_B_READID	2HD の ID 情報の読み出し
-$4b	_B_BADFMT	ハードディスクの破損トラックを使用不能にする
-$4c	_B_READDL	2HD からの破損データ読み込み
-$4d	_B_FORMAT	ディスクのフォーマット
-$4e	_B_DRVCHK	2HD ドライブの状態設定
-$4f	_B_EJECT	ディスクのイジェクト/シッピング
-$50	_DATEBCD	日付データのバイナリ→BCD 変換
-$51	_DATESET	日付の設定
-$52	_TIMEBCD	時刻データのバイナリ→BCD 変換
-$53	_TIMESET	時刻の設定
-$54	_DATEGET	日付の読み込み
-$55	_DATEBIN	日付データの BCD→バイナリ変換
-$56	_TIMEGET	時刻の読み込み
-$57	_TIMEBIN	時刻データの BCD→バイナリ変換
-$58	_DATECNV	日付データの文字列→バイナリ変換
-$59	_TIMECNV	時刻データの文字列→バイナリ変換
-$5a	_DATEASC	日付データのバイナリ→文字列変換
-$5b	_TIMEASC	時刻データのバイナリ→文字列変換
-$5c	_DAYASC		曜日データのバイナリ→文字列変換
-$5d	_ALARMMOD	アラーム許可/禁止
-$5e	_ALARMSET	アラーム設定
-$5f	_ALARMGET	アラームの設定状態を収得
+$21	_B_PRINT	Text column representation
+$22	_B_COLOR	Presentation color setting
+$23	_B_LOCATE	Move cursor
+$24	_B_DOWN_S	Move cursor down one line
+$25	_B_UP_S		Move cursor up one line
+$26	_B_UP		Move the cursor up a specified number of lines
+$27	_B_DOWN		Move the cursor down a specified number of rows
+$28	_B_RIGHT	Move the cursor to the right by the specified number of digits
+$29	_B_LEFT		Move the cursor to the left by the specified number of digits
+$2a	_B_CLR_ST	Erase multiple rows of screen
+$2b	_B_ERA_ST	Delete multiple digit of current line
+$2c	_B_INS		Insert multiple lines
+$2d	_B_DEL		Delete multiple lines
+$2e	_B_CONSOL	Display range setting
+$2f	_B_PUTMES	Coordinate specifies the text column representation
+$30	_SET232C	RS-232C parameter settings
+$31	_LOF232C	Find the number of data of RS-232C receive buffer
+$32	_INP232C	Obtain RS-232C receive data
+$33	_ISNS232C	Inspection of RS-232C receive data
+$34	_OSNS232C	Check if RS-232C data can be transmitted
+$35	_OUT232C	RS-232C data transmission
+$36	(Unused)	Processing address setting when receiving mouse data
+$37	(Unused)	Extended processing address setting of ESC[> series escape sequence
+$38	_SETFNTADR	External font address setting
+$39	(Unused)	Data setting of BEEP sound PCM
+$3a	(Unused)	Printer parameter setting
+$3b	_JOYGET		Joystick input
+$3c	_INIT_PRN	Printer initialization
+$3d	_SNSPRN		Check if output to printer
+$3e	_OUTLPT		Printer direct output
+$3f	_OUTPRN		Printer output
+$40	_B_SEEK		Seeking the disc
+$41	_B_VERIFY	Verify the disk
+$42	_B_READDI	Read for disk diagnosis
+$43	_B_DSKINI	Initialize drive
+$44	_B_DRVSNS	Drive status check
+$45	_B_WRITE	Write to disk
+$46	_B_READ		Read from disk
+$47	_B_RECALI	Recalibrate the disc
+$48	_B_ASSIGN	Alternate track setting for hard disk
+$49	_B_WRITED	Write broken data to 2HD
+$4a	_B_READID	Read ID information of 2 HD
+$4b	_B_BADFMT	Disable hard disk corrupted track
+$4c	_B_READDL	Read corrupted data from 2HD
+$4d	_B_FORMAT	Disk format
+$4e	_B_DRVCHK	2HD Drive Status Setting
+$4f	_B_EJECT	Disk eject / shipping
+$50	_DATEBCD	Binary to BCD conversion of date data
+$51	_DATESET	Set date
+$52	_TIMEBCD	Binary to BCD conversion of time data
+$53	_TIMESET	Time setting
+$54	_DATEGET	Read date
+$55	_DATEBIN	BCD → binary conversion of date data
+$56	_TIMEGET	Reading time
+$57	_TIMEBIN	BCD → binary conversion of time data
+$58	_DATECNV	String of date data → binary conversion
+$59	_TIMECNV	Character string of time data → binary conversion
+$5a	_DATEASC	Binary → string conversion of date data
+$5b	_TIMEASC	Binary to character string conversion of time data
+$5c	_DAYASC		Binary → string conversion of day data
+$5d	_ALARMMOD	Alarm permission / prohibition
+$5e	_ALARMSET	Alarm setting
+$5f	_ALARMGET	Acquire alarm setting state
 $60	_ADPCMOUT	ADPCM output
 $61	_ADPCMINP	ADPCM input
 $62	_ADPCMAOT	ADPCM output (array chain)
@@ -117,112 +117,112 @@ $6c	_VDISPST	Vertical sync interrupt setting
 $6d	_CRTCRAS	Raster interrupt setting
 $6e	_HSYNCST	Horizontal synchronization interrupt setting
 $6f	_PRNINTST	Printer interrupt setting
-$70	_MS_INIT	マウス初期化
-$71	_MS_CURON	マウスカーソル表示
-$72	_MS_CUROF	マウスカーソル消去
-$73	_MS_STAT	マウスカーソルの表示状態を調べる
-$74	_MS_GETDT	マウス移動量/ボタン状態を調べる
-$75	_MS_CURGT	マウスカーソルの座標収得
-$76	_MS_CURST	マウスカーソルの座標設定
-$77	_MS_LIMIT	マウスカーソルの移動範囲設定
-$78	_MS_OFFTM	マウスのボタンを離すまでの時間を調べる
-$79	_MS_ONTM	マウスのボタンを押すまでの時間を調べる
-$7a	_MS_PATST	マウスカーソルのパターン定義
-$7b	_MS_SEL		マウスカーソルのパターン選択
-$7c	_MS_SEL2	マウスカーソルのアニメーション
-$7d	_SKEY_MOD	ソフトキーボード制御
-$7e	_DENSNS		電卓制御
+$70	_MS_INIT	Mouse initialization
+$71	_MS_CURON	Mouse cursor display
+$72	_MS_CUROF	Delete mouse cursor
+$73	_MS_STAT	Check the display state of the mouse cursor
+$74	_MS_GETDT	Check mouse movement amount / button status
+$75	_MS_CURGT	Coordinate acquisition of mouse cursor
+$76	_MS_CURST	Setting the coordinates of the mouse cursor
+$77	_MS_LIMIT	Move cursor movement range setting
+$78	_MS_OFFTM	Determine the time to release the mouse button
+$79	_MS_ONTM	Determine the time to press the mouse button
+$7a	_MS_PATST	Mouse cursor pattern definition
+$7b	_MS_SEL		Pattern selection of mouse cursor
+$7c	_MS_SEL2	Animation of mouse cursor
+$7d	_SKEY_MOD	Soft keyboard control
+$7e	_DENSNS		Control calculator
 $7f	_ONTIME		Check elapsed time after startup
-$80	_B_INTVCS	ベクタ設定
-$81	_B_SUPER	スーパーバイザ/ユーザモードの切り換え
-$82	_B_BPEEK	指定アドレスから 1 バイト読み込み
-$83	_B_WPEEK	指定アドレスから 1 ワード読み込み
-$84	_B_LPEEK	指定アドレスから 1 ロングワード読み込み
+$80	_B_INTVCS	Vector setting
+$81	_B_SUPER	Switching the supervisor / user mode
+$82	_B_BPEEK	Read 1 byte from specified address
+$83	_B_WPEEK	Read 1 word from specified address
+$84	_B_LPEEK	Read one longword from specified address
 $85	_B_MEMSTR	Read multiple bytes from specified address
-$86	_B_BPOKE	指定アドレスヘ 1 バイト書き込み
-$87	_B_WPOKE	指定アドレスヘ 1 ワード書き込み
-$88	_B_LPOKE	指定アドレスヘ 1 ロングワード書き込み
-$89	_B_MEMSET	指定アドレスヘ複数バイト書き込み
-$8a	_DMAMOVE	DMA 転送
-$8b	_DMAMOV_A	DMA 転送(アレイチェーン)
-$8c	_DMAMOV_L	DMA 転送(リンクアレイチェーン)
-$8d	_DMAMODE	DMA 状態検査
-$8e	_BOOTINF	起動情報を得る
-$8f	_ROMVER		ROM バージョンを得る
-$90	_G_CLR_ON	グラフィック画面の初期化及び表示モードの設定
-$91	(未公開)	グラフィック画面モードの設定
-$92	(未公開)	プライオリティ設定
-$93	(未公開)	画面表示及び特殊モードの設定
-$94	_GPALET		グラフィックパレット設定
-$95	(未公開)	カラーコード設定
-$96	(未公開)	アクセスページ設定
-$97	(未公開)	グラフィック VRAM のドット単位読み込み
-$98	(未公開)	グラフィック VRAM のドット単位書き込み(色マスクあり)
-$99	(未公開)	グラフィック VRAM のドット単位書き込み
-$9a	(未公開)	グラフィック VRAM のビットパターン書き込み
-$9b	(未公開)	グラフィック VRAM のビットパターン書き込み(バックカラーあり)
-$9c	(未公開)	グラフィック VRAM のビットパターン拡大書き込み
-$a0	_SFTJIS		S-JIS→JIS コード変換
-$a1	_JISSFT		JIS→S-JIS コード変換
-$a2	_AKCONV		ANK→S-JIS コード変換
-$a3	_RMACNV		ローマ字→ANK カナ変換
-$a4	_DAKJOB		濁点処理
-$a5	_HANJOB		半濁点処理
-$ac	_SYS_STAT	システム状態の設定
-$ad	_B_CONMOD	カーソルおよびスクロールの設定
-$ae	_OS_CURON	カーソル表示
-$af	_OS_CUROF	カーソル消去
-$b0	_DRAWMODE	グラフィック描画モードの設定
-$b1	_APAGE		グラフィック描画ページの設定
-$b2	_VPAGE		グラフィック画面表示ページの設定
-$b3	_HOME		グラフィック画面の表示位置設定
-$b4	_WINDOW		グラフィック描画ウィンドウの設定
-$b5	_WIPE		グラフィック画面のクリア
-$b6	_PSET		グラフィック画面のポイントセット
-$b7	_POINT		グラフィック画面のポイントゲット
-$b8	_LINE		グラフィック画面のライン
-$b9	_BOX		グラフィック画面のボックス
-$ba	_FILL		グラフィック画面のボックスフィル
-$bb	_CIRCLE		グラフィック画面のサークル
-$bc	_PAINT		グラフィック画面のペイント
-$bd	_SYMBOL		グラフィック画面のシンボル
-$be	_GETGRM		グラフィック画面のドット単位読み込み
-$bf	_PUTGRM		グラフィック画面のドット単位書き込み
-$c0	_SP_INIT	スプライト初期化
-$c1	_SP_ON		スプライト表示
-$c2	_SP_OFF		スプライト消去
-$c3	_SP_CGCLR	スプライトパターンのクリア
-$c4	_SP_DEFCG	スプライトパターンの定義
-$c5	_SP_GTPCG	スプライトパターンの読み込み
-$c6	_SP_REGST	スプライトレジスタの設定
-$c7	_SP_REGGT	スプライトレジスタの読み出し
-$c8	_BGSCRLST	バックグラウンドスクロールレジスタの設定
-$c9	_BGSCRLGT	バックグラウンドスクロールレジスタの読み出し
-$ca	_BGCTRLST	バックグラウンドコントロールレジスタの設定
-$cb	_BGCTRLGT	バックグラウンドコントロールレジスタの読み出し
-$cc	_BGTEXTCL	バックグラウンドテキストのクリア
-$cd	_BGTEXTST	バックグラウンドテキストの設定
-$ce	_BGTEXTGT	バックグラウンドテキストの読み出し
-$cf	_SPALET		スプライトパレットの設定
-$d3	_TXXLINE	テキスト画面の水平ライン
-$d4	_TXYLINE	テキスト画面の垂直ライン
-$d5	_TXLINE		テキスト画面のライン
-$d6	_TXBOX		テキスト画面のボックス
-$d7	_TXFILL		テキスト画面のボックスフィル
-$d8	_TXREV		テキスト画面の反転
-$df	_TXRASCPY	テキスト画面のラスターコピー
-$f0	_OPMDRV		OPMDRV 制御
-$f1	_RSDRV		拡張 RS-232C 制御
-$f2	_A_JOYGET	アナログジョイスティック制御
-$f3	_MUSICDRV	MUSICDRV 制御
+$86	_B_BPOKE	Write 1 byte to specified address
+$87	_B_WPOKE	Write 1 word to specified address
+$88	_B_LPOKE	Write 1 longword to specified address
+$89	_B_MEMSET	Write multiple bytes to specified address
+$8a	_DMAMOVE	DMA transfer
+$8b	_DMAMOV_A	DMA transfer (array chain)
+$8c	_DMAMOV_L	DMA transfer (link array chain)
+$8d	_DMAMODE	DMA condition test
+$8e	_BOOTINF	Obtain activation information
+$8f	_ROMVER		Obtain ROM version
+$90	_G_CLR_ON	Initialization of graphic screen and setting of display mode
+$91	(Unused)	Setting the graphic screen mode
+$92	(Unused)	Priority setting
+$93	(Unused)	Screen display and special mode setting
+$94	_GPALET		Graphic palette setting
+$95	(Unused)	Color code setting
+$96	(Unused)	Access page setting
+$97	(Unused)	Reading graphic VRAM in dots
+$98	(Unused)	Dot unit writing of graphic VRAM (with color mask)
+$99	(Unused)	Dot unit write of graphic VRAM
+$9a	(Unused)	Write bit pattern of graphic VRAM
+$9b	(Unused)	Bit pattern writing of graphic VRAM (with back color)
+$9c	(Unused)	Graphic VRAM bit pattern widen write
+$a0	_SFTJIS		S-JIS → JIS code conversion
+$a1	_JISSFT		JIS → S-JIS code conversion
+$a2	_AKCONV		ANK → S-JIS code conversion
+$a3	_RMACNV		Roman alphabet → ANK kana conversion
+$a4	_DAKJOB		Turbidity treatment
+$a5	_HANJOB		Semi-opus point treatment
+$ac	_SYS_STAT	System state setting
+$ad	_B_CONMOD	Cursor and scroll settings
+$ae	_OS_CURON	Cursor display
+$af	_OS_CUROF	Clear cursor
+$b0	_DRAWMODE	Setting the graphic drawing mode
+$b1	_APAGE		Graphic drawing page setting
+$b2	_VPAGE		Setting of graphic screen display page
+$b3	_HOME		Display position setting of graphic screen
+$b4	_WINDOW		Graphic drawing window setting
+$b5	_WIPE		Clear graphic screen
+$b6	_PSET		Graphic screen point set
+$b7	_POINT		Graphic screen point get
+$b8	_LINE		Line of graphic screen
+$b9	_BOX		Box of graphic screen
+$ba	_FILL		Box fill of graphic screen
+$bb	_CIRCLE		Circle of graphic screen
+$bc	_PAINT		Paint graphic screen
+$bd	_SYMBOL		Symbols on the graphic screen
+$be	_GETGRM		Dot unit reading of graphic screen
+$bf	_PUTGRM		Dot unit writing of graphic screen
+$c0	_SP_INIT	Sprite initialization
+$c1	_SP_ON		Sprite display
+$c2	_SP_OFF		Clear sprite
+$c3	_SP_CGCLR	Clear sprite pattern
+$c4	_SP_DEFCG	Define sprite pattern
+$c5	_SP_GTPCG	Reading a sprite pattern
+$c6	_SP_REGST	Sprite register setting
+$c7	_SP_REGGT	Reading the sprite register
+$c8	_BGSCRLST	Setting the background scroll register
+$c9	_BGSCRLGT	Reading the background scroll register
+$ca	_BGCTRLST	Setting the background control register
+$cb	_BGCTRLGT	Reading the background control register
+$cc	_BGTEXTCL	Clear background text
+$cd	_BGTEXTST	Setting background text
+$ce	_BGTEXTGT	Read background text
+$cf	_SPALET		Sprite palette setting
+$d3	_TXXLINE	Horizontal line of text screen
+$d4	_TXYLINE	Vertical line of text screen
+$d5	_TXLINE		Line of text screen
+$d6	_TXBOX		Text box box
+$d7	_TXFILL		Box fill of text screen
+$d8	_TXREV		Flip text screen
+$df	_TXRASCPY	Raster copy of text screen
+$f0	_OPMDRV		OPMDRV control
+$f1	_RSDRV		Extended RS-232C control
+$f2	_A_JOYGET	Analog joystick control
+$f3	_MUSICDRV	MUSICDRV control
 $f5	_SCSIDRV	SCSI IOCS
-$fd	_ABORTRST	アボートする為に環境を再設定する
-$fe	_IPLERR		再起動する
-$ff	_ABORTJOB	アボート
+$fd	_ABORTRST	Reset the environment to abort
+$fe	_IPLERR		Restart
+$ff	_ABORTJOB	Abort
 
 ==============================================================================
 
-・キーのスキャンコード
+・Key scanning code
 
 キーコード	キー入力状態ビット
  グループ	7	6	5	4	3	2	1	0
@@ -387,7 +387,7 @@ Arg	d1.b	キーリピート間隔(0〜15)
 
 ==============================================================================
 
-$0a	(未公開)	OPT.2 によるテレビコントロール許可
+$0a	(Unused)	OPT.2 によるテレビコントロール許可
 
 	OPT.2 によるテレビコントロールを許可する.
 	ROM IOCS では、d0.b に $0a がセットされた状態で呼び出さないと正常動作
@@ -395,7 +395,7 @@ $0a	(未公開)	OPT.2 によるテレビコントロール許可
 
 ==============================================================================
 
-$0b	(未公開)	OPT.2 によるテレビコントロール禁止
+$0b	(Unused)	OPT.2 によるテレビコントロール禁止
 
 	OPT.2 によるテレビコントロールを禁止する.
 	ROM IOCS では、d0.b に $0b がセットされた状態で呼び出さないと正常動作
@@ -1112,7 +1112,7 @@ Arg	d1.b	送信データ
 
 ==============================================================================
 
-$36	(未公開)	マウスデータ受信時の処理アドレス設定
+$36	(Unused)	マウスデータ受信時の処理アドレス設定
 
 Arg	d1.l	処理アドレス(0 の時取り消し)
 	d2.w	カウンタ初期値
@@ -1127,7 +1127,7 @@ Arg	d1.l	処理アドレス(0 の時取り消し)
 
 ==============================================================================
 
-$37	(未公開)	ESC[> 系エスケープシーケンスの拡張処理アドレス設定
+$37	(Unused)	ESC[> 系エスケープシーケンスの拡張処理アドレス設定
 
 Arg	d1.l	処理アドレス(0 の時取り消し)
 
@@ -1179,7 +1179,7 @@ Ret	変更前のアドレス
 
 ==============================================================================
 
-$39	(未公開)	BEEP 音用 PCM のデータ設定
+$39	(Unused)	BEEP 音用 PCM のデータ設定
 
 Arg	d1.l	PCM データアドレス
 	d2.w	〃	  サイズ
@@ -1192,7 +1192,7 @@ Ret	d0.l	常に 0
 
 ==============================================================================
 
-$3a	(未公開)	プリンタパラメータ設定
+$3a	(Unused)	プリンタパラメータ設定
 
 Arg	a1.l	パラメータアドレス(0 で ROM)
 
@@ -2597,7 +2597,7 @@ $90	_G_CLR_ON	グラフィック画面の初期化及び表示モードの設定
 
 ==============================================================================
 
-$91	(未公開)	グラフィック画面モードの設定
+$91	(Unused)	グラフィック画面モードの設定
 
 Arg	d1.b	グラフィック画面モード
 		d1.b =	0	   16 色 4 画面(実画面 512)
@@ -2613,7 +2613,7 @@ Ret	変更前のグラフィック画面モード
 
 ==============================================================================
 
-$92	(未公開)	プライオリティ設定
+$92	(Unused)	プライオリティ設定
 
 Arg	d1.w	プライオリティ設定(ただし d1.w = -1 の時は現在の設定を調べます)
 
@@ -2624,7 +2624,7 @@ Ret	変更前の設定
 
 ==============================================================================
 
-$93	(未公開)	画面表示及び特殊モードの設定
+$93	(Unused)	画面表示及び特殊モードの設定
 
 Arg	d1.w	画面表示及び特殊モード設定
 		(ただし d1.w = -1 の時は現在の設定を調べます)
@@ -2651,7 +2651,7 @@ Ret	d0.l =	0	正常終了
 
 ==============================================================================
 
-$95	(未公開)	カラーコード設定
+$95	(Unused)	カラーコード設定
 
 Arg	d1.w	パレットコード
 
@@ -2659,7 +2659,7 @@ Arg	d1.w	パレットコード
 
 ==============================================================================
 
-$96	(未公開)	アクセスページ設定
+$96	(Unused)	アクセスページ設定
 
 Arg	d1.w	アクセスページ(0〜3)
 
@@ -2669,7 +2669,7 @@ Arg	d1.w	アクセスページ(0〜3)
 
 ==============================================================================
 
-$97	(未公開)	グラフィック VRAM のドット単位読み込み
+$97	(Unused)	グラフィック VRAM のドット単位読み込み
 
 Arg	d1.w	X 座標
 	d2.w	Y 〃
@@ -2683,7 +2683,7 @@ Arg	d1.w	X 座標
 
 ==============================================================================
 
-$98	(未公開)	グラフィック VRAM のドット単位書き込み(色マスクあり)
+$98	(Unused)	グラフィック VRAM のドット単位書き込み(色マスクあり)
 
 Arg	d1.w	X 座標
 	d2.w	Y 〃
@@ -2702,7 +2702,7 @@ Ret	d0.l =	0	正常終了
 
 ==============================================================================
 
-$99	(未公開)	グラフィック VRAM のドット単位書き込み
+$99	(Unused)	グラフィック VRAM のドット単位書き込み
 
 Arg	d1.w	X 座標
 	d2.w	Y 〃
@@ -2719,7 +2719,7 @@ Ret	d0.l =	0	正常終了
 
 ==============================================================================
 
-$9a	(未公開)	グラフィック VRAM のビットパターン書き込み
+$9a	(Unused)	グラフィック VRAM のビットパターン書き込み
 
 Arg	d1.w	X 座標
 	d2.w	Y 〃
@@ -2734,7 +2734,7 @@ Arg	d1.w	X 座標
 
 ==============================================================================
 
-$9b	(未公開)	グラフィック VRAM のビットパターン書き込み(バックカラーあり)
+$9b	(Unused)	グラフィック VRAM のビットパターン書き込み(バックカラーあり)
 
 Arg	d1.w	X 座標
 	d2.w	Y 〃
@@ -2750,7 +2750,7 @@ Arg	d1.w	X 座標
 
 ==============================================================================
 
-$9c	(未公開)	グラフィック VRAM のビットパターン拡大書き込み
+$9c	(Unused)	グラフィック VRAM のビットパターン拡大書き込み
 
 Arg	d1.w	X 座標
 	d2.w	Y 〃

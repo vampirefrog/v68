@@ -100,7 +100,7 @@ Note:
 (*4) Volume / frequency / localization is not changed.
 
 ----------------------------------------
-Array chain output Func code $001x
+Array chain output       Func code $001x
 ----------------------------------------
 
 Func:   Data of a plurality of memory areas indirectly designated by the chain table is outputted to the ADPCM.

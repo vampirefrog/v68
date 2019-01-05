@@ -1,0 +1,532 @@
+────────────────────────────────────
+		  High-speed Assembler ─ 68060 対応版
+			HAS060.X version 3.09+87
+
+			   ＜ Improvement notes memo ＞
+
+			       1999/11/17
+			        M.Kamada
+────────────────────────────────────
+
+  ハイスピードアセンブラ HAS060.X に「こんな機能が欲しい」と思われるもの
+を、これまでに HAS060.X を利用されている方から要望があってまだ実装されて
+いないものも含めて、リストアップしてみました。
+
+  これらの機能は HAS060.X v3.09+86 までに実装されておらず、本当に実現で
+きるかどうかすら定かでないものもあります。「絶対にできない」あるいは「絶
+対にやらない」というものは除外しましたが、詳しく吟味していない案もありま
+す。
+
+  以下の構想は削除される場合があります。
+
+  実現度の目安として、独断と偏見によって構想を大まかに 4 段階に分類して
+あります。あくまでも目安です。目安は変わることがあります。
+
+	◎ … I want to do
+	○ … It may be good to do it
+	△ … I might not do it
+	× … Maybe not
+
+  以下の構想について、「これはこういうふうに実装して欲しい」あるいは「こ
+れはやらないで欲しい」といった意見があれば教えて下さい。また、ここに挙げ
+られているかどうかに関わらず、「これは是非実現して欲しい」というアイデア
+があれば教えて下さい。
+
+
+	┌───────────────────────────┐
+	│			      ・・・・・・・・		│
+	│please note：  The following functions are not yet implemented.│
+	│							│
+	└───────────────────────────┘
+
+
+
+━＜Macro related＞━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+△Warning or error if numeric local label is used during macro definition
+
+  Prevent numerical local labels across macro expansion from referring to unexpected places.
+
+  マクロを展開するとき、その直前と直後で .text や .data と同様にローカル
+ラベルのスコープを分断する方法もある。しかし、マクロを二重に展開するとき
+に外側のマクロと内側のマクロが同じ数字ローカルラベルを使っている場合はそ
+のスコープを制限できないので、マクロの中では数字ローカルラベルを使えない
+ことにしたほうが安全。
+
+  例えば、
+
+	inside	.macro
+		moveq.l	#2-1,d2
+	@@:	moveq.l	#2-1,d3
+	@@:
+		dbra	@b,d3
+		dbra	@@b,d2
+		.endm
+
+	outside	.macro
+		moveq.l	#2-1,d0
+	@@:	moveq.l	#2-1,d1
+	@@:	inside
+		dbra	@b,d1
+		dbra	@@b,d0
+		.endm
+
+		outside
+
+The expansion result of、
+
+		moveq.l	#2-1,d0
+	@@:	moveq.l	#2-1,d1
+	@@:
+		moveq.l	#2-1,d2
+	@@:	moveq.l	#2-1,d3	  ←─┐
+	@@:			  ←┐│
+		dbra	d3,@b	  ─┤│
+		dbra	d2,@@b	  ─┼┤
+		dbra	d1,@b	  ─┘│
+		dbra	d0,@@b	  ──┘
+
+And it does not work as expected.
+
+
+× Function to output source after macro expansion
+
+  Just by expanding macros, output sources that can be assembled.
+
+  Do you also deploy FPPP and unimplemented instructions at the same time?
+
+
+×マクロ定義の &〜 およびマクロ展開の %〜 によるシンボル参照の直後に文字
+列を連結する手段
+
+
+
+━＜ローカルラベル関連＞━━━━━━━━━━━━━━━━━━━━━━━━
+
+◎定義されながら参照されなかった数字ローカルラベルを警告する
+
+  この警告はスイッチで ON/OFF（または警告レベルを上下）できたほうがよい。
+
+
+△数字ローカルラベルが .text や .data を跨げないようにするスイッチ
+
+  .text セクションが続いていても、ルーチンの先頭に毎回 .text と書くこと
+で数字ローカルラベルのスコープを制限できるようにする。
+
+  @b や @f が .text を跨いでいるときエラーになれば、間違って隣のサブルー
+チンの途中に飛び込んでしまうミスが減るはず。
+
+  ただし、
+		pea	(@f,pc)
+		DOS	_PRINT
+		addq.l	#4,sp
+		.data
+	@@:	.dc.b	'〜',13,10,0
+		.text
+のようなコードがアセンブルできなくなると困るので、オプションにする必要が
+ある。
+
+
+× Named local label
+
+  Define in the form of "@〜:"。However, @b and @f are prohibited.
+
+  名前付きローカルラベルの参照では、ローカルでないラベルを跨ぐことができ
+ない。つまり、名前付きローカルラベル のスコープは、ローカルでないラベルと
+ローカルでないラベルで囲まれた範囲とする。.text や .data を跨げないよう
+にしてもよい。
+
+  スコープ内では「@〜」の形式で参照できる。
+
+  スコープの外側からローカルラベルを参照したいときは、スコープの先頭のロ
+ーカルでないラベルを使って、「〜:@〜」の形式で参照できるものとする。
+
+  例:
+	subB:
+		move.w	countB,d0
+		bra	subA:@dbra  ──┐  subA の @dbra へ
+					│
+			:		│
+					│
+	subA:			      ─┴┐
+		move.w	countA,d0	  │
+		bra	@dbra	    ──┐│@dbra へ
+					││
+	@loop:			    ←┐││
+			:	      │││
+	@dbra:			    ←┼┴┘
+		dbra	d0,@loop    ─┘    @loopへ
+
+  ローカルでないラベルの間に同一名称のローカルラベルが複数存在した場合はエラー。
+
+  プログラムの先頭で、まだローカルでないラベルが定義されていない場所に記述されたローカルラベルの参照は「:@〜」となる。
+
+
+× .irp/.irpc/.rept の中で .local でローカルシンボルを定義できる
+
+  「@〜:」が自動的にマクロ内ローカルラベルと同じ扱いになれば、.local で
+定義する必要はない。
+
+
+
+━＜シンボルおよびセクション関連＞━━━━━━━━━━━━━━━━━━━
+
+◎シンボルを未定義にする疑似命令 .undef
+
+
+◎ .offsym 中にアラインメント調整ができるようにする
+
+  .offsym 中に .even/.quad/.align が書けるようにする。
+
+
+○ .offsym の初期値に定数以外を指定できるようにする
+
+  .offsym の初期値でテキストセクション内のシンボルを指定できたりするとよいかも知れない。
+
+
+○グローバル宣言されながら定義も使用もされなかったシンボルをオブジェクトに残さない
+
+  Reducing the possibility that unnecessary libraries are linked by preventing unnecessary symbols from remaining in the object.
+
+  使用しないシンボルを故意にグローバル宣言することで実行ファイルに特定のオブジェクトを埋め込むプログラムがあるので、削除するかどうかをオプションで選択できるようにする。
+
+  各々のグローバルシンボルが参照された回数を表示できると、プロファイルに使えて便利。
+
+
+△ .offsym の末尾を基準にするバージョン .offend
+
+  例えば、
+			.offend	0
+		prev:	.ds.l	1
+		proc:	.ds.l	1
+		tail:	.ds.l	1
+		next:	.ds.l	1
+			.text
+は、
+			.offsym	0,start
+		prev:	.ds.l	1
+		proc:	.ds.l	1
+		tail:	.ds.l	1
+		next:	.ds.l	1
+		start:
+			.text
+It is the same as the one, and it requires less one symbol.
+
+
+△ Obtaining the data length of .dc
+
+  「L'ラベル」の型式で、ラベルの行に書いてある .dc 疑似命令のデータ長を取得できる。
+
+  LASCII 型のデータが記述しやすくなる。
+
+		name:	.dc.b	L'trunk
+		trunk:	.dc.b	'hippopotamus'
+
+  ただし、LASCII に限れば、
+
+		LASCII	.macro	str
+			.dc.b	@btm-@top
+		@top:	.dc.b	str
+		@btm:
+			.endm
+
+		name:	LASCII	'hippopotamus'
+
+It is more readable.
+
+
+△ダミーセクション .dsect（または .offset 疑似命令の機能拡張）と疑似命令
+.using/.drop
+
+  疑似命令 .dsect または .offset で、セクション名付きの abs セクション
+（ダミーセクション）を定義する。
+
+	セクション名	.dsect|.offset	[初期値]
+	シンボル1:
+			:
+	シンボル2:
+			:
+		.text
+
+  疑似命令 .using でアドレスレジスタにダミーセクションを割り当てると、そ
+のダミーセクションで定義されたシンボルを使ったアドレッシングが指定された
+アドレスレジスタをベースレジスタとするアドレスレジスタ間接アドレッシング
+に自動的に変化する。
+
+		.using	セクション名,An
+
+	シンボルn+d.WL → (シンボルn+d.WL,An)
+
+	シンボルn+d.WL(Xi.WL*SF) → シンボルn+d.WL(An,Xi.WL*SF)
+
+	(シンボルn+d.WL,Xi.WL*SF) → (シンボルn+d.WL,An,Xi.WL*SF)
+
+  疑似命令 .drop で割り当てを解除できる。
+
+		.drop	セクション名|An
+
+
+△Named subsection of data section
+
+  Declare the start of the named subsection with the pseudo-instruction .loctr (or .data).
+
+		.loctr	Subsection name
+			:
+
+Alternatively,
+
+		.data	Subsection name
+			:
+
+  You can end the subsection with .text or .data, but if you describe .loctr without parameters, you can revert to the section before starting the subsection.
+
+		.loctr
+
+  Subsections with the same name are grouped together and organized at the end of the data section.
+
+  For example,
+
+			:
+		.loctr	msgtbl_section
+	msgtbl:
+	msgnum = 0
+			:
+		.text
+			:
+	DEFINE_MESSAGE	.macro	lab,str
+	lab	equ	msgnum
+	msgnum = msgnum+1
+		.loctr	msgtbl_section
+		.dc.l	@msg
+		.loctr	msgstr_section
+	@msg:	.dc.b	str,13,10,0
+		.loctr
+		.endm
+			:
+		DEFINE_MESSAGE	SYNTAX_ERROR,'Syntax error'
+		DEFINE_MESSAGE	OVERFLOW_ERROR,'Overflow error'
+			:
+		moveq.l	#OVERFLOW_ERROR,d0
+		bra	draw_message
+			:
+	draw_message:
+		lea.l	msgtbl,a0
+		asl.l	#2,d0
+		move.l	(a0,d0.l),a0
+		bra	print
+			:
+
+Then,
+
+			:
+		.text
+			:
+	SYNTAX_ERROR	equ	0
+	OVERFLOW_ERROR	equ	1
+			:
+		moveq.l	#OVERFLOW_ERROR,d0
+		bra	draw_message
+			:
+	draw_message:
+		lea.l	msgtbl,a0
+		asl.l	#2,d0
+		move.l	(a0,d0.l),a0
+		bra	print
+			:
+		.data
+			:
+	msgtbl:
+		.dc.l	??0001
+		.dc.l	??0002
+			:
+	??0001:
+		.dc.b	'Syntax error',0
+	??0002:
+		.dc.b	'Overflow error',0
+			:
+
+Become。
+
+The contents of the subsection are output as part of the data section to the object file.
+Because subsection information is not output to the object file, even if you define subsections of the same name in multiple source files, they are not grouped together in the executable file (you can also do that with the linker It is necessary to add).
+
+
+
+━＜Optimization related＞━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+◎ move.bwl #0,<mem> → clr.bwl <mem> の最適化
+
+  68020 以上ならば -c4 のとき無条件に最適化してよいと思われる。
+
+  68000/68010 のとき clr <mem> でデスティネーションオペランドに対するリ
+ードが発生してしまうので最適化していなかったが、副作用がないと分かりきっ
+ている場合に -cclr を指定すれば最適化されるようにする。
+
+  -c4 が指定されたとき、move.bwl #0,<mem> の <mem> のベースレジスタが a7
+ならば無条件に最適化するという手もある。
+
+
+
+━＜Warning / error related＞━━━━━━━━━━━━━━━━━━━━━━
+
+◎ illegal alignment をエラーにする
+
+  アセンブルできなくなるプログラムがある可能性があるので、オプションで指
+定できるようにする。
+
+  illegal alignment が連続しているときは、1 回だけ通知する。
+
+  68020 以上の .dc/.dcb/.ds はワーニングで、それ以外はエラー？
+
+
+○マクロ展開中にワーニングやエラーが発生したとき、マクロを展開した行だけ
+でなく、そのマクロの定義のどの行に該当するかを通知する
+
+  マクロ展開中のワーニングやエラーの位置がわかりにくいので。
+
+
+○最適化終了後に限ってエラーを出す疑似命令
+
+  最終的に生成されたオブジェクトのサイズに対してエラーチェックを行いたい。
+
+  「最後の仕上げ」の意で、
+
+	.finish <条件式>
+
+で条件式が 0 ならエラーとか。ただ、これだと .fail と条件が逆になって分か
+りにくいので、.fail と同じ条件にするのにふさわしい単語があればそれを採用。
+
+  数値を表示できれば、サイズをどれだけ調整すればよいかがわかる。
+
+  プログラムのサイズについては .org でチェックできるとなおよい。
+
+
+○アセンブル中にメッセージを出す疑似命令 .error/.warn/.message
+
+  メッセージは '〜' か？
+
+  式の値も表示できるとよい。
+
+  パス 1 で出すか、それともパス 3 で出すか？
+
+  シンボルの値がすべて確定するのはパス 2 が終わった後なので、パス 3 でな
+ければ通知できない条件もあり得る。
+
+  例:
+	.message 'ipl size: ',ipl_end-ipl_start
+
+  例:
+	.error ipl_end-ipl_start>1024,'ipl size: ',ipl_end-ipl_start
+
+
+○ .include などでファイルが見つからなかったとき、エラーメッセージでファ
+イル名を表示する
+
+  見つからなかったファイルを確認するためにソースを見るのは面倒。
+
+
+
+━＜アセンブルリスト関連＞━━━━━━━━━━━━━━━━━━━━━━━
+
+△ .insert のデータをアセンブルリストに出力しない
+
+
+
+━＜その他・特殊機能＞━━━━━━━━━━━━━━━━━━━━━━━━━
+
+○インデックス付き PC 間接アドレッシングのディスプレースメントが外部参照
+の場合、-e を指定すると 32 ビットディスプレースメントになるが、これを 16
+ビットにするオプション
+
+  アドレスレジスタ間接の場合は従来通りとする。
+
+
+○ .if の条件式の値が abs 以外のセクションにある場合は真とみなす
+
+  マクロのパラメータにアドレスと 0 のいずれかを指定できるようにしたい場
+合などに使う。
+
+
+○疑似命令 .super/.user
+
+  .super
+	以降はスーパーバイザモード。
+	特権命令の使用を許可。
+	read/write の回数が変化する最適化を禁止。
+	（68000 のとき MOVE.bwl #0,<ea> → CLR.bwl <ea> を禁止）
+
+  .user
+	以降はユーザモード。
+	特権命令の使用でワーニングまたはエラーを出す。
+	read/write の回数が変化する最適化を許可。
+	（68000 のとき MOVE.bwl #0,<ea> → CLR.bwl <ea> を許可）
+	68010 以上のとき MOVE from SR → MOVE from CCR。
+
+  3 つのモードをオプションで選択
+	(a) 初期状態は .super（デフォルト）。
+	(b) 初期状態は .user で、特権命令の使用をワーニングで通知。
+	(c) 初期状態は .user で、特権命令の使用をエラーで通知。
+
+  特権命令の許可/禁止、最適化の制御などの各機能を個別に指定できる方がよ
+い？
+
+
+○値のセクションを返す演算子
+
+  マクロのパラメータの値の種類を調べたい場合などに使う。
+
+
+△別バージョンで、FPPP を吸収した FPPPHAS.X のようなものを用意する
+
+  直接オブジェクトファイルを出力するだけでなく、変換後のコードをソースコ
+ードとして出力できると、手で最適化できるので便利。
+
+
+×文字列を操作する演算子
+
+  マクロのパラメータを解析したい場合などに使う。
+
+
+×疑似命令 .org を拡張して、以降のオブジェクトを特定の位置から開始できる
+ようにする
+
+  最適化終了までロケーションカウンタのチェックと修正を続ける。.align と
+同様にパディング値を指定できる。ただし、リンカが対応していないので、複数
+のオブジェクトファイルにまたがって指定することはできない。
+
+  Error when objects overlap.
+
+  You can check the size of the object.
+
+
+×Expand pseudo-instruction .org to reduce location counter so that objects can be overwritten
+
+  By specifying the position before the current location counter in the current section in the pseudo instruction .org, you can reduce the location counter and overwrite the program and data.
+
+	label:
+			:
+		.org	label-n
+			:
+		.org	label+n
+			:
+
+Alternatively,
+
+		.org	(*)-n
+
+  With .org without parameters, the location counter returns to the position before change.
+
+		.org
+
+
+×実際にアセンブルするソースと、アセンブルリストやエラーメッセージに使う
+ソースを分けて与えられるようにして、参照するソースファイル名や参照する行
+番号を指定するための疑似命令を追加する
+
+For preprocessor.
+
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+（ＥＯＦ）

@@ -3,7 +3,7 @@
 
 ==============================================================================
 
-・Exception vectors (メーカー予約:$00〜3f)
+・Exception vectors (Maker Reserv:$00〜3f)
 
 address	vector
 $000000	  $00	SSP after reset
@@ -21,8 +21,8 @@ $00002c	  $0b	〃	   line 1111 emulator (DOS コール,浮動小数点演算)
 $000030	  $0c	Unused
 $000034	  $0d	FPU プロトコルバイオレーション例外処理
 $000038	  $0e	〃  フォーマットエラー例外処理
-$00003c	  $0f	未初期化割り込み
-$000040	  $10	未使用
+$00003c	  $0f	Uninitialized interrupt
+$000040	  $10	Unused
 $000044	  $11	〃
 $000048	  $12	〃
 $00004c	  $13	〃
@@ -31,7 +31,7 @@ $000054	  $15	〃
 $000058	  $16	〃
 $00005c	  $17	〃
 $000060	  $18	Spurious interrupt
-$000064	  $19	レベル  1 割り込み(オートベクタ時)
+$000064	  $19	Level 1 interrupt (during auto vector)
 $000068	  $1a	〃	2 〃
 $00006c	  $1b	〃	3 〃
 $000070	  $1c	〃	4 〃
@@ -48,13 +48,13 @@ $000098	  $26	〃   #6
 $00009c	  $27	〃   #7
 $0000a0	  $28	〃   #8  (System reserved)
 $0000a4	  $29	〃   #9  (For OS debugger)
-$0000a8	  $2a	〃   #10 (リセット／電原オフ処理)
-$0000ac	  $2b	〃   #11 (BREAK キー処理)
-$0000b0	  $2c	〃   #12 (COPY キー処理)
-$0000b4	  $2d	〃   #13 (CTRL+C 処理)
-$0000b8	  $2e	〃   #14 (エラー処理)
+$0000a8	  $2a	〃   #10 (Reset / Power off processing)
+$0000ac	  $2b	〃   #11 (BREAK key processing)
+$0000b0	  $2c	〃   #12 (COPY key processing)
+$0000b4	  $2d	〃   #13 (CTRL + C processing)
+$0000b8	  $2e	〃   #14 (Error handling)
 $0000bc	  $2f	〃   #15 (IOCS call)
-$0000c0	  $30	FPU BSUN	(Branch/Set on Unordered) 例外処理
+$0000c0	  $30	FPU BSUN	(Branch/Set on Unordered) Exception handling
 $0000c4	  $31	〃  INEX1,INEX2	(Inexact Decimal Input,Inexact Operation)
 $0000c8	  $32	〃  DZ		(Divide by Zero)
 $0000cc	  $33	〃  UNFL	(Underflow)
@@ -62,13 +62,13 @@ $0000d0	  $34	〃  OPERR	(Operand Error)
 $0000d4	  $35	〃  OVFL	(Overflow)
 $0000d8	  $36	〃  SNAN	(Signaling Not A Number)
 $0000dc	  $37	〃  UNSUPP	(Unimplemented Data Type)
-$0000e0	  $38	MMU コンフィギュレーションエラー
+$0000e0	  $38	MMU configuration error
 $0000e4	  $39	〃  (68851)
 $0000e8	  $3a	〃  (68851)
-$0000ec	  $3b	未使用
-$0000f0	  $3c	未実装実効アドレス例外処理
-$0000f4	  $3d	未実装整数命令例外処理
-$0000f8	  $3e	未使用
+$0000ec	  $3b	Unused
+$0000f0	  $3c	Unimplemented effective address exception handling
+$0000f4	  $3d	Unimplemented integer instruction exception handling
+$0000f8	  $3e	Unused
 $0000fc	  $3f	〃
 
 Remarks The vector $0c (address $30) is referenced at X68030 when determining whether it is a restart by reset.
@@ -220,26 +220,26 @@ $0003fc	  $ff	〃	〃		 (#3)
 
 ==============================================================================
 
-・割り込みベクタ設定ポート
+・Interrupt vector setting port
 
-　以下は全てバイトサイズのポート.
+　The following are all byte size ports.
 
 
 ・DMAC
 
 device	address	r/w
 DMAC(#0)
- NIV	$e84025	R/W	%PPPP_PPPP (標準値 = $0f)
- EIV	$e84027	R/W	%PPPP_PPPP (標準値 = $0f)
+ NIV	$e84025	R/W	%PPPP_PPPP (Default = $0f)
+ EIV	$e84027	R/W	%PPPP_PPPP (Default = $0f)
 DMAC(#1)
- NIV	$e84065	R/W	%PPPP_PPPP (標準値 = $0f)
- EIV	$e84067	R/W	%PPPP_PPPP (標準値 = $0f)
+ NIV	$e84065	R/W	%PPPP_PPPP (Default = $0f)
+ EIV	$e84067	R/W	%PPPP_PPPP (Default = $0f)
 DMAC(#2)
- NIV	$e840a5	R/W	%PPPP_PPPP (標準値 = $68)
- EIV	$e840a7	R/W	%PPPP_PPPP (標準値 = $69)
+ NIV	$e840a5	R/W	%PPPP_PPPP (Default = $68)
+ EIV	$e840a7	R/W	%PPPP_PPPP (Default = $69)
 DMAC(#3)
- NIV	$e840e5	R/W	%PPPP_PPPP (標準値 = $6a)
- EIV	$e840e7	R/W	%PPPP_PPPP (標準値 = $6b)
+ NIV	$e840e5	R/W	%PPPP_PPPP (Default = $6a)
+ EIV	$e840e7	R/W	%PPPP_PPPP (Default = $6b)
 
 	NIV = Normal interrupt vector
 	EIV = Error interrupt vector
@@ -247,8 +247,8 @@ DMAC(#3)
 ・MFP
 
 device	address	r/w
-MFP	$e88017	R/W	%PPPP_XXXX (標準値 = $40)
- VR			※下位 4 ビットは割り込み要因で変化
+MFP	$e88017	R/W	%PPPP_XXXX (Default = $40)
+ VR			※ Lower 4 bits are changed by interrupt vector
 			%0000: GPIP0		%1000: タイマ B
 			%0001: GPIP1		%1001: 送信エラー
 			%0010: GPIP2		%1010: 送信バッファ空
@@ -258,16 +258,15 @@ MFP	$e88017	R/W	%PPPP_XXXX (標準値 = $40)
 			%0110: GPIP2		%1110: GPIP6
 			%0111: GPIP3		%1111: GPIP7
 
-　VR(ベクタレジスタ)のビット 3 はインサービスレジスタイネーブルの設定で、オー
-ト EOI モード(%0)かソフトウェア EOI モード(%1)の選択に使用するので注意すること.
-Human68k ではオート EOI モードで使用している.
+Note that bit 3 of VR (vector register) is set to in service register enable, and it is used to select auto EOI mode (% 0) or software EOI mode (% 1).
+Human 68k uses it in auto EOI mode.
 
 ・SCC
 
 device	address	r/w
-SCC(B)	$e98001	R/W	%PPPP_XXXP (標準値 = $50)
+SCC(B)	$e98001	R/W	%PPPP_XXXP (Default = $50)
  WR2/RR2
-SCC(A)	$e98005	R/W	%PPPP_XXXP (標準値 = $50)
+SCC(A)	$e98005	R/W	%PPPP_XXXP (Default = $50)
  WR2/RR2		※ビット 3〜1 は割り込み要因で変化
 			%000: チャンネル B 送信バッファ空
 			%001:	〃	   外部ステータス変化
@@ -295,7 +294,7 @@ SCC(A)	$e98005	R/W	%PPPP_XXXP (標準値 = $50)
 ・I/O コントローラ
 
 device	address	r/w
-I/O	$e9c003	R	%PPPP_PPXX  (標準値 = $60)
+I/O	$e9c003	R	%PPPP_PPXX  (Default = $60)
 			※下位 2 ビットは割り込み要因で変化
 			%00: FDC		%10: HD
 			%01: FDD		%11: プリンタ
@@ -303,43 +302,42 @@ I/O	$e9c003	R	%PPPP_PPXX  (標準値 = $60)
 ・MIDI ボード
 
 device	address	r/w	(MIDI ボード)
-MIDI	$eafa09	R	%PPPX_XXXX  (標準値 = $80)
+MIDI	$eafa09	R	%PPPX_XXXX  (Default = $80)
  ID=0
-MIDI	$eafa19	R	%PPPX_XXX0  (標準値 = $a0)
+MIDI	$eafa19	R	%PPPX_XXX0  (Default = $a0)
  ID=1			※ビット 4〜1 は割り込み要因で変化(ビット 0 は常に %0)
 		%0000: MIDI real time message detected
 		       (FIFO-IRx の最古データが $f9〜$fd)
 		%0001: Click Counter(カウント値が 0 になった) /
-		       MIDI-clock detected(FIFO-IRx の最古のデータが $f8)
-		%0010: Play-back Counter(プレイバックカウンタが負になった)
-		%0011: Recording Counter(レコーディングカウンタが 0 になった)
-		%0100: Off-line detected(300mS の間受信が行われなかった) /
-		       Break detected(2 キャラクタの間シリアル入力が 'L')
-		%0101: FIFO-Rx ready(受信 FIFO にデータがセットされた)
-		%0110: FIFO-Tx empty(送信 FIFO が空になった)
-		%0111: General Timer(タイマのカウント値が 0 になった)
+		       MIDI-clock detected(The oldest data of FIFO-IRx is $f8)
+		%0010: Play-back Counter(Playback counter becomes negative)
+		%0011: Recording Counter(Recording counter reached 0)
+		%0100: Off-line detected(No reception was made for 300 mS) /
+		       Break detected(Serial input is 'L' for 2 characters)
+		%0101: FIFO-Rx ready(Data was set in the receive FIFO)
+		%0110: FIFO-Tx empty(Transmit FIFO is empty)
+		%0111: General Timer(When the timer count value reaches 0)
 
-　$eafa03(ID=1)、$eafa13(ID=2)の RGR に $00 を書き込んでから $eafa09、$eafa19
-の GRP4 にベクタ番号を書き込む.
+Write $00 in the RGR of $eafa03 (ID = 1), $eafa13 (ID = 2) and write the vector number to GRP 4 of $eafa09, $eafa19.
 
-・パラレルボード
+・Parallel board
 
 device	address	r/w	(パラレルボード CZ-6BN1)
-PARA	$eafb0b	?/W	%PPPP_PPPP (標準値 = $f9)
+PARA	$eafb0b	?/W	%PPPP_PPPP (Default = $f9)
  ID=0
-PARA	$eafb1b	?/W	%PPPP_PPPP (標準値 = $fa)
+PARA	$eafb1b	?/W	%PPPP_PPPP (Default = $fa)
  ID=1
 
 ・拡張 RS-232C ボード
 
 device	address	r/w	(拡張 RS-232C ボード CZ-6BF1)
-RS232C	$eafc00	R/W	%PPPP_XXXP (標準値 = $b0 ※未確認)
+RS232C	$eafc00	R/W	%PPPP_XXXP (Default = $b0 ※未確認)
  ID=0(B)
-RS232C	$eafc04	R/W	%PPPP_XXXP (標準値 = $b8 ※未確認)
+RS232C	$eafc04	R/W	%PPPP_XXXP (Default = $b8 ※未確認)
  ID=0(A)
-RS232C	$eafc10	R/W	%PPPP_XXXP (標準値 = $c0 ※未確認)
+RS232C	$eafc10	R/W	%PPPP_XXXP (Default = $c0 ※未確認)
  ID=1(B)
-RS232C	$eafc14	R/W	%PPPP_XXXP (標準値 = $c8 ※未確認)
+RS232C	$eafc14	R/W	%PPPP_XXXP (Default = $c8 ※未確認)
  ID=1(A)
 RS232C	$eafc20	R/W	%PPPP_XXXP
  ID=2(B)
@@ -352,16 +350,16 @@ RS232C	$eafc34	R/W	%PPPP_XXXP
 
 　X680x0 内蔵の SCC と同一につき、SCC の項を参照のこと.
 
-・ユニバーサル I/O ボード
+・Universal I / O board
 
 device	address	r/w	(ユニバーサル I/O ボード CZ-6BU1)
-UIO	$eafd03	  W	%PPPP_PPPP  (標準値 = $fc ※未確認)
+UIO	$eafd03	  W	%PPPP_PPPP  (Default = $fc ※未確認)
  ID=0
-UIO	$eafd07	  W	%PPPP_PPPP  (標準値 = $fd ※未確認)
+UIO	$eafd07	  W	%PPPP_PPPP  (Default = $fd ※未確認)
  ID=1
-UIO	$eafd0b	  W	%PPPP_PPPP  (標準値 = $fe ※未確認)
+UIO	$eafd0b	  W	%PPPP_PPPP  (Default = $fe ※未確認)
  ID=2
-UIO	$eafd0f	  W	%PPPP_PPPP  (標準値 = $ff ※未確認)
+UIO	$eafd0f	  W	%PPPP_PPPP  (Default = $ff ※未確認)
  ID=3
 
 　ID=4〜63 にも設定でき、その場合のベクタ番号設定アドレスは $eafd13〜$eafdff
@@ -370,12 +368,12 @@ UIO	$eafd0f	  W	%PPPP_PPPP  (標準値 = $ff ※未確認)
 ・GP-IB ボード
 
 device	address	r/w	(GP-IB ボード SH-6BG1)
-GPIB	$eafe11	?/W	%PPPP_PPPP  (標準値 = $fb)
+GPIB	$eafe11	?/W	%PPPP_PPPP  (Default = $fb)
 
 ・Mercury-Unit V4
 
 device	address	r/w	(Mercury-Unit V4 OPNA)
-MK-MU1O	$ecc0b1	R/W	%PPPP_PPPP  (標準値 = $ff)
+MK-MU1O	$ecc0b1	R/W	%PPPP_PPPP  (Default = $ff)
 			※Master 側のタイマのみ使用可能(Slave 側は不可)
 
 ・POLYPHON
@@ -389,7 +387,7 @@ POLY	$eff8bf	R/W	%PPPP_PPPP
 ・PSX
 
 device	address	r/w	(PSX16550 / PSX16750)
-PSX	$efffxf	R/W	%PPPP_PPPP  (標準値 = $f0)
+PSX	$efffxf	R/W	%PPPP_PPPP  (Default = $f0)
  SCR			※'x' にはチャンネル番号が入る($0〜$f)
 
 ==============================================================================

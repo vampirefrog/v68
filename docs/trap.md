@@ -5,7 +5,7 @@
 
 ・TRAP 例外処理一覧
 
-trap	#0	ユーザ定義(Ko-Window)
+trap	#0	User definition (Ko-Window)
 trap	#1	〃	  (bgdrv, mpcm)
 trap	#2	〃	  (pcm8*)
 trap	#3	〃	  (zmusic, zmsc3, middrv)
@@ -14,150 +14,134 @@ trap	#5	〃	  (cdc)
 trap	#6	〃
 trap	#7	〃
 
-trap	#8	ブレークポイント(ROM デバッガ)
+trap	#8	Break point (ROM debugger)
 trap	#9	〃		(db、scd)
 trap	#10	Reset / field off processing
-trap	#11	BREAK キー処理
-trap	#12	COPY キー処理
-trap	#13	CTRL+C 処理
-trap	#14	エラー処理
+trap	#11	BREAK key processing
+trap	#12	COPY key processing
+trap	#13	CTRL+C processing
+trap	#14	Error handling
 trap	#15	IOCS call
 
-※ ether_ne.sys では trap #0〜#6 のうちいずれか一つを使用する(使用しない場合も
-   ある). また、inetd・hinetd・xip では trap #0〜#7 のうちいずれか一つを使用す
-   る(使用しない場合もある).
+※ In ether_ne.sys, one of trap # 0 to # 6 is used (sometimes not used).
+   Also, inetd · hinetd · xip uses one of trap # 0 to # 7 (it may not be used).
 
 ==============================================================================
 
 ・trap #10	Reset / field off processing
 
-引数	d0.l =	$58363801('X68'<<8+1)	フロントスイッチによる電源オフ
-		$58363802('X68'<<8+2)	外部スイッチによる電源オフ
-		$58363803('X68'<<8+3)	ソフトスイッチによる電源オフ
-		上記以外		ソフトウェアリセット
+Arg	d0.l =	$58363801('X68'<<8+1)	Power off by front switch
+		$58363802('X68'<<8+2)	Power off by external switch
+		$58363803('X68'<<8+3)	Power off with soft switch
+		Other than those above	Software reset
 
-	  電源オフ割り込みとキーボード処理内、若しくはユーザプログラムから呼び
-	出され、電源切断及びソフトウェアによるリセット処理を行う.
-	  Human68k 起動時にはフックされて、DOS コール実行中に呼び出されてもす
-	ぐには実行されず、終了してから呼び出されるようになる.
+	It is called from the power off interrupt and keyboard processing, or from the user program, and performs power off and reset processing by software.
+	It is hooked at Human 68k startup, it will not be executed immediately even if it is called during DOS call execution, and it will be called after it ends.
 
 ==============================================================================
 
-・trap #11	BREAK キー処理
+・trap #11	BREAK key processing
 
-引数	d0.b	シフトキーの状態
+Arg	d0.b	Shift key status
 
-	  BREAK キーが押された時に、キーボード処理から呼び出される. ただし、
-	$40〜$4f のディスク関連 IOCS を実行中は無視される.
-	  Human68k 起動時にはフックされて、DOS コール実行中に呼び出されてもす
-	ぐには実行されず、終了してから呼び出されるようになる.
-	  SHIFT を押さずに BREAK キーを押した場合は、trap #11 の後に trap #13
-	も実行される.
-	  多重呼び出しは行われないので、リエントラントな構造である必要はない.
+	Called from the keyboard process when the BREAK key is pressed.
+	However, it is ignored while executing disk related IOCS of $ 40 to $ 4f.
+	It is hooked at Human 68k startup, it will not be executed immediately even if it is called during DOS call execution, and it will be called after it ends.
+	If you press the BREAK key without pressing SHIFT, trap # 13 is also executed after trap # 11.
+	Since multiple calls are not made, there is no need to have a reentrant structure.
 
 ==============================================================================
 
-・trap #12	COPY キー処理
+・trap #12	COPY key processing
 
-引数	d0.b	シフトキーの状態
+Arg	d0.b	Shift key status
 
-	  COPY キーが押された時にキーボード処理から呼び出され、画面のハードコ
-	ピー処理を行う.
-	  多重呼び出しは行われないので、リエントラントな構造である必要はない.
+	  When the COPY key is pressed, it is called from the keyboard processing and performs the hard copy processing of the screen.
+	  Since multiple calls are not made, there is no need to have a reentrant structure.
 
-	  シフトキー状態によって以下のような動作をする.
+	  The following operations are performed depending on the shift key state.
 
-	COPY		縮小コピー(1色)
-	SHIFT + COPY	拡大コピー(1色)
-	CTRL  + COPY	拡大コピー(4色)
-	OPT.1 + COPY	FF 出力.
+	COPY		Reduced copy (1 color)
+	SHIFT + COPY	Enlarged copy (1 color)
+	CTRL  + COPY	Enlarged copy (4 colors)
+	OPT.1 + COPY	FF output.
 	OPT.2 + COPY	LF 〃
 
 ==============================================================================
 
-・trap #13	CTRL+C 処理
+・trap #13	CTRL + C processing
 
-	  CTRL+C 及び BREAK キーが入力された時にキーボード処理から呼び出される.
-	通常は何もしないルーチンが登録されているので、ユーザが使用できる.
+	  Called from the keyboard process when CTRL + C and BREAK keys are entered.
+	Usually routines that do not do anything are registered, so they can be used by users.
 
 ==============================================================================
 
-・trap #14	エラー処理
+・trap #14	Error handling
 
-引数	d7.w	エラー番号
-	a5.l	文字列のアドレス(d7.w = $??00 の場合のみ)
-返値	d7.b	1:再実行 2:無視
+Arg	d7.w	Error number
+	a5.l	String address (only for d7.w = $??00)
+Ret	d7.b	1: Rerun 2: Ignore
 
-	  起動直後はキー入力を待ってソフトウェアリセットによる再起動を行うだけ
-	であるが、Human68k 起動後はフックされて、白帯を表示してユーザの応答を
-	待つルーチンに置き換わる.
+	  Immediately after startup, it waits for key input and restarts by software reset, but after Human 68k is started it is hooked and replaced with a routine that displays the white band and waits for the user's response.
 
-	  システムがエラーを検出した場合、d7.w にエラー番号をセットして trap
-	#14 を実行する. このエラー処理ルーチンでは、エラーの種別に応じてメッセ
-	ージを出力した後、キーボードからの入力によって、d7.b に 1(再実行)か 2
-	(無視) をセットして復帰する. 中止が指定された場合はすぐにアボートし、
-	trap #14 を実行したところには戻らない.
+	If the system detects an error, it sets error number in d7.w and executes trap #14.
+	In this error processing routine, after outputting a message according to the type of error, it sets 1 (reexecution) or 2 (ignore) to d7.b by input from the keyboard and returns.
+	If abort is specified, abort immediately and do not return to where trap # 14 was executed.
 
-・エラー番号
+・Error number
 
-$00xx		CPU 例外処理／未登録の割り込み(中止のみ)
-		下位バイトがベクタ番号.
-	$0002	バスエラーが発生した
-	$0003	アドレスエラーが発生した
-	$0004	おかしな命令を実行した
-	$0005	0 で除算した
-	$0006	CHK 命令を実行した
-	$0007	TRAPV 命令を実行した
-	$0008	特権命令を実行した
-	$001f	インタラプトスイッチが押された
-$01xx		未登録の IOCS コール
-		下位バイトが IOCS コール番号.
-		FD にしか実行できないコールを SASI に対して使用した時、若しく
-		はその逆を行った時にも呼び出される.
-$02xx〜$0fxx	予約
-$10xx〜$1fxx	エラー(中止のみ)
-$20xx〜$2fxx	エラー(再実行のみ)
-$30xx〜$3fxx	エラー(再実行＆中止)
-	$301f	インタラプトスイッチが押された
-$40xx〜$4fxx	エラー(無視のみ)
-$50xx〜$5fxx	エラー(無視＆中止)
-$60xx〜$6fxx	エラー(無視＆再実行)
-$70xx〜$7fxx	エラー(無視＆再実行＆中止)
-$80xx〜$efxx	予約
-$f0xx〜$fdxx	F 系列の DOS コール以外の割り込み(中止のみ)
-$fexx		浮動小数点演算パッケージが組み込まれていない(中止のみ)
-$ffxx		未登録の DOS コール
-		Human68k version 3.0x では、未登録の DOS コールは -1 を返すだ
-		けなのでエラー処理は呼び出されない.
+$00xx		CPU exception processing / unregistered interrupt (stop only)
+		The lower byte is the vector number.
+$0002		Bus error occurred
+$0003		An address error occurred
+$0004		I executed a funny instruction
+$0005		Divided by 0
+$0006		Executed CHK instruction
+$0007		Execute the TRAPV instruction
+$0008		Executed privileged instruction
+$001f		Interrupt switch pressed
+$01xx		Unregistered IOCS call
+		The lower byte is the IOCS call number.
+		It is also called when using a call to SASI that can only be performed on FD, or vice versa.
+$02xx〜$0fxx	Reservation
+$10xx〜$1fxx	Error (cancellation only)
+$20xx〜$2fxx	Error (re-execute only)
+$30xx〜$3fxx	Error (Rerun & Abort)
+$301f		Interrupt switch pressed
+$40xx〜$4fxx	Error (Ignored only)
+$50xx〜$5fxx	Error (Ignored & Canceled)
+$60xx〜$6fxx	Error (ignore & re-execute)
+$70xx〜$7fxx	Error (ignore & re-execute & cancel)
+$80xx〜$efxx	Reservation
+$f0xx〜$fdxx	Interrupt other than F series DOS call (stop only)
+$fexx		Floating-point arithmetic package not built in (stop only)
+$ffxx		Unregistered DOS call
+		In Human 68k version 3.0x, unregistered DOS calls only return -1, so error handling is not invoked.
 
-	  インタラプトスイッチが押された場合のエラー番号は $001f と $003f の二
-	通りあるが、通常は後者を使用する.
+	  There are two error numbers when the interrupt switch is pressed, $ 001f and $ 003f, but usually the latter is used.
 
-	  $1000〜$7fff のエラー番号は、上位バイトの bit 4、5、6 がそれぞれ中止、
-	再実行、無視に対応する. この時の下位バイトの内容は以下の通り.
+	  The error number of $ 1000 to $ 7fff corresponds to abort, reexecution, ignoring, respectively, of the upper byte of bits 4, 5 and 6. The contents of the lower byte at this time are as follows.
 
-$00	ユーザ定義(a5.l に文字列のアドレスを入れる).
-$01	無効なユニット番号を指定した.
-$02	ディスクが入っていない.
-$03	デバイスドライバに無効なコマンドを指定した.
-$04	CRC エラー.
-$05	ディスクの管理領域が破壊されている.
-$06	シークエラー.
-$07	無効なメディア.
-$08	セクタが見つからない.
-$09	プリンタが繋がっていない.
-$0a	書き込みエラー.
-$0b	読み込みエラー.
-$0c	その他のエラー.
-$0d	ライトプロテクト(プロテクトを外して同じディスクを入れる).
-$0e	書き込み不可能.
-$0f	ファイル共有違反.
+$00	User defined (put a character string address in a5.l).
+$01	An invalid unit number was specified.
+$02	There is no disc in it.
+$03	An invalid command was specified for the device driver.
+$04	CRC error.
+$05	Disk management area is destroyed.
+$06	Seek error.
+$07	Invalid media.
+$08	Sector can not be found.
+$09	Printer is not connected.
+$0a	Write error.
+$0b	Error loading.
+$0c	Other errors.
+$0d	Write protect (remove protect and put the same disc).
+$0e	Unable to write.
+$0f	File sharing violation.
 
-	  下位バイトが 0 の場合、表示する文字列をユーザが指定する事が出来る.
-	文字列のアドレスは a5.l で渡し、文字列は表示幅 52 桁以下であること. た
-	だしデバイスドライバのエラーコードとして返す場合は下位バイト(リクエス
-	トヘッダ先頭から 3 バイト目)が 0 であれば正常終了として扱われ、文字列
-	のアドレスを渡すことも不可能なので、この機能は使用出来ない.
+	When the low byte is 0, the user can specify the character string to be displayed.
+	The address of the character string is passed in a5.l and the character string must be not more than 52 display width.
+	However, when returning it as an error code of the device driver, if the lower byte (3rd byte from the head of the request header) is 0, it is handled as normal termination and it is impossible to pass the address of the character string, so this function can not be used.
 
 ==============================================================================
 
@@ -170,27 +154,24 @@ Arg	d0.b	IOCS call number
 
 	  Arguments and return values other than d0.b differ depending on the call number
 
-	  IOCS コールを高速化するには、以下のような方法でショートカット呼び出しを実行する.
-	  ただし、スーパーバイザ状態でなければならない.
+	  To speed up the IOCS call, execute the shortcut call by the following method.
+	  However, it must be in supervisor state.
 
 	movea.l	(IOCS call number *4+$400),a0
 	jsr	(a0)
 
-	  IOCS の各機能は rts で帰るサブルーチンとして作成する.
-	  a0.l は破壊しても問題ないが(ユーザから見た場合、ショートカットする時は保存される保証はない)、他の返値を渡さないレジスタについては破壊しないこと.
+	  Each function of IOCS is created as a subroutine returning with rts.
+	  Although there is no problem in destroying a0.l (from the viewpoint of the user, there is no guarantee that it will be saved when shortcutting), do not destroy other registers that do not pass Ret.
 
-ベクタベースレジスタ vbr への対応方法:
+How to handle vector base register vbr:
 
-	  X68030(ROM IOCS version 1.3)では、一部のIOCS コールで直接 ROM 内のル
-	ーチンを呼び出しているものを除き、vbr を使用する事が出来る.
+	  With X 68030 (ROM IOCS version 1.3), you can use vbr, except those calling routines in ROM directly for some IOCS calls.
 
-	  まず、以下のベクタを、ROM 内を指す標準のベクタであることを確認した上
-	で、それぞれの設定アドレスから 2 を引いた値に変更する. 次に、それらの
-	うち未使用の割り込み(処理アドレスの最上位バイトが 0 でないもの)の処理
-	アドレスを $00ff0770 に変更する.
-	  当然 vbr の指し示す先に正しいアドレステーブルを作成しておくこと.
+	  First, after confirming that the following vectors are standard vectors pointing to inside the ROM, change to the value obtained by subtracting 2 from each setting address.
+	  Next, change the processing address of unused interrupts (one with the highest byte of the processing address not equal to 0) among them to $ 00ff0770.
+	  Naturally you have to create the correct address table at the point pointed to by vbr.
 
-	trap #15(IOCS 処理アドレステーブルも vbr+$400 に変更される)
+	trap # 15 (IOCS processing address table is also changed to vbr + $400)
 	IOCS _FNTGET
 	IOCS _OPMINTST
 	IOCS _TIMERDST
