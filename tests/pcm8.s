@@ -27,17 +27,17 @@ Trap2Handler:									;000008
 	ori.w	#$0700,sr				;$007c,$0700		;000008
 	movem.l	d1-d7/a0-a6,-(sp)			;$48e7,$7ffe		;00000c
 	cmpi.w	#$0030,d0		;'0'		;$0c40,$0030		;000010
-	bcs.s	L000028					;$6512			;000014
+	bcs.s	OutputFuncs				;$6512			;000014
 	cmpi.w	#$0070,d0		;'p'		;$0c40,$0070		;000016
-	bcs.s	L000056					;$653a			;00001a
+	bcs.s	UnknownFunc				;$653a			;00001a
 	cmpi.w	#$00a0,d0				;$0c40,$00a0		;00001c
 	bcc.w	L0000be					;$6400,$009c		;000020
 	subi.w	#$0040,d0				;$0440,$0040		;000024
-L000028:									;000028
+OutputFuncs:									;000028
 	moveq.l	#$0f,d7					;$7e0f			;000028
 	and.w	d0,d7					;$ce40			;00002a
 	cmpi.w	#$0008,d7				;$0c47,$0008		;00002c
-	bcc.s	L000056					;$6424			;000030
+	bcc.s	UnknownFunc				;$6424			;000030
 	lsl.w	#6,d7					;$ed4f			;000032
 	lea.l	(L001682,pc),a6				;$4dfa,$164c		;000034
 	lea.l	(a6,d7.w),a6				;$4df6,$7000		;000038
@@ -53,7 +53,7 @@ L000050:									;000050
 	movea.l	(JumpTable,pc,d0.w),a0			;$207b,$000c		;000050
 	jmp	(a0)					;$4ed0			;000054
 
-L000056:									;000056
+UnknownFunc:									;000056
 	moveq.l	#$00,d0					;$7000			;000056
 	movem.l	(sp)+,d1-d7/a0-a6			;$4cdf,$7ffe		;000058
 	rte						;$4e73			;00005c
@@ -77,8 +77,8 @@ JumpTable:									;00005e
 	.dc.l	L000fb4								;00009a
 	.dc.l	L0007c4								;00009e
 	.dc.l	L000df6								;0000a2
-	.dc.l	L000056								;0000a6
-	.dc.l	L000056								;0000aa
+	.dc.l	UnknownFunc							;0000a6
+	.dc.l	UnknownFunc							;0000aa
 	.dc.l	L000122								;0000ae
 	.dc.l	L000122								;0000b2
 	.dc.l	L000122								;0000b6

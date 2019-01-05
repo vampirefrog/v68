@@ -7,10 +7,10 @@
 *********************************************
 000000	DS	Start
 000008	P	Trap2Handler
-000028	P
+000028	P	OutputFuncs
 000048	P
 000050	P
-000056	P
+000056	P	UnknownFunc
 00005e	DL	JumpTable
 0000be	P
 0000e4	P
