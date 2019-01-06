@@ -14,5 +14,6 @@ int vgm_logger_begin(struct vgm_logger *, char *);
 void vgm_logger_wait(struct vgm_logger *, int samples);
 void vgm_logger_write_ay(struct vgm_logger *, uint8_t reg, uint8_t data);
 void vgm_logger_write_ym2151(struct vgm_logger *, uint8_t reg, uint8_t data);
+void vgm_logger_write_okim6258(struct vgm_logger *, uint8_t reg, uint8_t data);
 void vgm_logger_end(struct vgm_logger *);
 
