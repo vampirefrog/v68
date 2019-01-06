@@ -666,24 +666,15 @@ int m68k_execute(int num_cycles, int dasm)
 
 			if(dasm) {
 				char dasmbuf[256];
-				printf(
-					"cycles% 8d/%-8d %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x\n",
-					m68k_cycles_run(), m68k_cycles_remaining(),
-					m68k_read_memory_8(REG_A[7]), m68k_read_memory_8(REG_A[7] + 1), m68k_read_memory_8(REG_A[7] + 2), m68k_read_memory_8(REG_A[7] + 3),
-					m68k_read_memory_8(REG_A[7] + 4), m68k_read_memory_8(REG_A[7] + 5), m68k_read_memory_8(REG_A[7] + 6), m68k_read_memory_8(REG_A[7] + 7),
-					m68k_read_memory_8(REG_A[7] + 8), m68k_read_memory_8(REG_A[7] + 9), m68k_read_memory_8(REG_A[7] + 10), m68k_read_memory_8(REG_A[7] + 11),
-					m68k_read_memory_8(REG_A[7] + 12), m68k_read_memory_8(REG_A[7] + 13), m68k_read_memory_8(REG_A[7] + 14), m68k_read_memory_8(REG_A[7] + 15),
-					m68k_read_memory_8(REG_A[7] + 16), m68k_read_memory_8(REG_A[7] + 17), m68k_read_memory_8(REG_A[7] + 18), m68k_read_memory_8(REG_A[7] + 19),
-					m68k_read_memory_8(REG_A[7] + 20), m68k_read_memory_8(REG_A[7] + 21), m68k_read_memory_8(REG_A[7] + 22), m68k_read_memory_8(REG_A[7] + 23)
-				);
-				m68k_disassemble(dasmbuf, REG_PC, CPU_TYPE);
-				printf("D0-D7=%08X,%08X,%08X,%08X,%08X,%08X,%08X,%08X\n",
+
+				int d = m68k_disassemble(dasmbuf, REG_PC, CPU_TYPE);
+				printf("  D* %08X %08X %08X %08X %08X %08X %08X %08X\n",
 					REG_D[0], REG_D[1], REG_D[2], REG_D[3], REG_D[4], REG_D[5], REG_D[6], REG_D[7]);
-				printf("A0-A7=%08X,%08X,%08X,%08X,%08X,%08X,%08X,%08X\n",
+				printf("  A* %08X %08X %08X %08X %08X %08X %08X %08X\n",
 					REG_A[0], REG_A[1], REG_A[2], REG_A[3], REG_A[4], REG_A[5], REG_A[6], REG_A[7]);
-				printf("   PC=%08X  SR=%04X\n",
-					REG_PC, m68k_get_reg(0, M68K_REG_SR));
-				printf(" %s\n\n", dasmbuf);
+				printf("  PC=%08X  SR=%04X  cycles % 8d/%-8d\n",
+					REG_PC, m68k_get_reg(0, M68K_REG_SR), m68k_cycles_run(), m68k_cycles_remaining());
+				puts(dasmbuf);
 			}
 
 			/* Record previous program counter */
