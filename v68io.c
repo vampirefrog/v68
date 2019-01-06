@@ -104,8 +104,6 @@ int v68_io_open(char *filename, int mode) {
 	char resolved[PATH_MAX];
 	v68_io_resolve_path(xlated, resolved, sizeof(resolved));
 
-	// printf("file %s resolved to %s -> %s\n", filename, xlated, resolved);
-
 	switch(mode & 0x03) {
 		case 0x00:
 			mode = O_RDONLY;
@@ -114,7 +112,7 @@ int v68_io_open(char *filename, int mode) {
 			mode = O_WRONLY | O_TRUNC;
 			break;
 		case 0x02:
-			mode = O_TRUNC | O_RDWR;
+			mode = O_RDWR;
 			break;
 	}
 	int fd = open(resolved, mode, 0644);
@@ -208,6 +206,12 @@ int v68_io_seek(int fd, off_t offset, int whence) {
 	}
 
 	return lseek(dosfiles[fd].fd, offset, whence);
+}
+
+int v68_io_tell(int fd) {
+	CHECKFD(fd);
+
+	return lseek(dosfiles[fd].fd, 0, SEEK_CUR);
 }
 
 int v68_io_rename(char *oldpath, char *newpath) {

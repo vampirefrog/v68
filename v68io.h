@@ -11,6 +11,7 @@ int v68_io_close(int fd);
 int v68_io_read(int fd, void *buf, size_t count);
 int v68_io_write(int fd, void *buf, size_t count);
 int v68_io_seek(int fd, off_t offset, int whence);
+int v68_io_tell(int fd);
 int v68_io_rename(char *oldpath, char *newpath);
 int v68_io_chmod(char *pathname, mode_t mode);
 
