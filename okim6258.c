@@ -8,8 +8,10 @@
  *
  **********************************************************************************************/
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <stddef.h>	// for NULL
-#include "mamedef.h"
+#include "v68.h"
 
 #ifdef _DEBUG
 #include <stdio.h>
@@ -111,20 +113,18 @@ static int16_t clock_adpcm(struct okim6258 *chip, uint8_t nibble) {
      okim6258_update -- update the sound chip so that it is in sync with CPU execution
 
 ***********************************************************************************************/
-void okim6258_update(struct okim6258 *chip, stream_sample_t **outputs, int samples) {
-	stream_sample_t *bufL = outputs[0];
-	stream_sample_t *bufR = outputs[1];
-
+void okim6258_update(struct okim6258 *chip, int16_t **outputs, int samples) {
+	int16_t *bufL = outputs[0];
+	int16_t *bufR = outputs[1];
 	if (chip->status & STATUS_PLAYING) {
 		int nibble_shift = chip->nibble_shift;
 
 		while (samples) {
 			/* Compute the new amplitude and update the current step */
-			//int nibble = (chip->data_in >> nibble_shift) & 0xf;
 			int nibble;
 			int16_t sample;
 
-			if (! nibble_shift) {
+			if (!nibble_shift) {
 				// 1st nibble - get data
 				if (! chip->data_empty) {
 					chip->data_in = chip->data_buf[chip->data_buf_pos >> 4];
@@ -133,7 +133,6 @@ void okim6258_update(struct okim6258 *chip, stream_sample_t **outputs, int sampl
 					if ((chip->data_buf_pos >> 4) == (chip->data_buf_pos & 0x0F))
 						chip->data_empty ++;
 				} else {
-					//chip->data_in = chip->data_in_last;
 					if (chip->data_empty < 0x80)
 						chip->data_empty ++;
 				}
@@ -141,7 +140,6 @@ void okim6258_update(struct okim6258 *chip, stream_sample_t **outputs, int sampl
 			nibble = (chip->data_in >> nibble_shift) & 0xf;
 
 			/* Output to the buffer */
-			//int16_t sample = clock_adpcm(chip, nibble);
 			if (chip->data_empty < 0x02) {
 				sample = clock_adpcm(chip, nibble);
 				chip->last_smpl = sample;
@@ -156,7 +154,7 @@ void okim6258_update(struct okim6258 *chip, stream_sample_t **outputs, int sampl
 			}
 
 			nibble_shift ^= 4;
-
+			verbose2("okim6258_update samples=%d sample=%d\n", samples, sample);
 			*bufL++ = (chip->pan & 0x02) ? 0x00 : sample;
 			*bufR++ = (chip->pan & 0x01) ? 0x00 : sample;
 			samples--;
@@ -167,7 +165,6 @@ void okim6258_update(struct okim6258 *chip, stream_sample_t **outputs, int sampl
 	} else {
 		/* Fill with 0 */
 		while (samples--) {
-			//*buffer++ = 0;
 			*bufL++ = 0;
 			*bufR++ = 0;
 		}
@@ -199,7 +196,6 @@ int okim6258_init(struct okim6258 *chip, int clock, int divider, int adpcm_type,
 	chip->clock_buffer[0x01] = (clock & 0x0000FF00) >>  8;
 	chip->clock_buffer[0x02] = (clock & 0x00FF0000) >> 16;
 	chip->clock_buffer[0x03] = (clock & 0xFF000000) >> 24;
-	chip->SmpRateFunc = NULL;
 
 	/* D/A precision is 10-bits but 12-bit data can be output serially to an external DAC */
 	chip->output_bits = output_12bits ? 12 : 10;
@@ -233,8 +229,6 @@ void okim6258_reset(struct okim6258 *chip) {
 	chip->clock_buffer[0x02] = (chip->initial_clock & 0x00FF0000) >> 16;
 	chip->clock_buffer[0x03] = (chip->initial_clock & 0xFF000000) >> 24;
 	chip->divider = dividers[chip->initial_div];
-	if (chip->SmpRateFunc != NULL)
-		chip->SmpRateFunc(chip->SmpRateData, get_vclk(chip));
 
 	chip->signal = -2;
 	chip->step = 0;
@@ -255,9 +249,6 @@ void okim6258_reset(struct okim6258 *chip) {
 ***********************************************************************************************/
 void okim6258_set_divider(struct okim6258 *chip, int val) {
 	chip->divider = dividers[val];
-
-	if (chip->SmpRateFunc != NULL)
-		chip->SmpRateFunc(chip->SmpRateData, get_vclk(chip));
 }
 
 
@@ -275,9 +266,6 @@ void okim6258_set_clock(struct okim6258 *chip, int val) {
 								(chip->clock_buffer[0x02] << 16) |
 								(chip->clock_buffer[0x03] << 24);
 	}
-
-	if (chip->SmpRateFunc != NULL)
-		chip->SmpRateFunc(chip->SmpRateData, get_vclk(chip));
 }
 
 
@@ -290,13 +278,13 @@ int okim6258_get_vclk(struct okim6258 *chip) {
 	return get_vclk(chip);
 }
 
-
 /**********************************************************************************************
 
      okim6258_data_w -- write to the control port of an OKIM6258-compatible chip
 
 ***********************************************************************************************/
 static void okim6258_data_w(struct okim6258 *chip, uint8_t data) {
+	verbose1("okim6258_data_w data=0x%02x\n", data);
 	if (chip->data_empty >= 0x02)
 		chip->data_buf_pos = 0x00;
 	chip->data_in_last = data;
@@ -304,7 +292,6 @@ static void okim6258_data_w(struct okim6258 *chip, uint8_t data) {
 	chip->data_buf_pos += 0x01;
 	chip->data_buf_pos &= 0xF7;
 	if ((chip->data_buf_pos >> 4) == (chip->data_buf_pos & 0x0F)) {
-		//fprintf(stderr, "Warning: FIFO full!\n");
 		chip->data_buf_pos = (chip->data_buf_pos & 0xF0) | ((chip->data_buf_pos-1) & 0x07);
 	}
 	chip->data_empty = 0x00;
@@ -342,7 +329,6 @@ static void okim6258_ctrl_w(struct okim6258 *chip, uint8_t data) {
 	}
 
 	if(data & COMMAND_RECORD) {
-		// logerror("M6258: Record enabled\n");
 		chip->status |= STATUS_RECORDING;
 	} else {
 		chip->status &= ~STATUS_RECORDING;
@@ -387,10 +373,4 @@ void okim6258_write(struct okim6258 *chip, uint8_t Port, uint8_t Data) {
 
 void okim6258_set_options(struct okim6258 *chip, uint16_t options) {
 	chip->internal_10_bit = (options >> 0) & 0x01;
-}
-
-void okim6258_set_srchg_cb(struct okim6258 *chip, SRATE_CALLBACK CallbackFunc, void* DataPtr) {
-	// set Sample Rate Change Callback routine
-	chip->SmpRateFunc = CallbackFunc;
-	chip->SmpRateData = DataPtr;
 }

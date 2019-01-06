@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#include "mamedef.h"
 
 struct okim6258 {
 	uint8_t status;
@@ -34,9 +33,6 @@ struct okim6258 {
 	uint8_t clock_buffer[0x04];
 	uint32_t initial_clock;
 	uint8_t initial_div;
-
-	SRATE_CALLBACK SmpRateFunc;
-	void* SmpRateData;
 };
 
 #define FOSC_DIV_BY_1024    0
@@ -58,9 +54,8 @@ void okim6258_set_divider(struct okim6258 *chip, int val);
 void okim6258_set_clock(struct okim6258 *chip, int val);
 int okim6258_get_vclk(struct okim6258 *chip);
 
-void okim6258_update(struct okim6258 *chip, stream_sample_t **outputs, int samples);
+void okim6258_update(struct okim6258 *chip, int16_t **outputs, int samples);
 
 void okim6258_write(struct okim6258 *chip, uint8_t Port, uint8_t Data);
 
 void okim6258_set_options(struct okim6258 *chip, uint16_t options);
-void okim6258_set_srchg_cb(struct okim6258 *chip, SRATE_CALLBACK CallbackFunc, void* DataPtr);
