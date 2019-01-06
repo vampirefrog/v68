@@ -2,8 +2,7 @@
 
 ==============================================================================
 
-・DOS コール一覧
-
+・DOS call list
 
 $ff00   _EXIT       Program end
 $ff01   _GETCHAR    Keyboard input (with echo)
