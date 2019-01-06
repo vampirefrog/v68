@@ -1,13 +1,6 @@
 #include "sjis.h"
 #include "utf8.h"
 
-void put_utf8(FILE *f, int c) {
-	char buf[4];
-	int chars = utf8_encode(c, buf);
-	if(chars) {
-		fwrite(buf, chars, 1, f);
-	}
-}
 
 int main(int argc, char **argv) {
 	FILE *in = stdin, *out = stdout;
@@ -20,7 +13,7 @@ int main(int argc, char **argv) {
 		if(SJIS_FIRST_CHAR(b)) {
 			last_byte = b;
 		} else {
-			put_utf8(out, sjis_char_to_unicode((last_byte << 8) | b));
+			utf8_fputc(sjis_char_to_unicode((last_byte << 8) | b), out);
 			last_byte = 0;
 		}
 	}

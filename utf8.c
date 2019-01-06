@@ -25,3 +25,14 @@ int utf8_encode(int c, char *buf) {
 	buf[0] = c;
 	return 1;
 }
+
+int utf8_fputc(int c, FILE *f) {
+	char buf[4];
+	int chars = utf8_encode(c, buf);
+	if(chars) {
+		if(fwrite(buf, chars, 1, f) < 1)
+			return EOF;
+		return c;
+	}
+	return EOF;
+}
