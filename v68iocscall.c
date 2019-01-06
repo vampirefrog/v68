@@ -500,6 +500,46 @@ int v68_iocs_call(uint16_t instr) {
 				}
 			}
 			break;
+		case IOCS_CALL_ADPCMOUT: {
+				verbose1("_ADPCMOUT\n");
+				m68k_write_memory_8(0x00E840C5, 0x32); // Channel 3, OCR
+				m68k_write_memory_8(0x00E840C0, 0xff); // Channel 3, CSR
+				m68k_write_memory_32(0x00E840CC, m68k_get_reg(0, M68K_REG_A1)); // Channel 3, MAR
+				m68k_write_memory_16(0x00E840CA, m68k_get_reg(0, M68K_REG_D2)); // Channel 3, MTC
+				m68k_write_memory_8(0x00E840C7, 0x88); // Channel 3, CCR
+				m68k_write_memory_8(0xe9a005, 0x08); // Write to UPD8255
+				m68k_write_memory_8(0xE92001, 0x02); // OKI ADPCM: play start
+			}
+			break;
+		case IOCS_CALL_ADPCMINP: {
+				verbose1("_ADPCMINP\n");
+			}
+			break;
+		case IOCS_CALL_ADPCMAOT: {
+				verbose1("_ADPCMAOT\n");
+			}
+			break;
+		case IOCS_CALL_ADPCMAIN: {
+				verbose1("_ADPCMAIN\n");
+			}
+			break;
+		case IOCS_CALL_ADPCMLOT: {
+				verbose1("_ADPCMLOT\n");
+			}
+			break;
+		case IOCS_CALL_ADPCMLIN: {
+				verbose1("_ADPCMLIN\n");
+			}
+			break;
+		case IOCS_CALL_ADPCMSNS: {
+				verbose1("_ADPCMSNS\n");
+			}
+			break;
+		case IOCS_CALL_ADPCMMOD: {
+				verbose1("_ADPCMMOD\n");
+			}
+			break;
+
 		default:
 			logcall("Unimplemented V68 IOCS CALL %04x %s\n", instr, iocs_call_names[call]);
 	}

@@ -2,8 +2,13 @@
 
 #include <stdint.h>
 
+#include "okim6258.h"
+#include "speex_resampler.h"
+#include "ym2151.h"
+#include "dmac.h"
+
 void v68_periph_init(void);
-void v68_periph_render(int32_t *bufL, int32_t *bufR, int nsamples);
+void v68_periph_render(int16_t *bufL, int16_t *bufR, int nsamples);
 uint32_t v68_periph_next_int(uint32_t tstates);
 void v68_periph_advance(uint32_t cycles);
 

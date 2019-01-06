@@ -10,6 +10,8 @@
 #include "v68human.h"
 #include "okim6258.h"
 #include "ym2151.h"
+#include "dmac.h"
+
 #include "vgm.h"
 
 #define XHEAD_SIZE      0x40        /* Xファイルのヘッダサイズ */
@@ -38,10 +40,10 @@
 #define RAS_INTERVAL    10000   /* ラスタ割り込みの間隔 */
 
 #define verbose(v, fmt...) { if(v68.verbosity >= v) printf(fmt); }
-#define verbose1(fmt...) verbose(1, fmt);
-#define verbose2(fmt...) verbose(2, fmt);
-#define verbose3(fmt...) verbose(3, fmt);
-#define verbose4(fmt...) verbose(4, fmt);
+#define verbose1(fmt...) verbose(1, "[1] " fmt);
+#define verbose2(fmt...) verbose(2, "[2]  " fmt);
+#define verbose3(fmt...) verbose(3, "[3]   " fmt);
+#define verbose4(fmt...) verbose(4, "[4]    " fmt);
 #define logcall(fmt...) { if(v68.log_calls) printf(fmt); }
 
 struct v68 {
@@ -62,7 +64,7 @@ struct v68 {
 	int mfp_vec;
 
 	/* Sound Timing */
-	int32_t *bufL, *bufR;
+	int16_t *bufL, *bufR;
 	int sample_rate;
 	int samples_remainder, buf_remaining;
 	int prev_sound_cycles, remaining_tstates;
@@ -71,7 +73,7 @@ struct v68 {
 	int cpu_clock, cpu_cycle_remainder, cpu_ended_timeslice;
 
 	/* Peripheral timing */
-	int periph_timers_altered;
+	int periph_timers_altered, in_periph_timing, periph_cycles;
 
 	/* OPM */
 	struct ym2151 opm;
@@ -83,12 +85,13 @@ struct v68 {
 	/* ADPCM */
 	struct okim6258 oki;
 	int oki_sample_counter, oki_sample_cycles;
+	int oki_resample_remainder, oki_freq;
 
 	/* 8255 PPI */
 	uint8_t ppi_regs[4];
 
 	/* DMAC */
-	uint8_t dmac_regs[0x100];
+	struct dmac dmac;
 
 	/* VGM logging */
 	struct vgm_logger *logger;
@@ -102,7 +105,7 @@ extern struct v68 v68;
 
 int v68_init(int clock, int ram_size, int sample_rate);
 int v68_shutdown();
-int v68_fill_buffer(int32_t *bufL, int32_t *bufR, int samples);
+int v68_fill_buffer(int16_t *bufL, int16_t *bufR, int samples);
 
 /* Traps */
 int v68_trap(int which);
@@ -119,4 +122,3 @@ unsigned int m68k_read_disassembler_16 (unsigned int addr);
 unsigned int m68k_read_disassembler_32 (unsigned int addr);
 uint32_t v68_int_ack_handler(int int_level);
 int v68_trap(int which);
-int v68_render_tstates(int tstates);

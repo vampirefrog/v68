@@ -20,6 +20,7 @@ int v68_init(int clock, int ram_size, int sample_rate) {
 	v68.ram_size = ram_size;
 	v68.cpu_clock = clock;
 	v68.sample_rate = sample_rate;
+	v68.samples_remainder = 0;
 
 	v68.ram = calloc(v68.ram_size, 1);
 	if(!v68.ram) return errno;
@@ -41,32 +42,9 @@ int v68_shutdown() {
 	return 0;
 }
 
-int v68_render_tstates(int tstates) {
-	int64_t x = (int64_t)tstates * (int64_t)v68.sample_rate + v68.samples_remainder;
-	int64_t samples = x / (int64_t)v68.cpu_clock;
-	if(samples > v68.buf_remaining)
-		samples = v68.buf_remaining;
-	v68.samples_remainder = x - samples * v68.cpu_clock;
-	verbose2("v68_render_tstates tstates=%d buf_remaining=%d samples=%ld\n", tstates, v68.buf_remaining, samples);
-
-	if(samples > 0) {
-		v68_periph_render(v68.bufL, v68.bufR, samples);
-#ifndef __EMSCRIPTEN__
-		if(v68.logger) {
-			vgm_logger_wait(v68.logger, samples);
-		}
-#endif
-
-		v68.bufL += samples;
-		v68.bufR += samples;
-		v68.buf_remaining -= samples;
-	}
-
-	return samples;
-}
-
 extern int m68ki_initial_cycles;
-int v68_fill_buffer(int32_t *bufL, int32_t *bufR, int samples) {
+int v68_fill_buffer(int16_t *bufL, int16_t *bufR, int samples) {
+	verbose1("v68_fill_buffer samples=%d\n", samples);
 	v68.prev_sound_cycles = 0;
 	v68.buf_remaining = samples;
 	v68.bufL = bufL;
@@ -76,34 +54,34 @@ int v68_fill_buffer(int32_t *bufL, int32_t *bufR, int samples) {
 	int cpu_tstates = x / v68.sample_rate;
 	v68.cpu_cycle_remainder = x - cpu_tstates * v68.sample_rate;
 
-	verbose2("v68 fill buffer %d  tstates=%d  stopped=%d  pc=%08x  rate=%d\n", samples, cpu_tstates, CPU_STOPPED, REG_PC, v68.sample_rate);
+	verbose2("v68_fill_buffer  cpu_tstates=%d CPU_STOPPED=%d PC=%08x v68.sample_rate=%d\n", cpu_tstates, CPU_STOPPED, REG_PC, v68.sample_rate);
 
 	int remaining_tstates = cpu_tstates;
 	while(remaining_tstates > 0) {
-		verbose1("remaining tstates %d flags=%02x\n", remaining_tstates, v68.opm_flags);
+		verbose2("v68_fill_buffer  remaining_tstates=%d opm_flags=0x%02x\n", remaining_tstates, v68.opm_flags);
 		int next_int = v68_periph_next_int(remaining_tstates);
 
-		verbose1("executing %d\n", next_int);
+		verbose2("v68_fill_buffer  executing next_int=%d remaining_tstates=%d\n", next_int, remaining_tstates);
 		v68.cpu_ended_timeslice = 0;
 		v68.prev_sound_cycles = 0;
 		int cycles = m68k_execute(next_int, v68.log_dasm);
 		int executed_cycles = v68.cpu_ended_timeslice ? next_int - m68ki_initial_cycles : cycles;
-		verbose1("ended=%d cycles=%d remaining=%d initial=%d executed=%d run=%d next_int=%d calculated=%d\n", v68.cpu_ended_timeslice, cycles, remaining_tstates, m68ki_initial_cycles, executed_cycles, m68k_cycles_run(), next_int, next_int - m68ki_initial_cycles);
-		verbose1("executed cycles %d / %d\n", executed_cycles, next_int);
+		verbose2("v68_fill_buffer  executed_cycles=%d next_int=%d remaining_tstates = %d\n", executed_cycles, next_int, remaining_tstates);
 		v68.cpu_ended_timeslice = 0;
 
-		v68_render_tstates(executed_cycles - v68.prev_sound_cycles);
-		verbose1("timer A cycles = %d, timer B cycles = %d flags=%02x\n", v68.opm_timera_cycles, v68.opm_timerb_cycles, v68.opm_flags);
-		v68_periph_advance(executed_cycles);
+		verbose2("v68_fill_buffer  advancing executed_cycles=%d - prev_sound_cycles=%d = %d\n", executed_cycles, v68.prev_sound_cycles, executed_cycles - v68.prev_sound_cycles);
+		v68.periph_cycles = v68.prev_sound_cycles;
+		v68_periph_advance(executed_cycles - v68.prev_sound_cycles);
+		verbose2("v68_fill_buffer  remaining_tstates=%d  executed_cycles=%d  remaining_tstates-executed_cycles=%d\n", remaining_tstates, executed_cycles, remaining_tstates-executed_cycles);
 		remaining_tstates -= executed_cycles;
 	}
 
-	verbose1("filled buffer buf_remaining=%d\n", v68.buf_remaining);
+	verbose2("v68_fill_buffer  filled buffer buf_remaining=%d\n", v68.buf_remaining);
 
 	return 0;
 }
 
-unsigned int  m68k_read_memory_8(unsigned int addr) {
+unsigned int m68k_read_memory_8(unsigned int addr) {
 	if(addr >= 0x00e80000 && addr < 0x00eb0000)
 		return v68_read_periph_8(addr);
 	else if(addr > v68.ram_size) {

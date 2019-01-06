@@ -136,7 +136,7 @@ int main(int argc, char **argv, char **envp) {
 
 	/* -- Play some stuff -- */
 	while(running) {
-		int32_t bufL[BUF_SIZE], bufR[BUF_SIZE];
+		int16_t bufL[BUF_SIZE], bufR[BUF_SIZE];
 		int16_t buf[BUF_SIZE * 2];
 		v68_fill_buffer(bufL, bufR, BUF_SIZE);
 		for(int i = 0; i < BUF_SIZE; i++) {

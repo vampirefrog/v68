@@ -515,8 +515,7 @@ int v68_dos_call(uint16_t instr) {
 				uint8_t *str_ptr = &v68.ram[file];
 				size_t l = strnlen((char *)str_ptr, v68.ram_size - file - 1);
 				str_ptr[l] = 0;
-				// logcall("Create %s %04x\n", str_ptr, attr);
-				logcall("Create %s attr=%04x\n", str_ptr, attr);
+				logcall("filename=%s attr=0x%04x\n", str_ptr, attr);
 				int fd = v68_io_create((char *)str_ptr, attr);
 				m68k_set_reg(M68K_REG_D0, fd);
 
@@ -534,8 +533,8 @@ int v68_dos_call(uint16_t instr) {
 				uint8_t *str_ptr = &v68.ram[file];
 				size_t l = strnlen((char *)str_ptr, v68.ram_size - file - 1);
 				str_ptr[l] = 0;
-				logcall("Open %s %04x\n", str_ptr, mode);
 				int fd = v68_io_open((char *)str_ptr, mode);
+				logcall("filename=\"%s\" mode=0x%04x fd=%d\n", str_ptr, mode, fd);
 				m68k_set_reg(M68K_REG_D0, fd);
 
 				/* Fill fd bitmap */
@@ -551,7 +550,7 @@ int v68_dos_call(uint16_t instr) {
 				int r = v68_io_close(fd);
 				m68k_set_reg(M68K_REG_D0, r);
 
-				logcall("%d\n", fd);
+				logcall("fd=%d\n", fd);
 
 				/* Unset bit from fd bitmap */
 				if(!r) {
@@ -567,7 +566,7 @@ int v68_dos_call(uint16_t instr) {
 				uint32_t len = m68k_read_memory_32(m68k_get_reg(0, M68K_REG_A7) + 6);
 
 				int r = v68_io_write(fd, &v68.ram[buffer], len);
-				logcall("fd=%d buffer=%08x len=%d r=%d\n", fd, buffer, len, r);
+				logcall("fd=%d buffer=0x%08x len=%d r=%d\n", fd, buffer, len, r);
 
 				m68k_set_reg(M68K_REG_D0, r);
 			}
@@ -576,9 +575,9 @@ int v68_dos_call(uint16_t instr) {
 				uint16_t fd = m68k_read_memory_16(m68k_get_reg(0, M68K_REG_A7));
 				uint32_t buffer = m68k_read_memory_32(m68k_get_reg(0, M68K_REG_A7) + 2);
 				uint32_t len = m68k_read_memory_32(m68k_get_reg(0, M68K_REG_A7) + 6);
-
+				int pos_before = v68_io_tell(fd);
 				int r = v68_io_read(fd, &v68.ram[buffer], len);
-				logcall("fd=%d buffer=%08x len=%d r=%d\n", fd, buffer, len, r);
+				logcall("fd=%d buffer=0x%08x len=%d r=%d pos_before=0x%08x pos=0x%08x\n", fd, buffer, len, r, pos_before, v68_io_tell(fd));
 
 				m68k_set_reg(M68K_REG_D0, r);
 			}
@@ -597,6 +596,7 @@ int v68_dos_call(uint16_t instr) {
 				uint32_t whence = m68k_read_memory_16(m68k_get_reg(0, M68K_REG_A7) + 6);
 
 				int r = v68_io_seek(fd, ofs, whence);
+				logcall("fd=%d ofs=0x%08x whence=0x%04x r=0x%08x pos=0x%08x\n", fd, ofs, whence, r, v68_io_tell(fd));
 
 				m68k_set_reg(M68K_REG_D0, r);
 			}
@@ -642,7 +642,7 @@ int v68_dos_call(uint16_t instr) {
 			}
 			break;
 		case DOS_CALL_GETPDB: {
-				m68k_set_reg(M68K_REG_D0, v68.cur_prog_addr);
+				m68k_set_reg(M68K_REG_D0, v68.cur_prog_addr - 0x10);
 			}
 			break;
 		default:

@@ -290,8 +290,6 @@ int v68_run_command(char *cmd) {
 int v68_queue_command(char *cmdline) {
 	if(v68.cmd_queue_pos > V68_CMD_QUEUE_LEN) return -1;
 
-	printf("Queuing command \"%s\"\n", cmdline);
-
 	strncpy(v68.cmd_queue[v68.cmd_queue_pos], cmdline, sizeof(v68.cmd_queue[0]));
 	v68.cmd_queue_pos++;
 
