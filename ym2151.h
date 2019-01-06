@@ -31,12 +31,6 @@
 #pragma once
 
 #include <stdint.h>
-#include "mamedef.h"
-
-/* 16- and 8-bit samples (signed) are supported*/
-#define SAMPLE_BITS 16
-
-typedef stream_sample_t SAMP;
 
 /* struct describing a single operator */
 struct ym2151_operator {
@@ -47,10 +41,10 @@ struct ym2151_operator {
 	uint32_t      dt1_i;                  /* DT1 index * 32 */
 	uint32_t      dt2;                    /* current DT2 (detune 2) value */
 
-	signed int *connect;                /* operator output 'direction' */
+	signed int   *connect;                /* operator output 'direction' */
 
 	/* only M1 (operator 0) is filled with this data: */
-	signed int *mem_connect;            /* where to put the delayed sample (MEM) */
+	signed int   *mem_connect;            /* where to put the delayed sample (MEM) */
 	int32_t       mem_value;              /* delayed sample (MEM) value */
 
 	/* channel specific data; note: each operator number 0 contains channel specific data */
@@ -90,7 +84,7 @@ struct ym2151_operator {
 };
 
 struct ym2151 {
-	struct ym2151_operator oper[32];    /* the 32 operators */
+	struct        ym2151_operator oper[32];    /* the 32 operators */
 
 	uint32_t      pan[16];                /* channels output masks (0xffffffff = enable) */
 	uint8_t       Muted[8];               /* used for muting */
@@ -125,26 +119,6 @@ struct ym2151 {
 	uint32_t      irq_enable;             /* IRQ enable for timer B (bit 3) and timer A (bit 2); bit 7 - CSM mode (keyon to all slots, everytime timer A overflows) */
 	uint32_t      status;                 /* chip status (BUSY, IRQ Flags) */
 	uint8_t       connect[8];             /* channels connections */
-
-#ifdef USE_MAME_TIMERS
-	/* ASG 980324 -- added for tracking timers */
-	emu_timer   *timer_A;
-	emu_timer   *timer_B;
-	attotime    timer_A_time[1024];     /* timer A times for MAME */
-	attotime    timer_B_time[256];      /* timer B times for MAME */
-	int         irqlinestate;
-#else
-	uint8_t       tim_A;                  /* timer A enable (0-disabled) */
-	uint8_t       tim_B;                  /* timer B enable (0-disabled) */
-	int32_t       tim_A_val;              /* current value of timer A */
-	int32_t       tim_B_val;              /* current value of timer B */
-	uint32_t      tim_A_tab[1024];        /* timer A deltas */
-	uint32_t      tim_B_tab[256];         /* timer B deltas */
-#endif
-	uint32_t      timer_A_index;          /* timer A index */
-	uint32_t      timer_B_index;          /* timer B index */
-	uint32_t      timer_A_index_old;      /* timer A previous index */
-	uint32_t      timer_B_index_old;      /* timer B previous index */
 
 	/*  Frequency-deltas to get the closest frequency possible.
 	*   There are 11 octaves because of DT2 (max 950 cents over base frequency)
@@ -210,7 +184,7 @@ void ym2151_reset_chip(struct ym2151 *ym2151);
  * '**buffers' is table of pointers to the buffers: left and right
  * 'length' is the number of samples that should be generated
  */
-void ym2151_update_one(struct ym2151 *ym2151, SAMP **buffers, int length);
+void ym2151_update_one(struct ym2151 *ym2151, int16_t **buffers, int length);
 
 /* write 'v' to register 'r' on YM2151 */
 void ym2151_write_reg(struct ym2151 *ym2151, int r, int v);

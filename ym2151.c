@@ -41,15 +41,9 @@
 
 #define TL_RES_LEN      (256) /* 8 bits addressing (real chip) */
 
-#if (SAMPLE_BITS==16)
-	#define FINAL_SH    (1)
-	#define MAXOUT      (+32767)
-	#define MINOUT      (-32768)
-#else
-	#define FINAL_SH    (8)
-	#define MAXOUT      (+127)
-	#define MINOUT      (-128)
-#endif
+#define FINAL_SH    (1)
+#define MAXOUT      (+32767)
+#define MINOUT      (-32768)
 
 /*  TL_TAB_LEN is calculated as:
 *   13 - sinus amplitude bits     (Y axis)
@@ -381,8 +375,6 @@ static void init_chip_tables(struct ym2151 *chip) {
 	int i,j;
 	double mult,phaseinc,Hz;
 	double scaler;
-	//attotime pom;
-	double pom;
 
 	scaler = ( (double)chip->clock / 64.0 ) / ( (double)chip->sampfreq );
 
@@ -436,33 +428,6 @@ static void init_chip_tables(struct ym2151 *chip) {
 			chip->dt1_freq[ (j+0)*32 + i ] = phaseinc * mult;
 			chip->dt1_freq[ (j+4)*32 + i ] = -chip->dt1_freq[ (j+0)*32 + i ];
 		}
-	}
-
-
-	/* calculate timers' deltas */
-	/* User's Manual pages 15,16  */
-	mult = (1<<TIMER_SH);
-	for (i=0; i<1024; i++) {
-		/* ASG 980324: changed to compute both tim_A_tab and timer_A_time */
-		//pom= attotime_mul(ATTOTIME_IN_HZ(chip->clock), 64 * (1024 - i));
-		pom = ((double)64 * (1024 - i) / chip->clock);
-		#ifdef USE_MAME_TIMERS
-			chip->timer_A_time[i] = pom;
-		#else
-			//chip->tim_A_tab[i] = attotime_to_double(pom) * (double)chip->sampfreq * mult;  /* number of samples that timer period takes (fixed point) */
-			chip->tim_A_tab[i] = pom * (double)chip->sampfreq * mult;  /* number of samples that timer period takes (fixed point) */
-		#endif
-	}
-	for (i=0; i<256; i++) {
-		/* ASG 980324: changed to compute both tim_B_tab and timer_B_time */
-		//pom= attotime_mul(ATTOTIME_IN_HZ(chip->clock), 1024 * (256 - i));
-		pom = ((double)1024 * (256 - i) / chip->clock);
-		#ifdef USE_MAME_TIMERS
-			chip->timer_B_time[i] = pom;
-		#else
-			//chip->tim_B_tab[i] = attotime_to_double(pom) * (double)chip->sampfreq * mult;  /* number of samples that timer period takes (fixed point) */
-			chip->tim_B_tab[i] = pom * (double)chip->sampfreq * mult;  /* number of samples that timer period takes (fixed point) */
-		#endif
 	}
 
 	/* calculate noise periods table */
@@ -719,94 +684,15 @@ void ym2151_write_reg(struct ym2151 *chip, int r, int v) {
 			break;
 
 		case 0x10:  /* timer A hi */
-			chip->timer_A_index = (chip->timer_A_index & 0x003) | (v<<2);
 			break;
 
 		case 0x11:  /* timer A low */
-			chip->timer_A_index = (chip->timer_A_index & 0x3fc) | (v & 3);
 			break;
 
 		case 0x12:  /* timer B */
-			chip->timer_B_index = v;
 			break;
 
 		case 0x14:  /* CSM, irq flag reset, irq enable, timer start/stop */
-
-			chip->irq_enable = v;   /* bit 3-timer B, bit 2-timer A, bit 7 - CSM */
-
-			if (v&0x10) /* reset timer A irq flag */
-			{
-#ifdef USE_MAME_TIMERS
-				chip->status &= ~1;
-				timer_set(chip->device->machine, attotime_zero,chip,0,irqAoff_callback);
-#else
-				//int oldstate = chip->status & 3;
-				chip->status &= ~1;
-				//if ((oldstate==1) && (chip->irqhandler)) (*chip->irqhandler)(chip->device, 0);
-#endif
-			}
-
-			if (v&0x20) /* reset timer B irq flag */
-			{
-#ifdef USE_MAME_TIMERS
-				chip->status &= ~2;
-				timer_set(chip->device->machine, attotime_zero,chip,0,irqBoff_callback);
-#else
-				//int oldstate = chip->status & 3;
-				chip->status &= ~2;
-				//if ((oldstate==2) && (chip->irqhandler)) (*chip->irqhandler)(chip->device, 0);
-#endif
-			}
-
-			if (v&0x02){    /* load and start timer B */
-				#ifdef USE_MAME_TIMERS
-				/* ASG 980324: added a real timer */
-				/* start timer _only_ if it wasn't already started (it will reload time value next round) */
-					if (!timer_enable(chip->timer_B, 1))
-					{
-						timer_adjust_oneshot(chip->timer_B, chip->timer_B_time[ chip->timer_B_index ], 0);
-						chip->timer_B_index_old = chip->timer_B_index;
-					}
-				#else
-					if (!chip->tim_B)
-					{
-						chip->tim_B = 1;
-						chip->tim_B_val = chip->tim_B_tab[ chip->timer_B_index ];
-					}
-				#endif
-			}else{      /* stop timer B */
-				#ifdef USE_MAME_TIMERS
-				/* ASG 980324: added a real timer */
-					timer_enable(chip->timer_B, 0);
-				#else
-					chip->tim_B = 0;
-				#endif
-			}
-
-			if (v&0x01){    /* load and start timer A */
-				#ifdef USE_MAME_TIMERS
-				/* ASG 980324: added a real timer */
-				/* start timer _only_ if it wasn't already started (it will reload time value next round) */
-					if (!timer_enable(chip->timer_A, 1))
-					{
-						timer_adjust_oneshot(chip->timer_A, chip->timer_A_time[ chip->timer_A_index ], 0);
-						chip->timer_A_index_old = chip->timer_A_index;
-					}
-				#else
-					if (!chip->tim_A)
-					{
-						chip->tim_A = 1;
-						chip->tim_A_val = chip->tim_A_tab[ chip->timer_A_index ];
-					}
-				#endif
-			}else{      /* stop timer A */
-				#ifdef USE_MAME_TIMERS
-				/* ASG 980324: added a real timer */
-					timer_enable(chip->timer_A, 0);
-				#else
-					chip->tim_A = 0;
-				#endif
-			}
 			break;
 
 		case 0x18:  /* LFO frequency */
@@ -1030,14 +916,6 @@ void ym2151_init(struct ym2151 *chip, int clock, int rate) {
 	chip->eg_timer_add  = (1<<EG_SH)  * (clock/64.0) / chip->sampfreq;
 	chip->eg_timer_overflow = ( 3 ) * (1<<EG_SH);
 
-#ifdef USE_MAME_TIMERS
-	/* this must be done _before_ a call to ym2151_reset_chip() */
-	chip->timer_A = timer_alloc(device->machine, timer_callback_a, chip);
-	chip->timer_B = timer_alloc(device->machine, timer_callback_b, chip);
-#else
-	chip->tim_A      = 0;
-	chip->tim_B      = 0;
-#endif
 	for (chn = 0; chn < 8; chn ++)
 		chip->Muted[chn] = 0x00;
 }
@@ -1072,22 +950,6 @@ void ym2151_reset_chip(struct ym2151 *chip) {
 	chip->lfp = 0;
 
 	chip->test= 0;
-
-	chip->irq_enable = 0;
-#ifdef USE_MAME_TIMERS
-	/* ASG 980324 -- reset the timers before writing to the registers */
-	timer_enable(chip->timer_A, 0);
-	timer_enable(chip->timer_B, 0);
-#else
-	chip->tim_A      = 0;
-	chip->tim_B      = 0;
-	chip->tim_A_val  = 0;
-	chip->tim_B_val  = 0;
-#endif
-	chip->timer_A_index = 0;
-	chip->timer_B_index = 0;
-	chip->timer_A_index_old = 0;
-	chip->timer_B_index_old = 0;
 
 	chip->noise     = 0;
 	chip->noise_rng = 0;
@@ -1686,31 +1548,10 @@ static void advance(struct ym2151 *chip) {
 *   '**buffers' is table of pointers to the buffers: left and right
 *   'length' is the number of samples that should be generated
 */
-void ym2151_update_one(struct ym2151 *chip, SAMP **buffers, int length) {
-	int i;
-	signed int outl,outr;
-	SAMP *bufL, *bufR;
+void ym2151_update_one(struct ym2151 *chip, int16_t **buffers, int samples) {
+	int16_t *bufL = buffers[0], *bufR = buffers[1];
 
-	bufL = buffers[0];
-	bufR = buffers[1];
-
-#ifdef USE_MAME_TIMERS
-		/* ASG 980324 - handled by real timers now */
-#else
-	if(chip->tim_B) {
-		chip->tim_B_val -= (length << TIMER_SH);
-		if(chip->tim_B_val <= 0) {
-			chip->tim_B_val += chip->tim_B_tab[chip->timer_B_index];
-			if(chip->irq_enable & 0x08) {
-				//int oldstate = chip->status & 3;
-				chip->status |= 2;
-				//if ((!oldstate) && (chip->irqhandler)) (*chip->irqhandler)(chip->device, 1);
-			}
-		}
-	}
-#endif
-
-	for(i=0; i<length; i++) {
+	while(samples) {
 		advance_eg(chip);
 
 		chip->chanout[0] = 0;
@@ -1731,8 +1572,8 @@ void ym2151_update_one(struct ym2151 *chip, SAMP **buffers, int length) {
 		chan_calc(chip, 6);
 		chan7_calc(chip);
 
-		outl = chip->chanout[0] & chip->pan[0];
-		outr = chip->chanout[0] & chip->pan[1];
+		int outl = chip->chanout[0] & chip->pan[0];
+		int outr = chip->chanout[0] & chip->pan[1];
 		outl += (chip->chanout[1] & chip->pan[2]);
 		outr += (chip->chanout[1] & chip->pan[3]);
 		outl += (chip->chanout[2] & chip->pan[4]);
@@ -1750,36 +1591,14 @@ void ym2151_update_one(struct ym2151 *chip, SAMP **buffers, int length) {
 
 		outl >>= FINAL_SH;
 		outr >>= FINAL_SH;
-		double outld = outl / 32767.0;
-		if(outld < -1.0) outld = 1.0;
-		else if(outld > 1.0) outld = 1.0;
-		else outld = outld - outld * outld * outld / 3;
-		double outrd = outr / 32767.0;
-		if(outrd < -1.0) outrd = 1.0;
-		else if(outrd > 1.0) outrd = 1.0;
-		else outrd = outrd - outrd * outrd * outrd / 3;
+		if(outl > 32767) outl = 32767;
+		if(outl < -32768) outl = -32768;
+		if(outr > 32767) outr = 32767;
+		if(outr < -32768) outr = -32768;
+		*bufL++ = outl;
+		*bufR++ = outr;
+		samples--;
 
-		((SAMP*)bufL)[i] = (SAMP)(outld * 32767);
-		((SAMP*)bufR)[i] = (SAMP)(outrd * 32767);
-
-#ifdef USE_MAME_TIMERS
-		/* ASG 980324 - handled by real timers now */
-#else
-		/* calculate timer A */
-		if(chip->tim_A) {
-			chip->tim_A_val -= (1 << TIMER_SH);
-			if(chip->tim_A_val <= 0) {
-				chip->tim_A_val += chip->tim_A_tab[ chip->timer_A_index ];
-				if(chip->irq_enable & 0x04) {
-					//int oldstate = chip->status & 3;
-					chip->status |= 1;
-					//if ((!oldstate) && (chip->irqhandler)) (*chip->irqhandler)(chip->device, 1);
-				}
-				if (chip->irq_enable & 0x80)
-					chip->csm_req = 2;  /* request KEY ON / KEY OFF sequence */
-			}
-		}
-#endif
 		advance(chip);
 	}
 }
