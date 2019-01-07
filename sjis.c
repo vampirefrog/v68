@@ -22,7 +22,7 @@ int sjis_to_utf8(uint8_t *sjis_data, int sjis_len, uint8_t *utf8_data, int utf8_
 
 	int j = 0, last_byte = 0;
 	for(int i = 0; i < sjis_len; i++) {
-		char b = sjis_data[i];
+		uint8_t b = sjis_data[i];
 		if(last_byte == 0 && SJIS_FIRST_CHAR(b)) {
 			last_byte = b;
 		} else {
@@ -47,7 +47,7 @@ int sjis_write_utf8(FILE *f, uint8_t *sjis_data, int sjis_len) {
 
 	int j = 0, last_byte = 0;
 	for(int i = 0; i < sjis_len; i++) {
-		char b = sjis_data[i];
+		uint8_t b = sjis_data[i];
 		if(last_byte == 0 && SJIS_FIRST_CHAR(b)) {
 			last_byte = b;
 		} else {
