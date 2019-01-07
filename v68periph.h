@@ -3,7 +3,6 @@
 #include <stdint.h>
 
 #include "okim6258.h"
-#include "speex_resampler.h"
 #include "ym2151.h"
 #include "dmac.h"
 
