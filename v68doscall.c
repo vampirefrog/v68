@@ -636,9 +636,107 @@ int v68_dos_call(uint16_t instr) {
 			}
 			break;
 		case DOS_CALL_NAMECK: {
+#define IS_SLASH(a) ((a) == '/' || (a) == '\\')
 				uint32_t filename = m68k_read_memory_32(m68k_get_reg(0, M68K_REG_A7));
 				uint32_t buffer = m68k_read_memory_32(m68k_get_reg(0, M68K_REG_A7) + 4);
-				strncpy((char *)&v68.ram[buffer], (char *)&v68.ram[filename], 91);
+				uint32_t len = strnlen((char *)&v68.ram[filename], v68.ram_size - filename);
+
+				/* Do some checks on the input filename */
+				if(v68.ram[filename] == ':' || v68.ram[filename] == '-' || v68.ram[filename] == '"' || v68.ram[filename] == '\'' || v68.ram[filename] == ',' || v68.ram[filename] == '[' || v68.ram[filename] == ']') {
+					m68k_set_reg(M68K_REG_D0, 0xfffffff3); // -13 Invalid file name specification
+					break;
+				}
+
+				if(buffer + 91 >= v68.ram_size) { /* Check if there's enough room for 91 bytes */
+					m68k_set_reg(M68K_REG_D0, 0xfffffff3); // -13 Invalid file name specification
+					break;
+				}
+				memset(&v68.ram[buffer], 0, 91);
+
+				int last_slash = -1;
+				int last_dot = -1;
+
+				/* Drive name */
+				int drv = v68_io_curdrv(); /* If drive is not specified, get cur drive */
+				if(len >= 2 && m68k_read_memory_8(filename + 1) == ':') {
+					drv = toupper(m68k_read_memory_8(filename)) - 'A';
+					last_slash = 1;
+				}
+				if(drv < 0 || drv >= 26) {
+					m68k_set_reg(M68K_REG_D0, 0xfffffff1); // -15 Invalid drive specification
+					break;
+				}
+
+				v68.ram[buffer + 0] = drv + 'A';
+				v68.ram[buffer + 1] = ':';
+
+				for(int i = 0; i < len; i++) {
+					if(IS_SLASH(v68.ram[filename + i])) {
+						last_slash = i;
+					}
+				}
+
+				for(int i = last_slash + 1; i < len; i++) {
+					if(v68.ram[filename + i] == '.') {
+						last_dot = i;
+					}
+				}
+
+				if(IS_SLASH(v68.ram[filename])) { /* Starts with a slash */
+					if(last_slash > 62) {
+						m68k_set_reg(M68K_REG_D0, 0xfffffff3); // -13 Invalid file name specification
+						break;
+					}
+
+					for(int i = 0; i < last_slash; i++) {
+						int c = v68.ram[filename + i];
+						v68.ram[buffer + i + 2] = (c == '/' ? '\\' : c);
+					}
+				} else if(v68.ram[filename + 1] == ':') {
+					v68.ram[buffer + 2] = '\\';
+					int s = IS_SLASH(v68.ram[filename + 2]) ? 3 : 2;
+					if(last_slash - s > 63) {
+						m68k_set_reg(M68K_REG_D0, 0xfffffff3); // -13 Invalid file name specification
+						break;
+					}
+					for(int i = 0; i < last_slash - 2; i++) {
+						int c = v68.ram[filename + i + s];
+						v68.ram[buffer + i + 3] = (c == '/' ? '\\' : c);
+					}
+				} else {
+					char curdir[65];
+					v68_io_getcwd(drv, curdir, 64);
+					int l = strnlen(curdir, sizeof(curdir) - 1);
+					if(l + last_slash > 62) {
+						m68k_set_reg(M68K_REG_D0, 0xfffffff3); // -13 Invalid file name specification
+						break;
+					}
+					v68.ram[buffer + 2] = '\\';
+					for(int i = 0; i < l; i++) {
+						int c = curdir[i];
+						v68.ram[buffer + 3 + i] = c == '/' ? '\\' : c;
+					}
+					v68.ram[buffer + 3 + l] = '\\';
+					for(int i = 0; i < last_slash; i++) {
+						int c = v68.ram[filename + i];
+						v68.ram[buffer + 4 + l + i] = c == '/' ? '\\' : c;
+					}
+				}
+
+				/* filename */
+				if(last_slash + 1 < len) {
+					int flen = len - last_slash - 1;
+					if(last_dot > last_slash && last_dot - last_slash < flen) flen = last_dot - last_slash - 1;
+					if(flen > 18) flen = 18;
+					memcpy(&v68.ram[buffer + 67], &v68.ram[filename + last_slash + 1], flen);
+				}
+
+				/* extension */
+				if(last_dot > -1 && last_dot + 1 < len) {
+					int flen = len - last_dot;
+					if(flen > 4) flen = 4;
+					memcpy(&v68.ram[buffer + 86], &v68.ram[filename + last_dot], flen);
+				}
 			}
 			break;
 		case DOS_CALL_GETPDB: {
