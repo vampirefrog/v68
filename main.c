@@ -73,7 +73,8 @@ int parse_cmdline(int argc, char **argv) {
 
 		if(first_nonarg_reached) {
 			strncat(cmdbuf, argv[i], sizeof(cmdbuf) - strlen(cmdbuf));
-			strncat(cmdbuf, " ", sizeof(cmdbuf) - strlen(cmdbuf));
+			if(i + 1 < argc)
+				strncat(cmdbuf, " ", sizeof(cmdbuf) - strlen(cmdbuf));
 		}
 	}
 	if(cmdbuf[0]) {
