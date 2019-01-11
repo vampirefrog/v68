@@ -36,7 +36,7 @@ STACK_SIZE: .equ 32*1024
 	DOS	_OPEN
 	addq.l	#6,sp
 
-	move.w d0, (pdxFd)
+	move.w d0, (adpFd)
 
 	cmp.l #$00, d0
 	bge fileOpened
@@ -52,40 +52,20 @@ fileOpened:
 	DOS _PRINT
 	addq.l #4, sp
 
-	* Skip to a sample's pointer
-	move.w	#$00,-(sp)
-	move.l	#(3*8),-(sp)
-	move.w	(pdxFd),-(sp)
+	* Skip to end, get size
+	move.w	#$02,-(sp)
+	move.l	#$00,-(sp)
+	move.w	(adpFd),-(sp)
 	DOS	_SEEK
+	move.l	d0, (sampleSize)
 	addq.l	#8,sp
 
-	move.l #4, -(sp)
-	pea	(sampleOffset)
-	move.w (pdxFd), -(sp)
-	DOS	_READ
-	lea	(10,sp),sp
-	* Check for error
-	tst.l d0
-	bpl @f
-	pea.l (readErrStr,pc)
-	DOS _PRINT
-	addq.l #4, sp
-	DOS _EXIT
-@@:
-
-	move.l #4, -(sp)
-	pea	(sampleSize)
-	move.w (pdxFd), -(sp)
-	DOS	_READ
-	lea	(10,sp),sp
-	* Check for error
-	tst.l d0
-	bpl @f
-	pea.l (readErrStr,pc)
-	DOS _PRINT
-	addq.l #4, sp
-	DOS _EXIT
-@@:
+	* rewind
+	move.w	#$00,-(sp)
+	move.l	#$00,-(sp)
+	move.w	(adpFd),-(sp)
+	DOS	_SEEK
+	addq.l	#8,sp
 
 	* Allocate memory for the sample
 	move.l (sampleSize), -(sp)
@@ -101,20 +81,10 @@ fileOpened:
 	addq.l #4, sp
 	DOS _EXIT
 @@:
-
-	* Seek to sample data
-	move.w	#$00,-(sp)
-	move.l (sampleOffset), d1
-	add.l #96, d1
-	move.l	d1,-(sp)
-	move.w	(pdxFd),-(sp)
-	DOS	_SEEK
-	addq.l	#8,sp
-
 	* Read sample data
 	move.l (sampleSize), -(sp)
 	pea (sampleBlock)
-	move.w (pdxFd), -(sp)
+	move.w (adpFd), -(sp)
 	DOS _READ
 	lea (10,sp),sp
 	* Check for error
@@ -126,7 +96,7 @@ fileOpened:
 	DOS _EXIT
 @@:
 	* Close PDX file
-	move.w (pdxFd), -(sp)
+	move.w (adpFd), -(sp)
 	DOS	_CLOSE
 	addq.l	#4,sp
 
@@ -158,7 +128,7 @@ readSampleErrStr:
 mallocErrStr:
 .dc.b 'Could not MALLOC', $0d, $0a, $00
 adpcmFileStr:
-.dc.b 'OH_X.PDX', $00
+.dc.b 'piano-c4.adp', $00
 couldNotOpenStr:
 .dc.b 'Could not open PDX file', $0d, $0a, $00
 openedFileStr:
@@ -171,10 +141,8 @@ crlf:
 
 buf:
 .ds.b 32
-pdxFd:
+adpFd:
 .ds.w 1
-sampleOffset:
-.ds.l 1
 sampleSize:
 .ds.l 1
 sampleBlock:

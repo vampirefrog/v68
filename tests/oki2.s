@@ -47,7 +47,7 @@ STACK_SIZE: .equ 32*1024
 	DOS	_OPEN
 	addq.l	#6,sp
 
-	move.w d0, (pdxFd)
+	move.w d0, (adpFd)
 
 	cmp.l #$00, d0
 	bge fileOpened
@@ -63,40 +63,20 @@ fileOpened:
 	DOS _PRINT
 	addq.l #4, sp
 
-	* Skip to a sample's pointer
-	move.w	#$00,-(sp)
-	move.l	#(3*8),-(sp)
-	move.w	(pdxFd),-(sp)
+	* Skip to end, get size
+	move.w	#$02,-(sp)
+	move.l	#$00,-(sp)
+	move.w	(adpFd),-(sp)
 	DOS	_SEEK
+	move.l	d0, (sampleSize)
 	addq.l	#8,sp
 
-	move.l #4, -(sp)
-	pea	(sampleOffset)
-	move.w (pdxFd), -(sp)
-	DOS	_READ
-	lea	(10,sp),sp
-	* Check for error
-	tst.l d0
-	bpl @f
-	pea.l (readErrStr,pc)
-	DOS _PRINT
-	addq.l #4, sp
-	DOS _EXIT
-@@:
-
-	move.l #4, -(sp)
-	pea	(sampleSize)
-	move.w (pdxFd), -(sp)
-	DOS	_READ
-	lea	(10,sp),sp
-	* Check for error
-	tst.l d0
-	bpl @f
-	pea.l (readErrStr,pc)
-	DOS _PRINT
-	addq.l #4, sp
-	DOS _EXIT
-@@:
+	* rewind
+	move.w	#$00,-(sp)
+	move.l	#$00,-(sp)
+	move.w	(adpFd),-(sp)
+	DOS	_SEEK
+	addq.l	#8,sp
 
 	* Allocate memory for the sample
 	move.l (sampleSize), -(sp)
@@ -113,19 +93,10 @@ fileOpened:
 	DOS _EXIT
 @@:
 
-	* Seek to sample data
-	move.w	#$00,-(sp)
-	move.l (sampleOffset), d1
-;	add.l #96, d1
-	move.l	d1,-(sp)
-	move.w	(pdxFd),-(sp)
-	DOS	_SEEK
-	addq.l	#8,sp
-
 	* Read sample data
 	move.l (sampleSize), -(sp)
 	move.l (sampleBlock), -(sp)
-	move.w (pdxFd), -(sp)
+	move.w (adpFd), -(sp)
 	DOS _READ
 	lea (10,sp),sp
 	* Check for error
@@ -137,7 +108,7 @@ fileOpened:
 	DOS _EXIT
 @@:
 	* Close PDX file
-	move.w (pdxFd), -(sp)
+	move.w (adpFd), -(sp)
 	DOS	_CLOSE
 	addq.l	#4,sp
 
@@ -157,6 +128,12 @@ fileOpened:
 	* ori.b #$80, d2 * 4MHz
 	andi.b #$7f, d2 * 8MHz
 	bsr WriteOPM
+
+	; Setup interrupts
+	lea.l (DMAIntHandler), a6
+	move.l a6, ($0001A8)
+	lea.l (DMAErrIntHandler), a6
+	move.l a6, ($0001AC)
 
 	* OKI ADPCM: play start
 	move.b  #$02, ($E92001.l)
@@ -263,6 +240,38 @@ WriteOPM:
 	move.b	d2,($09da)
 	rts
 
+DMAIntHandler:
+	andi.b	#$f7,($00e88015)
+	movem.l	d0-d7/a0-a6,-(sp)
+	move.w sr, -(sp)
+	andi.w	#$f8ff,sr
+
+	pea.l (dmaIntHandlerStr,pc)
+	DOS _PRINT
+	addq.l #4, sp
+
+	* Enable all interrupts
+	move.w (sp)+, sr
+	movem.l	(sp)+,d0-d7/a0-a6
+	ori.b	#$08,($00e88015)
+	rte
+
+DMAErrIntHandler:
+	andi.b	#$f7,($00e88015)
+	movem.l	d0-d7/a0-a6,-(sp)
+	move.w sr, -(sp)
+	andi.w	#$f8ff,sr
+
+	pea.l (dmaErrIntHandlerStr,pc)
+	DOS _PRINT
+	addq.l #4, sp
+
+	* Enable all interrupts
+	move.w (sp)+, sr
+	movem.l	(sp)+,d0-d7/a0-a6
+	ori.b	#$08,($00e88015)
+	rte
+
 include itoh.s
 
 .data
@@ -277,11 +286,15 @@ readSampleErrStr:
 mallocErrStr:
 .dc.b 'Could not MALLOC', $0d, $0a, $00
 adpcmFileStr:
-.dc.b 'OH_X.PDX', $00
+.dc.b 'piano-c4.adp', $00
 couldNotOpenStr:
 .dc.b 'Could not open PDX file', $0d, $0a, $00
 openedFileStr:
 .dc.b 'Opened PDX file', $0d, $0a, $00
+dmaIntHandlerStr:
+.dc.b 'DMA Interrupt Handler', $0d, $0a, $00
+dmaErrIntHandlerStr:
+.dc.b 'DMA Error Interrupt Handler', $0d, $0a, $00
 crlf:
 .dc.b $0d, $0a, $00
 
@@ -301,7 +314,7 @@ cer10001: .dc.b 'software forced stop', $0d, $0a, $00
 
 buf:
 .ds.b 32
-pdxFd:
+adpFd:
 .ds.w 1
 sampleOffset:
 .ds.l 1
@@ -309,6 +322,12 @@ sampleSize:
 .ds.l 1
 sampleBlock:
 .ds.l 1
+
+oldDMACInt:
+.ds.l 1
+oldDMACErrInt:
+.ds.l 1
+
 WORK_SIZE:
 
 .end
