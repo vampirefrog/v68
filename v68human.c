@@ -38,24 +38,36 @@ void v68_human_init() {
 	m68k_write_memory_32(0xA0, TRAP8_WORK);        /* trap8 */
 	m68k_write_memory_32(0x118, 0);                /* vdisp */
 	m68k_write_memory_32(0x138, 0);                /* crtc */
-	m68k_write_memory_16(HUMAN_WORK    , 0x4e73);  /* 0x4e73 = rte */
-	m68k_write_memory_16(HUMAN_WORK + 2, 0x4e75);  /* 0x4e75 = rts */
-	m68k_write_memory_16(HUMAN_WORK + 4, 0x4e72);  /* 0x4e75 = stop */
-	m68k_write_memory_16(HUMAN_WORK + 6, 0x2000);  /* 0x2000 = SR S=1 */
-	m68k_write_memory_16(HUMAN_WORK + 8, 0x60fa);  /* 0x4e75 = bra -4. */
 
-	/* IOCSコールベクタの設定 */
-	for(int i = 0; i < 256; i ++ ) {
-		m68k_write_memory_32(0x400 + i * 4, HUMAN_WORK + 2);
+
+	uint16_t human_work[] = {
+		/* HUMAN_WORK + 0x00: Default exception handler */
+		0x4e73,                         /* rte                        */
+
+		/* HUMAN_WORK + 0x02: Default subroutine handler */
+		0x4e75,                         /* rts                        */
+
+		/* HUMAN_WORK + 0x04: Stop loop */
+		0x4e72, 0x2000,                 /* stop $2000                 */
+		0x60fa,                         /* bra -4                     */
+	};
+
+	for(int i = 0; i < sizeof(human_work) / sizeof(human_work[0]); i++) {
+		m68k_write_memory_16(HUMAN_WORK + i * 2, human_work[i]);
 	}
 
-	/* IOCSワークの設定 */
-	m68k_write_memory_16(0x970, 79);       /* 画面の桁数-1 */
-	m68k_write_memory_16(0x972, 24);       /* 画面の行数-1 */
+	/* IOCS call vector setting */
+	for(int i = 0; i < 256; i++) {
+		m68k_write_memory_32(0x400 + i * 4, HUMAN_WORK + 0x02);
+	}
 
-	/* DOSコールベクタの設定 */
-	for(int i = 0; i < 256; i ++ ) {
-		m68k_write_memory_32(0x1800 + i * 4, HUMAN_WORK + 2);
+	/* IOCS work setting */
+	m68k_write_memory_16(0x970, 79);       /* Number of columns on screen -1 */
+	m68k_write_memory_16(0x972, 24);       /* Number of lines on screen -1 */
+
+	/* DOS call vector setting */
+	for(int i = 0; i < 256; i++) {
+		m68k_write_memory_32(0x1800 + i * 4, HUMAN_WORK + 0x02);
 	}
 
 	FLAG_S = 0;
