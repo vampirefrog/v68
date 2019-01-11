@@ -29,6 +29,7 @@ int v68_init(int clock, int ram_size, int sample_rate) {
 	m68k_set_cpu_type(M68K_CPU_TYPE_68000);
 	m68k_pulse_reset();
 
+	v68_ipl_init();
 	v68_periph_init();
 	v68_io_init();
 	v68_human_init();
@@ -82,45 +83,89 @@ int v68_fill_buffer(int16_t *bufL, int16_t *bufR, int samples) {
 }
 
 unsigned int m68k_read_memory_8(unsigned int addr) {
-	if(addr >= 0x00e80000 && addr < 0x00eb0000)
-		return v68_read_periph_8(addr);
-	else if(addr > v68.ram_size) {
-		verbose2("Could not read RAM at 0x%08x\n", addr);
+	// addr &= 0x00ffffff;
+
+	if(addr >= 0x00fe0000 && addr <= 0x00ffffff) {
+		uint8_t r = v68_ipl_read_8(addr);
+		verbose3("READ8 IPL 0x%08x = 0x%02x\n", addr, r);
+		return r;
+	}
+
+	if(addr >= 0x00e80000 && addr < 0x00eb0000) {
+		uint8_t r = v68_read_periph_8(addr);
+		verbose3("READ8 PERIPH 0x%08x = 0x%02x\n", addr, r);
+		return r;
+	}
+
+	if(addr >= v68.ram_size) {
+		verbose2("READ8 ERROR 0x%08x\n", addr);
 		return 0;
 	}
-	unsigned int i = v68.ram[addr];
-	verbose3("READ8  @0x%08x = 0x%02x\n", addr, i);
-	return i;
+
+	uint8_t r = v68.ram[addr];
+	verbose3("READ8 RAM 0x%08x = 0x%02x\n", addr, r);
+	return r;
 }
 
 unsigned int  m68k_read_memory_16(unsigned int addr) {
-	if(addr >= 0x00e80000 && addr < 0x00eb0000) return v68_read_periph_16(addr);
-	else if(addr > v68.ram_size) {
-		verbose2("Could not read RAM at 0x%08x\n", addr);
+	// addr &= 0x00ffffff;
+
+	if(addr >= 0x00fe0000 && addr <= 0x00ffffff) {
+		uint16_t r = v68_ipl_read_16(addr);
+		verbose3("READ16 IPL 0x%08x = 0x%04x\n", addr, r);
+		return r;
+	}
+
+	if(addr >= 0x00e80000 && addr < 0x00eb0000) {
+		uint16_t r = v68_read_periph_16(addr);
+		verbose3("READ16 PERIPH 0x%08x = 0x%04x\n", addr, r);
+		return r;
+	}
+
+	if(addr >= v68.ram_size - 1) {
+		verbose2("READ16 ERROR 0x%08x\n", addr);
 		return 0;
 	}
-	unsigned int i = (v68.ram[addr] << 8) | v68.ram[addr + 1];
-	verbose3("READ16 @0x%08x = 0x%04x\n", addr, i);
-	return i;
+
+	uint16_t r = (v68.ram[addr] << 8) | v68.ram[addr + 1];
+	verbose3("READ16 RAM 0x%08x = 0x%04x\n", addr, r);
+	return r;
 }
 
 unsigned int  m68k_read_memory_32(unsigned int addr) {
-	if(addr >= 0x00e80000 && addr < 0x00eb0000) return v68_read_periph_32(addr);
-	else if(addr > v68.ram_size) {
-		verbose2("Could not read RAM at 0x%08x\n", addr);
+	// addr &= 0x00ffffff;
+
+	if(addr >= 0x00fe0000 && addr <= 0x00ffffff) {
+		uint32_t r = v68_ipl_read_32(addr);
+		verbose3("READ32 IPL 0x%08x = 0x%08x\n", addr, r);
+		return r;
+	}
+
+	if(addr >= 0x00e80000 && addr < 0x00eb0000) {
+		uint32_t r = v68_read_periph_32(addr);
+		verbose3("READ32 PERIPH 0x%08x = 0x%08x\n", addr, r);
+		return r;
+	}
+
+	if(addr > v68.ram_size) {
+		verbose2("READ32 ERROR 0x%08x\n", addr);
 		return 0;
 	}
-	unsigned int i = (v68.ram[addr] << 24) | (v68.ram[addr+1] << 16) | (v68.ram[addr+2] << 8) | v68.ram[addr+3];
-	verbose3("READ32 @0x%08x = 0x%08x\n", addr, i);
-	return i;
+
+	uint32_t r = (v68.ram[addr] << 24) | (v68.ram[addr+1] << 16) | (v68.ram[addr+2] << 8) | v68.ram[addr+3];
+	verbose3("READ32 @0x%08x = 0x%08x\n", addr, r);
+	return r;
 }
 
 void m68k_write_memory_8(unsigned int addr, unsigned int data) {
-	verbose3("WRITE8  @0x%08x = %02x\n", addr, data);
+	// addr &= 0x00ffffff;
+
+	verbose3("WRITE8 0x%08x = %02x\n", addr, data);
 	if(addr >= 0x00e80000 && addr < 0x00eb0000) {
 		v68_write_periph_8(addr, data);
 		return;
-	} else if(addr > v68.ram_size) {
+	}
+	if(addr > v68.ram_size) {
 		verbose2("Could not write RAM at 0x%08x = 0x%02x\n", addr, data);
 		return;
 	}
@@ -128,11 +173,14 @@ void m68k_write_memory_8(unsigned int addr, unsigned int data) {
 }
 
 void m68k_write_memory_16(unsigned int addr, unsigned int data) {
-	verbose3("WRITE16 @0x%08x = %04x\n", addr, data);
+	// addr &= 0x00ffffff;
+
+	verbose3("WRITE16 0x%08x = %04x\n", addr, data);
 	if(addr >= 0x00e80000 && addr < 0x00eb0000) {
 		v68_write_periph_16(addr, data);
 		return;
-	} else if(addr > v68.ram_size) {
+	}
+	if(addr > v68.ram_size) {
 		verbose2("Could not write RAM at 0x%08x = 0x%04x\n", addr, data);
 		return;
 	}
@@ -141,11 +189,14 @@ void m68k_write_memory_16(unsigned int addr, unsigned int data) {
 }
 
 void m68k_write_memory_32(unsigned int addr, unsigned int data) {
-	verbose3("WRITE32 @0x%08x = %08x\n", addr, data);
+	// addr &= 0x00ffffff;
+
+	verbose3("WRITE32 0x%08x = %08x\n", addr, data);
 	if(addr >= 0x00e80000 && addr < 0x00eb0000) {
 		v68_write_periph_32(addr, data);
 		return;
-	} else if(addr > v68.ram_size) {
+	}
+	if(addr > v68.ram_size) {
 		verbose2("Could not write RAM at 0x%08x = 0x%08x\n", addr, data);
 		return;
 	}
