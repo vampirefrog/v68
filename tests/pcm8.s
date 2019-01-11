@@ -10747,15 +10747,15 @@ EntryPoint:									;006512
 	pea.l	(HelloString,pc)			;$487a,$03d4		;006524
 	DOS	_PRINT					;$ff09			;006528
 	addq.l	#4,sp					;$588f			;00652a
-	bsr.w	L006616					;$6100,$00e8		;00652c
-	bmi.s	L006570					;$6b3e			;006530
+	bsr.w	ParseCmdlineArgs			;$6100,$00e8		;00652c
+	bmi.s	ErrExitPrintHelp			;$6b3e			;006530
 	beq.s	L0065a0					;$676c			;006532
-	bsr.w	L0065f2					;$6100,$00bc		;006534
-	bne.s	L00656a					;$6630			;006538
+	bsr.w	CheckPCM8Loaded				;$6100,$00bc		;006534
+	bne.s	ErrExitNotLoaded			;$6630			;006538
 	moveq.l	#$ff,d0					;$70ff			;00653a
 	trap	#2					;$4e42			;00653c
 	tst.l	d0					;$4a80			;00653e
-	bmi.s	L006550					;$6b0e			;006540
+	bmi.s	ErrExitCannotUnlock			;$6b0e			;006540
 	pea.l	(CanceledString,pc)			;$487a,$04dd		;006542
 L006546:									;006546
 	DOS	_PRINT					;$ff09			;006546
@@ -10764,34 +10764,34 @@ L006546:									;006546
 	addq.l	#4,sp					;$588f			;00654c
 	DOS	_EXIT					;$ff00			;00654e
 
-L006550:									;006550
+ErrExitCannotUnlock:								;006550
 	addq.w	#1,d0					;$5240			;006550
-	bmi.s	L00655a					;$6b06			;006552
+	bmi.s	ErrExitVectorInUse			;$6b06			;006552
 	pea.l	(CannotUnlockString,pc)			;$487a,$0558		;006554
-	bra.s	L006586					;$602c			;006558
-L00655a:									;00655a
+	bra.s	PrintErrAndExit				;$602c			;006558
+ErrExitVectorInUse:								;00655a
 	addq.w	#1,d0					;$5240			;00655a
-	bmi.s	L006564					;$6b06			;00655c
+	bmi.s	ErrExitCannotCancel			;$6b06			;00655c
 	pea.l	(VectorAlreadyInUseString,pc)		;$487a,$0577		;00655e
-	bra.s	L006586					;$6022			;006562
-L006564:									;006564
+	bra.s	PrintErrAndExit				;$6022			;006562
+ErrExitCannotCancel:								;006564
 	pea.l	(CannotCancelString,pc)			;$487a,$05a2		;006564
-	bra.s	L006586					;$601c			;006568
-L00656a:									;00656a
+	bra.s	PrintErrAndExit				;$601c			;006568
+ErrExitNotLoaded:								;00656a
 	pea.l	(NotLoadedString,pc)			;$487a,$04ca		;00656a
-	bra.s	L006586					;$6016			;00656e
-L006570:									;006570
+	bra.s	PrintErrAndExit				;$6016			;00656e
+ErrExitPrintHelp:								;006570
 	pea.l	(HelpString,pc)				;$487a,$03c3		;006570
-	bra.s	L006586					;$6010			;006574
-L006576:									;006576
+	bra.s	PrintErrAndExit				;$6010			;006574
+ErrExitOutOfMem:								;006576
 	pea.l	(OutOfMemoryString,pc)			;$487a,$05a7		;006576
-	bra.s	L006586					;$600a			;00657a
-L00657c:									;00657c
+	bra.s	PrintErrAndExit				;$600a			;00657a
+ErrExitAlreadyLoaded:								;00657c
 	pea.l	(AlreadyLoadedString,pc)		;$487a,$04d5		;00657c
-	bra.s	L006586					;$6004			;006580
-L006582:									;006582
+	bra.s	PrintErrAndExit				;$6004			;006580
+ErrExitCouldNotLoad:								;006582
 	pea.l	(CouldNotLoadString,pc)			;$487a,$04ee		;006582
-L006586:									;006586
+PrintErrAndExit:								;006586
 	DOS	_PRINT					;$ff09			;006586
 	addq.l	#4,sp					;$588f			;006588
 	DOS	_SUPER					;$ff20			;00658a
@@ -10801,17 +10801,17 @@ L006586:									;006586
 
 L006594:									;006594
 	bsr.w	L00681e					;$6100,$0288		;006594
-	bmi.s	L00657c					;$6be2			;006598
+	bmi.s	ErrExitAlreadyLoaded			;$6be2			;006598
 	pea.l	(SettingChangedString,pc)		;$487a,$04f7		;00659a
 	bra.s	L006546					;$60a6			;00659e
 L0065a0:									;0065a0
-	bsr.s	L0065f2					;$6150			;0065a0
+	bsr.s	CheckPCM8Loaded				;$6150			;0065a0
 	beq.s	L006594					;$67f0			;0065a2
 	tst.l	d7					;$4a87			;0065a4
-	bmi.s	L006576					;$6bce			;0065a6
+	bmi.s	ErrExitOutOfMem				;$6bce			;0065a6
 	move.l	($0088),d0				;$2038,$0088		;0065a8
 	cmpi.l	#$00f00000,d0				;$0c80,$00f0,$0000	;0065ac
-	bcs.s	L006582					;$65ce			;0065b2
+	bcs.s	ErrExitCouldNotLoad			;$65ce			;0065b2
 	bsr.w	L0068cc					;$6100,$0316		;0065b4
 	lea.l	(EntryPoint),a0				;$41f9,$0000,$6512	;0065b8
 	lea.l	(End+$019b02),a1			;$43f9,$0002,$0850	;0065be
@@ -10826,7 +10826,7 @@ L0065d4:									;0065d4
 	bsr.w	Sub006b3e				;$6100,$0568		;0065d4
 	bsr.w	L006886					;$6100,$02ac		;0065d8
 	tst.l	d0					;$4a80			;0065dc
-	bmi.s	L006582					;$6ba2			;0065de
+	bmi.s	ErrExitCouldNotLoad			;$6ba2			;0065de
 	bsr.w	L00681e					;$6100,$023c		;0065e0
 	DOS	_SUPER					;$ff20			;0065e4
 	addq.l	#4,sp					;$588f			;0065e6
@@ -10834,7 +10834,7 @@ L0065d4:									;0065d4
 	move.l	#$00020850,-(sp)			;$2f3c,$0002,$0850	;0065ea
 	DOS	_KEEPPR					;$ff31			;0065f0
 
-L0065f2:									;0065f2
+CheckPCM8Loaded:								;0065f2
 	movea.l	($0088),a0				;$2078,$0088		;0065f2
 	cmpi.w	#$5043,(-$0008,a0)	;'PC'		;$0c68,$5043,$fff8	;0065f6
 	bne.s	L006614					;$6616			;0065fc
@@ -10847,7 +10847,7 @@ L0065f2:									;0065f2
 L006614:									;006614
 	rts						;$4e75			;006614
 
-L006616:									;006616
+ParseCmdlineArgs:								;006616
 	addq.l	#1,a2					;$528a			;006616
 	lea.l	(L0067bc,pc),a0				;$41fa,$01a2		;006618
 L00661c:									;00661c
