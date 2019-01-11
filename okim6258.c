@@ -105,7 +105,7 @@ static int16_t clock_adpcm(struct okim6258 *chip, uint8_t nibble) {
 		chip->step = 0;
 
 	/* return the signal scaled up to 32767 */
-	return chip->signal << 4;
+	return chip->signal << 3;
 }
 
 /**********************************************************************************************
