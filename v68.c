@@ -54,6 +54,8 @@ int v68_fill_buffer(int16_t *bufL, int16_t *bufR, int samples) {
 	v68.buf_remaining = samples;
 	v68.bufL = bufL;
 	v68.bufR = bufR;
+	memset(bufL, 0, samples * sizeof(*bufL));
+	memset(bufR, 0, samples * sizeof(*bufR));
 
 	int64_t x = (int64_t)samples * v68.cpu_clock + v68.cpu_cycle_remainder;
 	int cpu_tstates = x / v68.sample_rate;
