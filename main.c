@@ -15,7 +15,7 @@
 #define BUF_SIZE 4096
 #define SAMPLE_RATE 44100
 #define V68_CLOCK 16000000
-#define V68_RAM 2*1024*1024
+#define V68_RAM 8*1024*1024
 
 int opt_utf8 = 0;
 int opt_verbosity = 0;
