@@ -5,9 +5,12 @@
 #include <limits.h>
 
 #include "v68.h"
+#include "v68ipl.h"
 #include "v68io.h"
 #include "v68periph.h"
+#include "v68iocscall.h"
 #include "musashi/m68kcpu.h"
+
 
 struct v68 v68;
 
@@ -33,6 +36,7 @@ int v68_init(int clock, int ram_size, int sample_rate) {
 	v68_periph_init();
 	v68_io_init();
 	v68_human_init();
+	v68_iocs_init();
 
 	return 0;
 }
@@ -219,17 +223,14 @@ unsigned int m68k_read_disassembler_32 (unsigned int addr) {
 	return m68k_read_memory_32(addr);
 }
 
-void v68_iocs_call(uint16_t instr);
 int v68_trap(int which) {
+	verbose1("v68_trap which=%d d0=0x%08x\n", which, m68k_get_reg(NULL, M68K_REG_D0));
 	switch(which) {
-		case 15: {
-				/* IOCS */
-				v68_iocs_call(m68k_get_reg(NULL, M68K_REG_D0));
-				return 0;
-			}
-			break;
+		case 15:
+			/* IOCS */
+			return v68_iocs_call(m68k_get_reg(NULL, M68K_REG_D0));
 		default:
-			verbose2("v68_trap %d\n", which);
+			verbose2("v68_trap unknown #%d d0=0x%08x\n", which, m68k_get_reg(0, M68K_REG_D0));
 	}
 	return 1;
 }

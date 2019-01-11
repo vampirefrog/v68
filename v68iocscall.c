@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/sysinfo.h>
 #include "v68.h"
+#include "v68iocscall.h"
 #include "musashi/m68k.h"
 #include "musashi/m68kcpu.h"
 #include "sjis.h"
@@ -463,18 +464,38 @@ static const char *iocs_call_names[256] = {
 	/* 0xff */ "_ABORTJOB",
 };
 
+void v68_iocs_init() {
+	/* Set the IOCS call addresses at 0x400 */
+	for(int i = 0; i < 256; i++) {
+		m68k_write_memory_32(0x400 + i * 4, 0xff0000);
+	}
+}
+
 int v68_iocs_call(uint16_t instr) {
 	uint8_t call = instr & 0xff;
+	uint32_t call_addr = m68k_read_memory_32(0x400 + call * 4);
 
 	if(v68.log_calls)
-		printf("V68 IOCS CALL %04x %s\n", instr, iocs_call_names[call]);
+		printf("v68_iocs_call call=0x%02x %s call_addr=0x%08x\n", instr, iocs_call_names[call], call_addr);
+
+	if(call_addr < 0xff0000) {/* Only implement calls that aren't overridden */
+		uint16_t sr = m68k_get_reg(0, M68K_REG_SR);
+		uint32_t sp = m68k_get_reg(0, M68K_REG_SP);
+		verbose2("v68_iocs_call call_addr=0x%08x implemented sp=0x%08x\n", call_addr, sp);
+		sp -= 4;
+		m68k_set_reg(M68K_REG_SR, sr | 0x2000);
+		uint32_t pc = m68k_get_reg(0, M68K_REG_PC);
+		m68k_write_memory_32(sp, pc);
+		m68k_set_reg(M68K_REG_SP, sp);
+		m68k_set_reg(M68K_REG_PC, call_addr);
+		return 0;
+	}
 
 	switch(call) {
 		case IOCS_CALL_B_PUTC: {
 				uint16_t chr = m68k_get_reg(0, M68K_REG_D0);
 				uint8_t chrbuf[2] = { chr >> 8, chr };
 				sjis_print_utf8(chrbuf[0] ? chrbuf : chrbuf+1, chrbuf[0] ? 2 : 1);
-
 				m68k_set_reg(M68K_REG_D0, 0x00100010);
 			}
 			break;
