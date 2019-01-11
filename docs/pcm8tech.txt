@@ -174,7 +174,9 @@ Ret:    d0.l = Volume / frequency / localization
 End                      Func code $0100
 ----------------------------------------
 
-Func:   The chain operation of all the channels is canceled and the channel operation is stopped as soon as the output of the currently output data block is completed.
+Func:   The chain operation of all the channels is canceled and the channel
+        operation is stopped as soon as the output of the currently output
+        data block is completed.
 
         If it is paused, immediately stop the operation of all channels.
 
@@ -183,7 +185,8 @@ Call:   d0.w = $0100
 Ret:    d0.l = 0        Success
 
 Note:   Note that it is not an immediate termination.
-        If you want to terminate completely immediately, issue this call after pause ($ 0101).
+        If you want to terminate completely immediately, issue this call
+        after pause ($0101).
         During single tone IOCS output, this call is ignored.
 
 ----------------------------------------
@@ -201,7 +204,7 @@ Ret:    d0.l = 0        Success
 Note:   During single tone IOCS output, this call is ignored.
 
 ----------------------------------------
-Unpause                 Func code $0102
+Unpause                  Func code $0102
 ----------------------------------------
 
 Func:   Cancel the paused state.

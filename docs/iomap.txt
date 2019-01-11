@@ -2,25 +2,25 @@
 
 ==============================================================================
 
-・グラフィック VRAM
+・Graphics VRAM
 
   G-VRAM は実画面サイズ及び色数によって構造が異なり、合計 512KB の VRAM が分割
 されて割り当てられている. ドットの表現は垂直型で、どのモードでも 1 ドットは必
 ず 1 ワードで表し、16/256 色表示モードではそのうち下位の 4/8 ビットのみが有効
 となる.
 
-        X = 通常の設定モードでの X 座標
-        Y = 〃                   Y 座標
-        P = プレーン番号
-        ADR = 65536 色表示モードで (X,Y) 点をアクセスする時のアドレス
-        BIT = 〃                                     ビット位置
+        X = X coordinate in normal setting mode
+        Y = Y coordinate 〃
+        P = Plane number
+        ADR = Address when accessing (X, Y) point in 65536 color display mode
+        BIT = 〃                                     Bit position
 
-実画面512×512ドット、65536色表示:
+Real screen 512 × 512 dots, 65536 color display:
         有効ビット   下位 16 ビット
         1 ライン   1024 バイト(512 ワード)
         ページ 0   $c00000〜$c7ffff
 
-実画面512×512ドット、256色表示:
+Real screen 512 × 512 dots, 256 color display:
         有効ビット   下位 8 ビット
         1 ライン   1024 バイト(512 ワード)
         ページ 0   $c00000〜$c7ffff
@@ -29,7 +29,7 @@
         ADR = $c00000＋Y×1024＋X×2
         BIT = P×8 〜 P×8＋7 の 8 ビット
 
-実画面512×512ドット、16色表示:
+Real screen 512 x 512 dots, 16 color display:
         有効ビット   下位 4 ビット
         1 ライン   1024 バイト(512 ワード)
         ページ 0   $c00000〜$c7ffff
@@ -40,7 +40,7 @@
         ADR = $c00000＋Y×1024＋X×2
         BIT = P×4 〜 P×4＋3 の 4 ビット
 
-実画面1024×1024ドット、16色表示:
+Real screen 1024 × 1024 dots, 16 color display:
         有効ビット   下位 4 ビット
         1 ライン   2048 バイト(1024 ワード)
         ページ 0   $c00000〜$dfffff
@@ -51,17 +51,18 @@
 
 ==============================================================================
 
-・テキスト VRAM
+・Text VRAM
 
-  T-VRAM は実画面サイズ1024×1024、16 色表示に固定で 4 プレーン合計 512KB の
-VRAM が割り当てられている. ドットの表現は水平型で、1 ワードは横 16 ドットの各
-プレーンにおけるパレットコードを表わす.
+The T-VRAM has a real screen size of 1024 × 1024, fixed to 16 color display,
+and a total of 512 KB of VRAM is allocated to 4 planes. The expression of the
+dot is a horizontal type, and one word represents the pallet code in each
+plane of 16 horizontal dots.
 
-        1 ライン   128 バイト(64 ワード)
-        プレーン 0  $e00000〜$e1ffff
-        プレーン 1  $e20000〜$e3ffff
-        プレーン 2  $e40000〜$e5ffff
-        プレーン 3  $e60000〜$e7ffff
+        1 line   128 bytes (64 words)
+        Plane 0  $e00000〜$e1ffff
+        Plane 1  $e20000〜$e3ffff
+        Plane 2  $e40000〜$e5ffff
+        Plane 3  $e60000〜$e7ffff
 
 ==============================================================================
 
@@ -71,18 +72,18 @@ VRAM が割り当てられている. ドットの表現は水平型で、1 ワ�
 
 
 address size    R/W
-$e80000 1.w       W     R00     Horizontal total        ┐
-$e80002 1.w       W     R01     水平同期終了位置        │Horizontal timing control
-$e80004 1.w       W     R02     水平表示開始位置        │
-$e80006 1.w       W     R03     水平表示終了位置        ┘
-$e80008 1.w       W     R04     垂直トータル            ┐
-$e8000a 1.w       W     R05     垂直同期終了位置        │Vertical timing control
-$e8000c 1.w       W     R06     垂直表示開始位置        │
-$e8000e 1.w       W     R07     垂直表示終了位置        ┘
-$e80010 1.w       W     R08     外部同期水平アジャスト  : Horizontal position fine adjustment
+$e80000 1.w       W     R00     Horizontal total                          ┐
+$e80002 1.w       W     R01     Horizontal end position                   │Horizontal timing control
+$e80004 1.w       W     R02     Horizontal indicates the starting position│
+$e80006 1.w       W     R03     Horizontal indicates the final position   ┘
+$e80008 1.w       W     R04     Vertical total                                ┐
+$e8000a 1.w       W     R05     Vertical synchronization end position         │Vertical timing control
+$e8000c 1.w       W     R06     Vertical position                             │
+$e8000e 1.w       W     R07     Vertical representation of the final position ┘
+$e80010 1.w       W     R08     External synchronization horizontal adjustment  : Horizontal position fine adjustment
 $e80012 1.w       W     R09     Raster number           : For raster interrupt
-$e80014 1.w       W     R10     X 位置                  ┐Text screen
-$e80016 1.w       W     R11     Y 位置                  ┘scrolling
+$e80014 1.w       W     R10     X position                  ┐Text screen
+$e80016 1.w       W     R11     Y position                  ┘scrolling
 $e80018 1.w       W     R12     X0                      ┐
 $e8001a 1.w       W     R13     Y0                      │
 $e8001c 1.w       W     R14     X1                      │
@@ -101,7 +102,7 @@ $e80480 1.w     R/W     Behavior Image capture / fast clear / raster copy contro
 CRTC R00($e80000):
         bit 15                           8   7                           0
           ┌───────────────┬───────────────┐
-          │                              │                水平トータル  │
+          │                              │            Horizontal total  │
           └───────────────┴───────────────┘
                 水平同期期間×水平表示ドット数
         R00 = ───────────────── -1
@@ -361,7 +362,7 @@ $e82500 1.w     R1      priority control
 $e82600 1.w     R2      ON / OFF control/special priority
 
 
-グラフィックパレット($e82000):
+Graphic palette($e82000):
           グラフィックパレットは 16/256色表示モードと 65536色表示モードでは構
         造が異なる.
 
@@ -440,7 +441,7 @@ VC R0($e82400):
           └─────────────────────────┴─┴───┘
                                                                 SIZ
 
-        bit 2    SIZ    実画面サイズ
+        bit 2    SIZ    Actual screen size
                         %0  :  512× 512ドット
                         %1  : 1024×1024ドット
         bit 1〜0 COL     色モード
@@ -448,7 +449,7 @@ VC R0($e82400):
                         %01 :   256色
                         %10 : 未定義
                         %11 : 65536色
-        ※CRTC R20 のビット 10〜8 と同じ値を設定すること.
+        ※Set the same value as bits 10 to 8 of CRTC R20.
 
 VC R1($e82500):
         bit 15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0
@@ -514,12 +515,14 @@ VC R2($e82600):
 
 ・DMAC
 
-The HD63450 has four channels, and at X680x0, channels # 0, # 1, and # 3 are assigned to FD, HD, and ADPCM, respectively.
-Channel # 2 is released to the user, so REQ (DMA transfer request signal), ACK (response signal), PCL (general purpose input signal) etc. are wired in the expansion slot, so transfer between memory and memory or expansion board It is available.
+The HD63450 has four channels, and at X680x0, channels #0, #1, and #3 are
+assigned to FD, HD, and ADPCM, respectively. Channel # 2 is released to the
+user, so REQ (DMA transfer request signal), ACK (response signal), PCL
+(general purpose input signal) etc. are wired in the expansion slot, so
+transfer between memory and memory or expansion board It is available.
 
-Registers of the DMAC exist for each channel from $e84000 to $40 bytes at a time.
-However, GCR (General Control Register) is only in channel # 3.
-
+Registers of the DMAC exist for each channel from $e84000 to $40 bytes
+at a time. However, GCR (General Control Register) is only in channel #3.
 
 address channel
 $e84000 #0      FDD
@@ -624,12 +627,12 @@ DMAC DCR(+$04):
           └───┴───┴─┴─┴───┘
                             DPS
 
-        bit 7〜6 XRM     External Request Mode
+        bit 7〜6 XRM    External Request Mode
                         %00 : Burst transfer mode
                         %01 : (undefined)
                         %10 : Hold-free cycle steal mode
                         %11 : With hold 〃
-        bit 5〜4 DTYP    device type
+        bit 5〜4 DTYP   device type
                         %00 : 68000 Bus type             ┐ Dual address mode
                         %01 : 6800  Bus type             ┘
                                           ___
@@ -747,14 +750,14 @@ DMAC MFC(+$29):
 
         bit 2〜0 FC2〜FC0
                          Memory function code
-                         % 000: (not used)
-                         % 001: User data
-                         % 010: User program
-                         % 011: (not used)
-                         % 100: (not used)
-                         % 101: Supervisor data
-                         % 110: Supervisor program
-                         % 111: interrupt acknowledge
+                         %000: (not used)
+                         %001: User data
+                         %010: User program
+                         %011: (not used)
+                         %100: (not used)
+                         %101: Supervisor data
+                         %110: Supervisor program
+                         %111: interrupt acknowledge
 
 DMAC CPR(+$2d):
         bit  7                   2   1   0
@@ -781,15 +784,15 @@ DMAC GCR(+$3f):
 
         bit 3 to 2 BT burst time
                          (Number of DMA clock cycles per burst)
-                         % 00: 16 clocks
-                         % 01: 32 〃
-                         % 10: 64 "
-                         % 11: 128 〃
+                         %00: 16 clocks
+                         %01: 32 〃
+                         %10: 64 "
+                         %11: 128 〃
         bit 1 to 0 BR Bandwidth Threshold (band occupancy)
-                         % 00: 50.00%
-                         % 01: 25.00%
-                         % 10: 12.50%
-                         % 11: 6.25%
+                         %00: 50.00%
+                         %01: 25.00%
+                         %10: 12.50%
+                         %11: 6.25%
         *Only affects the channel of the limited speed auto request mode.
 
 
@@ -831,20 +834,19 @@ offset size
 
 address size    R/W
 $e86001 1.b       W     Area set register
-$eaff81 1.b       W     Extended area set register 0($200000〜$3fffff に対応)
+$eaff81 1.b       W     Extended area set register 0(Corresponds to $200000〜$3fffff)
 $eaff83 1.b       W     〃                        1($400000〜$5fffff 〃)
 $eaff85 1.b       W     〃                        2($600000〜$7fffff 〃)
 $eaff87 1.b       W     〃                        3($800000〜$9fffff 〃)
 $eaff89 1.b       W     〃                        4($a00000〜$bfffff 〃)
 
 
-エリアセットレジスタ($e86001):
-          0 番地からどれだけのメモリ領域をスーパバイザ領域にするかを 8KB 単位
-        で指定する. 0 番地から、((設定値+1)×8192-1)までのアドレスがスーパバ
-        イザ領域となり、最大で 2MB(($ff+1)×8192-1)の範囲が指定できる.
-          本体リセット時、このレジスタには 0 が設定される.
+Area set register($e86001):
+          Specify how much memory area from address 0 should be supervisor area in 8 KB units.
+          Addresses from address 0 to ((set value + 1) × 8192 - 1) are supervisor areas, and a range up to 2 MB (($ ff + 1) × 8192 - 1) can be specified.
+          0 is set to this register when the main unit is reset.
 
-拡張エリアセットレジスタ:
+Extended area set register:
           $200000 番地から 256KB 単位でスーパバイザ領域にするかどうかを指定す
         る. レジスタ #0 の bit 0 から bit 7、…、レジスタ #4 の bit 0 から bit
         7 の順に各ビットがそれぞれ $200000〜$23ffff、$240000〜$27ffff、…、
@@ -865,35 +867,34 @@ $eaff89 1.b       W     〃                        4($a00000〜$bfffff 〃)
 
 ・MFP
 
-  マルチファンクションペリフェラル MC68901 は 4 個のタイマ、1 チャンネルのシリ
-アルポート(USART)、8 ビット分の汎用 I/O ポート(GPIP)を持っている.
-  X680x0/Human68k での割り当ては以下のようになっている.
+  Multifunction Peripheral MC68901 has 4 timers, 1 channel serial port (USART), and 8 bits general purpose I / O port (GPIP).
+  The allocation in X680x0 / Human68k is as follows.
 
-        タイマ   A       V-DISP(垂直表示期間)信号による割り込み
-        〃      B       シリアルポートのクロック生成
-        〃      C       カーソル点滅/FDD 制御等の割り込み
-        〃      D       BG プロセス切り換え用の割り込み
-        シリアルポート キーボード入出力
-        汎用 I/O ポート      各種信号による割り込み
+        Timer   A       Interrupt by V-DISP (vertical display period) signal
+        〃      B       Serial port clock generation
+        〃      C       Cursor blink / FDD control interrupt
+        〃      D       Interrupt for BG process switching
+        Serial port keyboard I / O
+        General purpose I / O port      Interruption by various signals
 
 
 address size    R/W
-$e88001 1.b     R       GPIP    汎用 I/O レジスタ               ┐
-$e88003 1.b     R/W     AER     アクティブエッジレジスタ        │GPIP control
-$e88005 1.b     R/W     DDR     データ方向レジスタ              ┘
-$e88007 1.b     R/W     IERA    割り込みイネーブルレジスタ    A ┐
+$e88001 1.b     R       GPIP    General purpose I / O register  ┐
+$e88003 1.b     R/W     AER     Active edge register            │GPIP control
+$e88005 1.b     R/W     DDR     Data direction register         ┘
+$e88007 1.b     R/W     IERA    Interrupt enable register     A ┐
 $e88009 1.b     R/W     IERB    〃                            B │
-$e8800b 1.b     R/W     IPRA    割り込みペンディングレジスタ  A │
+$e8800b 1.b     R/W     IPRA    Interrupt pending register    A │
 $e8800d 1.b     R/W     IPRB    〃                            B │
-$e8800f 1.b     R/W     ISRA    割り込みインサービスレジスタ  A │Interrupt control
+$e8800f 1.b     R/W     ISRA    Interrupt in service register A │Interrupt control
 $e88011 1.b     R/W     ISRB    〃                            B │
-$e88013 1.b     R/W     IMRA    割り込みマスクレジスタ        A │
+$e88013 1.b     R/W     IMRA    Interrupt mask register       A │
 $e88015 1.b     R/W     IMRB    〃                            B │
-$e88017 1.b     R/W     VR      ベクタレジスタ                  ┘
-$e88019 1.b     R/W     TACR    タイマ A コントロールレジスタ   ┐
-$e8801b 1.b     R/W     TBCR    タイマ B 〃                     │
-$e8801d 1.b     R/W     TCDCR   タイマ C&D コントロールレジスタ │
-$e8801f 1.b     R/W     TADR    タイマ A データレジスタ         │Timer control
+$e88017 1.b     R/W     VR      Vector register                 ┘
+$e88019 1.b     R/W     TACR    Timer A control register        ┐
+$e8801b 1.b     R/W     TBCR    Timer B 〃                      │
+$e8801d 1.b     R/W     TCDCR   Timer C & D control register    │
+$e8801f 1.b     R/W     TADR    Timer A data register           │Timer control
 $e88021 1.b     R/W     TBDR    タイマ B 〃                     │
 $e88023 1.b     R/W     TCDR    タイマ C 〃                     │
 $e88025 1.b     R/W     TDDR    タイマ D 〃                     ┘
@@ -944,46 +945,46 @@ MFP GPIP($e88001):
                         %1 : 'H'(通常)
 
 MFP AER($e88003):
-        (GPIP と同様)
+        (Like GPIP)
 
-        各信号ごとに、割り込みを発生させる変化方向を設定する.
-        %0 : %0 → %1 の変化で割り込み発生
-        %1 : %1 → %0 〃
+        For each signal, set the direction of change in which an interrupt is generated.
+        %0 : Interrupt occurred when %0 → %1 change
+        %1 : 〃                      %1 → %0 〃
 
 MFP DDR($e88005):
-        (GPIP と同様)
+        (Like GPIP)
 
-        各信号ごとに、入力/出力のいずれで使うのかを設定する.
-        %0 : 入力
-        %1 : 出力
-        ※X680x0 では全て入力として使用する.
+        For each signal, set whether to use as input or output.
+        %0 : input
+        %1 : output
+        ※For X680x0, it is used as input.
 
 MFP IERA($e88007):
         bit  7   6   5   4   3   2   1   0
           ┌─┬─┬─┬─┬─┬─┬─┬─┐
           │  │  │  │  │  │  │  │  │
           └─┴─┴─┴─┴─┴─┴─┴─┘
-            │  │  │  │  │  │  │  └ タイマ B
-            │  │  │  │  │  │  └ 送信エラー
-            │  │  │  │  │  └ 送信バッファエンプティ
-            │  │  │  │  └ 受信エラー
-            │  │  │  └ 受信バッファフル
-            │  │  └ タイマ A
+            │  │  │  │  │  │  │  └ Timer B
+            │  │  │  │  │  │  └ sending error
+            │  │  │  │  │  └ Transmit buffer empty
+            │  │  │  │  └ Reception error
+            │  │  │  └ Receive buffer full
+            │  │  └ Timer A
             │  └ CIRQ(GPIP 6)
             └ H-SYNC(GPIP 7)
 
-        bit 7   CRTC H-SYNC(水平同期信号)
-        bit 6   CRTC ラスタ割り込み
-        bit 5   タイマ A
-        bit 4   MPSC 受信バッファフル(受信データ読み取り要求)
-        bit 3   〃  受信エラー
-        bit 2   〃  送信バッファエンプティ(送信データ書き込み要求)
-        bit 1   〃  送信エラー
-        bit 0   タイマ B
+        bit 7   CRTC H-SYNC(Horizontal synchronization signal)
+        bit 6   CRTC Raster interrupt
+        bit 5   Timer A
+        bit 4   MPSC receive buffer full (receive data read request)
+        bit 3   〃  Reception error
+        bit 2   〃  Transmit buffer empty (transmit data write request)
+        bit 1   〃  sending error
+        bit 0   Timer B
 
-        各割り込みの発生の許可/禁止を設定する.
-        %0 : 割り込み発生禁止
-        %1 : 〃          許可
+        Set enable / disable of generation of each interrupt.
+        %0 : Interrupt generation disabled
+        %1 : 〃                   enabled
 
 MFP IERB($e88009):
         bit  7   6   5   4   3   2   1   0
@@ -994,8 +995,8 @@ MFP IERB($e88009):
             │  │  │  │  │  │  └ EXPON(GPIP 1)
             │  │  │  │  │  └ POW SW(GPIP 2)
             │  │  │  │  └ FMIRQ(GPIP 3)
-            │  │  │  └ タイマ D
-            │  │  └ タイマ C
+            │  │  │  └ Timer D
+            │  │  └ Timer C
             │  └ V-DISP(GPIP 4)
             └ (GPIP 5)
 
@@ -1106,7 +1107,7 @@ MFP TCDCR($e8801d):
                 CC2〜CC0 DC2〜DC0
 
         bit 6〜4 CC2〜CC0
-                        タイマ C 動作モード
+                        Timer C operation mode
                         %000 : タイマストップ
                         %001 : ディレイモード  (÷  4 プリスケーラ)
                         %010 : 〃               (÷ 10 〃   )
@@ -1249,8 +1250,8 @@ MFP UDR read($e8802f):
           └─┴─────────────┘
             └ Make/Break
 
-        最後に押されたキー若しくは最後に離されたキーのキーコードが読み出される.
-        一度読んだ後も次の入力が発生するまでは、最後の入力キーコードを保持する.
+        The last pressed key or the key code of the last released key is read out.
+        The last input key code is retained until the next input occurs even after reading once.
 
         bit 7   Make/Break
                 %0 : キーが押された
@@ -1262,16 +1263,17 @@ MFP UDR write($e8802f):
           │D7│D6│D5│D4│D3│D2│D1│D0│
           └───────────────┘
 
-        キーボードへの制御コマンドを書き込む.
+        Write the control command to the keyboard.
 
 
-※スプリアス割り込み
-  MFP のレジスタを操作して割り込みを禁止する時、MPU の割り込みマスクレベルが禁
-止しようとしている割り込みを受け付ける設定であった場合、レジスタを操作した瞬間
-に割り込みが発生すると、割り込みを正しく処理できずにスプリアス割り込みが発生す
-る. これを防ぐには MPU の割り込みマスクを設定して割り込みを受け付けないように
-するか、スプリアス割り込みが呼び出されても何もせずに戻るルーチンに置き換えれば
-よい.
+※ Spurious interrupt
+  When interrupts are prohibited by manipulating registers of the MFP, if the
+interrupt mask level of the MPU is set to accept an interrupt to be inhibited,
+if an interrupt occurs at the moment of operating the register, the interrupt
+can not be processed correctly A spurious interrupt is generated. To prevent
+this, set the interrupt mask of the MPU so that it does not accept interrupts,
+or replace it with a routine returning without doing anything even if the
+spurious interrupt is called.
 
 ==============================================================================
 
@@ -1285,7 +1287,7 @@ MFP UDR write($e8802f):
         ディスプレイ制御信号を発生させる.
 
         bit 4〜0 TV CTRL Code
-                コード      名称             機能                              キー
+                コード  名称            機能                              キー
                 %00000 : ---            (無効)
                 %00001 : Vol.up         音量 up                           [↑]
                 %00010 : Vol.down       〃  down                        [↓]
@@ -1330,7 +1332,7 @@ MFP UDR write($e8802f):
           └─┴─┴─┴─┴─┴───┴─┘
                                         └ MSCTRL
 
-        マウスコントロール信号を制御する.
+        Control the mouse control signal.
 
         bit 0   MSCTRL
                 %0 : MSCTRL を 'Low' にする
@@ -1342,12 +1344,12 @@ MFP UDR write($e8802f):
           └─┴─┴─┴─┴─┴───┴─┘
                                         └ KEY EN
 
-        キーデータの送出を許可/禁止する.
-        禁止中もキースキャンは行うのでディスプレイ制御は可能.
+        Enable / disable the sending of key data.
+        While prohibited, key scan is performed so display control is possible.
 
         bit 0   KEY EN
-                %0 : キーデータ送出禁止
-                %1 : 〃            許可
+                %0 : Key data transmission disabled
+                %1 : 〃                    enabled
 
         bit  7   6   5   4   3   2   1   0
           ┌─┬─┬─┬─┬─┬─┬─┬─┐
@@ -1447,15 +1449,14 @@ MFP UDR write($e8802f):
         bit 0   かな
 
 
-※以下のコマンドは Compact キーボード用(未確認).
+※The following commands are for the Compact keyboard (unconfirmed).
 
         bit  7   6   5   4   3   2   1   0
           ┌─┬─┬─┬─┬─┬─┬─┬─┐
           │ 0│ 1│ 0│ 0│ 0│ 1│ 1│ 1│
           └─┴─┴─┴─┴─┴─┴─┴─┘
 
-        キーボードの種類を判別する. このコマンドを出力後に $fe が入力されれば
-        Compact のキーボードである.
+        Determine the type of keyboard. When this command is outputted $ fe is entered it is Compact keyboard.
 
         bit  7   6   5   4   3   2   1   0
           ┌─┬─┬─┬─┬─┬─┬─┬─┐
@@ -1463,7 +1464,7 @@ MFP UDR write($e8802f):
           └─┴─┴─┴─┴─┴─┴─┴─┘
                                         └ NUM LED
 
-        Compact キーボード上の NUM キー LED の点灯/消灯を制御する.
+        Controls the turning on / off of the NUM key LED on the Compact keyboard.
 
         bit 0   NUM LED
                 %0 : 消灯
@@ -1834,7 +1835,7 @@ $e90003 1.b     R       ステータスレジスタ
                         %1 : 〃      オーバーフロー発生
 
 
-OPM レジスタ一覧
+OPM register list
 
 レジスタ番号  内容
 $00             ---
@@ -2409,7 +2410,7 @@ IOC アクセスドライブセレクト等($e94007):
 ・SASI
 
 address size    R/W
-$e96001 1.b     R/W     SASI データ入出力
+$e96001 1.b     R/W     SASI data input / output
 $e96003 1.b     R       SASI ステータス入力
 〃      〃        W     SEL 信号 H
 $e96005 1.b       W     データ任意
@@ -3530,16 +3531,16 @@ RR10:
                         %1 : ループモードで、トランスミッタがアクティブである
 
 RR12:
-        (WR12 と同様)
-        WR12 設定値がそのまま読み出される.
+        (Like WR12)
+        WR12 set value is read out as it is.
 
 RR13:
-        (WR13 と同様)
-        WR13 設定値がそのまま読み出される.
+        (Like WR13)
+        WR13 set value is read out as it is.
 
 RR15:
-        (WR15 と同様)
-        WR15 設定値がそのまま読み出される.
+        (Like WR15)
+        WR15 set value is read out as it is.
 
 ==============================================================================
 
@@ -3666,7 +3667,7 @@ Control word mode setting ($e9a007):
 
 ==============================================================================
 
-・I/O コントローラ
+・I/O controller
 
 address size    R/W
 $e9c001 1.b     R       割り込みステータス
@@ -3753,24 +3754,24 @@ IOC 割り込みベクタ($e9c003):
 
 ==============================================================================
 
-・コプロセッサ I/O
+・Coprocessor I/O
 
 address size    R/W
-$e9e000 1.w     R       応答 CIR
-$e9e002 1.w       W     コントロール CIR
-$e9e004 1.w     R       セーブ CIR
-$e9e006 1.w     R/W     リストア CIR
-$e9e008 1.w     ---     (オペレーションワード CIR)
-$e9e00a 1.w       W     コマンド CIR
+$e9e000 1.w     R       Response CIR
+$e9e002 1.w       W     Control CIR
+$e9e004 1.w     R       Save CIR
+$e9e006 1.w     R/W     Restore CIR
+$e9e008 1.w     ---     (Operation word CIR)
+$e9e00a 1.w       W     Command CIR
 $e9e00c 1.w     ---
-$e9e00e 1.w       W     コンディション CIR
-$e9e010 1.l     R/W     オペランド CIR
-$e9e014 1.w     R       レジスタ選択 CIR
+$e9e00e 1.w       W     Condition CIR
+$e9e010 1.l     R/W     Operand CIR
+$e9e014 1.w     R       Register selection CIR
 $e9e016 1.w     ---
-$e9e018 1.l       W     命令アドレス CIR
-$e9e01c 1.l     ---     (オペランドアドレス CIR)
+$e9e018 1.l       W     Instruction address CIR
+$e9e01c 1.l     ---     (Operand address CIR)
 
-※第二アドレスの場合は $e9e080〜$e9e09f.
+※In the case of the second address, $e9e080 to $e9e09f.
 
 
 応答 CIR($e9e000):
@@ -3835,7 +3836,7 @@ $e9e01c 1.l     ---     (オペランドアドレス CIR)
 
 ==============================================================================
 
-・スプライト/BG
+・Sprite / BG
 
   スプライト/BG のメモリは画面モードが 512×512 若しくは 256×256 の時以外は切
 り離されてアクセスできない. また、スプライトは同一水平線上には最大 32 個までし
