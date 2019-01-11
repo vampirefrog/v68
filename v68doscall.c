@@ -455,8 +455,9 @@ int v68_dos_call(uint16_t instr) {
 				logcall("memptr=0x%08x len=%d\n", memptr, len);
 				v68_mem_dump();
 				logcall("Shrinking mem\n");
-				v68_mem_shrink(memptr, len);
+				int r = v68_mem_shrink(memptr, len);
 				v68_mem_dump();
+				m68k_set_reg(M68K_REG_D0, r);
 			}
 			break;
 		case DOS_CALL_MALLOC: {
