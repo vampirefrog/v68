@@ -61,7 +61,7 @@ struct v68 {
 	int running;
 
 	/* MFP */
-	int mfp_vec;
+	int int_vec;
 
 	/* Sound Timing */
 	int16_t *bufL, *bufR;

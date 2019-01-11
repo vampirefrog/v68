@@ -12,7 +12,7 @@ $(patsubst %.c,musashi/%.c,$(MUSASHIGENCFILES)): musashi/m68kmake musashi/m68k_i
 musashi/m68kmake: musashi/m68kmake.o
 	gcc $^ -o $@
 
-v68: main.o tools.o v68.o v68io.o v68periph.o v68human.o v68doscall.o v68iocscall.o v68fecall.o sjis.o sjis_unicode.o utf8.o ym2151.o dmac.o okim6258.o vgm.o $(MUSASHIOBJS) $(MUSASHIGENOBJS)
+v68: main.o tools.o v68.o v68ipl.o v68io.o v68periph.o v68human.o v68doscall.o v68iocscall.o v68fecall.o sjis.o sjis_unicode.o utf8.o ym2151.o dmac.o okim6258.o vgm.o $(MUSASHIOBJS) $(MUSASHIGENOBJS)
 	gcc $^ $(shell pkg-config --libs ao)  -lm -o $@
 
 xinfo: xinfo.o md5.o cmdline.o

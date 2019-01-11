@@ -1,6 +1,7 @@
 /* ＤＭＡＣ ◆ DMA controller */
 
 #include "v68.h"
+#include "musashi/m68k.h"
 #include "dmac.h"
 
 static void dmac_transfer_start(int chan);
@@ -100,7 +101,6 @@ void dmac_tick(int chan) {
 		verbose2("dmac_tick memory->device mar=0x%08x dar=0x%08x data=0x%02x\n", v68.dmac.channels[chan].mar, v68.dmac.channels[chan].dar, data);
 	}
 
-
 	// decrease memory transfer counter
 	if (v68.dmac.channels[chan].mtc > 0)
 		v68.dmac.channels[chan].mtc--;
@@ -116,8 +116,7 @@ void dmac_tick(int chan) {
 	else if ((v68.dmac.channels[chan].scr & 0x0c) == 0x08)
 		v68.dmac.channels[chan].mar-=datasize;
 
-	if (v68.dmac.channels[chan].mtc <= 0)
-	{
+	if (v68.dmac.channels[chan].mtc <= 0) {
 		// End of transfer
 		verbose2("dmac_tick End of transfer\n");
 		if ((v68.dmac.channels[chan].ocr & 0x0c) != 0 && v68.dmac.channels[chan].btc > 0)
@@ -139,6 +138,9 @@ void dmac_tick(int chan) {
 		{
 			// m_cpu->set_input_line(INPUT_LINE_HALT, CLEAR_LINE);
 		}
+
+		v68.int_vec = 0x6a;
+		m68k_set_irq(3);
 	}
 }
 
@@ -185,6 +187,8 @@ static void dmac_transfer_abort(int chan) {
 	v68.dmac.channels[chan].cer = 0x11;
 	v68.dmac.channels[chan].ccr &= ~0xc0;
 	// m_dma_error((offs_t)3, v68.dmac.channels[chan].ccr & 0x08);
+	v68.int_vec = 0x6b;
+	m68k_set_irq(3);
 }
 
 static void dmac_transfer_halt(int chan) {

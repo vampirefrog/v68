@@ -51,18 +51,30 @@ uint32_t v68_periph_next_int(uint32_t cycles) {
 		next_int = v68.opm_timerb_cycles - v68.opm_timerb_counter;
 	}
 
+	if((v68.dmac.channels[3].csr & 0x08) && v68.dmac.channels[3].mtc * v68.oki_sample_cycles < next_int) {
+		next_int = v68.dmac.channels[3].mtc * v68.oki_sample_cycles;
+	}
+
 	verbose2("v68_periph_next_int returning %d\n", next_int);
 	return next_int;
 }
 
 uint32_t v68_int_ack_handler(int int_level) {
-	verbose1("v68_int_ack_handler %d\n", int_level);
-	if(int_level == 6) {
+	verbose1("v68_int_ack_handler int_level=%d int_vec=0x%02x\n", int_level, v68.int_vec);
+	if(int_level == 6) { /* MFP */
 		CPU_INT_LEVEL = 0;
-		int vec = v68.mfp_vec;
-		if(vec) { // MFP
-			verbose2("v68_int_ack_handler  MFP int ack vec=0x%04x vector address at 0x%08x points to 0x%08x)\n", v68.mfp_vec, v68.mfp_vec * 4, m68k_read_memory_32(v68.mfp_vec * 4));
-			v68.mfp_vec = 0;
+		int vec = v68.int_vec;
+		if(vec) {
+			verbose2("v68_int_ack_handler  MFP int ack vec=0x%04x vector address at 0x%08x points to 0x%08x)\n", v68.int_vec, v68.int_vec * 4, m68k_read_memory_32(v68.int_vec * 4));
+			v68.int_vec = 0;
+			return vec;
+		}
+	} else if(int_level == 3) { /* DMAC */
+		CPU_INT_LEVEL = 0;
+		int vec = v68.int_vec;
+		if(vec) {
+			verbose2("v68_int_ack_handler DMAC int ack vec=0x%04x vector address at 0x%08x points to 0x%08x)\n", v68.int_vec, v68.int_vec * 4, m68k_read_memory_32(v68.int_vec * 4));
+			v68.int_vec = 0;
 			return vec;
 		}
 	}
@@ -132,7 +144,7 @@ void v68_periph_advance(uint32_t cycles) {
 	if((v68.opm_flags & 0x01) && v68.opm_timera_counter < v68.opm_timera_cycles) {
 		v68.opm_timera_counter += cycles;
 		if(v68.opm_timera_counter >= v68.opm_timera_cycles && (v68.opm_flags & 0x04)) {
-			v68.mfp_vec = 0x43;
+			v68.int_vec = 0x43;
 			verbose2("v68_periph_advance  generating IRQ 6 Timer A\n");
 			m68k_set_irq(6);
 		}
@@ -142,7 +154,7 @@ void v68_periph_advance(uint32_t cycles) {
 	if((v68.opm_flags & 0x02) && v68.opm_timerb_counter < v68.opm_timerb_cycles) {
 		v68.opm_timerb_counter += cycles;
 		if(v68.opm_timerb_counter >= v68.opm_timerb_cycles && (v68.opm_flags & 0x08)) {
-			v68.mfp_vec = 0x43;
+			v68.int_vec = 0x43;
 			verbose2("v68_periph_advance generating IRQ 6 Timer B\n");
 			m68k_set_irq(6);
 		}
