@@ -1935,7 +1935,6 @@ void m68ki_exception_interrupt(uint int_level)
 
 	/* Acknowledge the interrupt */
 	vector = m68ki_int_ack(int_level);
-	// printf("m68ki_exception_interrupt level=%d vector=%x\n", int_level, vector);
 
 	/* Get the interrupt vector */
 	if(vector == M68K_INT_ACK_AUTOVECTOR)
