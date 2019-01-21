@@ -35,20 +35,21 @@ Structure of the environment
 ・Memory management pointer
 
 offset	size
-0	1.l	前のメモリ管理ポインタ(0 なら先頭)
-4	1.l	このメモリを確保したプロセスのメモリ管理ポインタ(0 なら親はない)
-8	1.l	このメモリブロックの終わり+1 のアドレス
-12	1.l	次のメモリ管理ポインタ(0 なら終わり)
+0	1.l	Previous memory management pointer(If it is 0)
+4	1.l	The memory management pointer of the process that secured this memory(0 if there is no parent)
+8	1.l	End address of this memory block + 1
+12	1.l	Next memory management pointer (end if 0)
 
-	  メモリ管理ポインタは必ず下位 4 ビットが 0 のアドレス(16 バイト境界)
-	から始まり、先頭は OS 本体のスーパバイザ領域内に存在する.
+	The memory management pointer always starts from the address (16 byte
+	boundary) whose lower 4 bits are 0, and the head exists in the supervisor
+	area of the OS main body.
 
-	  4 バイト目(メモリを確保したプロセス)の最上位バイトで、そのメモリブロ
-	ックの属性を表わす.
+	It is the most significant byte of the 4th byte (the process that
+	allocated memory) and represents the attribute of that memory block.
 
-	$ff	常駐プロセス(KEEP)
-	$fe	不明(MEMDRV)
-	$fd	サブメモリブロック
+	$ff	Resident process(KEEP)
+	$fe	unknown(MEMDRV)
+	$fd	Sub memory block
 
 ==============================================================================
 
