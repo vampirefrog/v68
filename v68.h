@@ -18,15 +18,6 @@
 #define HUMAN_HEAD      0x6800      /* Humanのメモリ管理ブロック位置 */
 #define FCB_WORK        0x20F00     /* DOSCALL GETFCB用ワーク領域 */
 #define HUMAN_WORK      0x21000     /* 割り込み処理先等のワーク領域 */
-#define TRAP0_WORK      0x20FF0000  /* TRAP割り込み処理先等のワーク領域 */
-#define TRAP1_WORK      0x21FF0000  /* TRAP割り込み処理先等のワーク領域 */
-#define TRAP2_WORK      0x22FF0000  /* TRAP割り込み処理先等のワーク領域 */
-#define TRAP3_WORK      0x23FF0000  /* TRAP割り込み処理先等のワーク領域 */
-#define TRAP4_WORK      0x24FF0000  /* TRAP割り込み処理先等のワーク領域 */
-#define TRAP5_WORK      0x25FF0000  /* TRAP割り込み処理先等のワーク領域 */
-#define TRAP6_WORK      0x26FF0000  /* TRAP割り込み処理先等のワーク領域 */
-#define TRAP7_WORK      0x27FF0000  /* TRAP割り込み処理先等のワーク領域 */
-#define TRAP8_WORK      0x28FF0000  /* TRAP割り込み処理先等のワーク領域 */
 #define ENV_TOP         0x21C00
 #define ENV_SIZE        0x2000
 #define STACK_TOP       ENV_TOP + ENV_SIZE
@@ -35,7 +26,6 @@
 #define PSP_SIZE        MB_SIZE + 240
 #define PROG_TOP        (STACK_TOP + STACK_SIZE + PSP_SIZE)
 #define NEST_MAX        20
-#define FILE_MAX        20
 
 #define RAS_INTERVAL    10000   /* ラスタ割り込みの間隔 */
 
@@ -53,12 +43,11 @@ struct v68 {
 	/* Memory allocation */
 	int heap_start, heap_top;
 
-	struct v68_file_info file_info[FILE_MAX];
-
 #define V68_CMD_QUEUE_LEN 8
 	char cmd_queue[V68_CMD_QUEUE_LEN][1024];
 	int cmd_queue_pos;
 	int running;
+	int reset_pulsed;
 
 	/* MFP */
 	int int_vec;

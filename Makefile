@@ -12,8 +12,27 @@ $(patsubst %.c,musashi/%.c,$(MUSASHIGENCFILES)): musashi/m68kmake musashi/m68k_i
 musashi/m68kmake: musashi/m68kmake.o
 	gcc $^ -o $@
 
-v68: main.o tools.o v68.o v68ipl.o v68io.o v68periph.o v68human.o v68doscall.o v68iocscall.o v68fecall.o sjis.o sjis_unicode.o utf8.o ym2151.o dmac.o okim6258.o vgm.o $(MUSASHIOBJS) $(MUSASHIGENOBJS)
-	gcc $^ $(shell pkg-config --libs ao)  -lm -o $@
+v68: main.o tools.o v68.o v68ipl.o v68io.o v68periph.o v68human.o v68doscall.o v68iocscall.o v68fecall.o sjis.o sjis_unicode.o utf8.o ym2151.o dmac.o okim6258.o vgm.o $(MUSASHIOBJS) $(MUSASHIGENOBJS) fake_ipl.inc fake_human.inc
+	gcc $(filter %.o,$^) $(shell pkg-config --libs ao)  -lm -o $@
+
+v68human.o: v68human.c fake_human.inc
+
+v68ipl.o: v68ipl.c fake_ipl.inc
+
+HAS060=wine ~/ownCloud/X68000/run68/run68.exe 'H:\\ownCloud\\X68000\\has060.x'
+HASFLAGS=-m68000
+LK=wine ~/ownCloud/X68000/run68/run68.exe x/xc/BIN/LK.X
+fake_ipl.inc: fake_ipl.s xdump
+	include=tests $(HAS060) $(HASFLAGS) $(patsubst %.inc,%.s,$@)
+	$(LK) /bff0000 $(patsubst %.inc,%.o,$@)
+	./xdump $(patsubst %.inc,%.x,$@) > $@
+	rm -f $(patsubst %.inc,%.x,$@) $(patsubst %.inc,%.o,$@)
+
+fake_human.inc: fake_human.s xdump
+	include=tests $(HAS060) $(HASFLAGS) $(patsubst %.inc,%.s,$@)
+	$(LK) /b006800 $(patsubst %.inc,%.o,$@)
+	./xdump $(patsubst %.inc,%.x,$@) > $@
+	rm -f $(patsubst %.inc,%.x,$@) $(patsubst %.inc,%.o,$@)
 
 xinfo: xinfo.o md5.o cmdline.o
 	gcc $^ -o $@
@@ -34,7 +53,7 @@ test-mem: test-mem.o v68.o v68human.o v68opm.o v68io.o v68doscall.o v68fecall.o 
 	gcc -g -Wall $(shell pkg-config --cflags ao) -c $< -o $@
 
 clean:
-	rm -f v68 xinfo sjis2utf8 *.o musashi/*.o $(patsubst %.c,musashi/%.c,$(MUSASHIGENCFILES)) ay.js *.wasm *.map test
+	rm -f v68 xinfo xdump sjis2utf8 *.o musashi/*.o $(patsubst %.c,musashi/%.c,$(MUSASHIGENCFILES)) ay.js *.wasm *.map test
 
 main.o: main.c v68.h okim6258.h mamedef.h ym2151.h v68io.h cmdline.h \
  tools.h

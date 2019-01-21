@@ -15,29 +15,14 @@ static void write_ipl_16(uint32_t addr, const uint16_t *data, int data_len) {
 }
 
 void v68_ipl_init() {
-#define DMA3_VEC_END 0x6a
-#define DMA3_VEC_ERR 0x6b
-#define DMA3_INT_ADDR 0xff1940
-	const uint16_t dma3_int[] = {
-		/* DMA 3 interrupt handler */
-		0x2f08,                         /* move.l a0, -(a7)           */
-		0x41f9, 0x00e8, 0x40c0,         /* lea.l ($00e840c0), a0      */
-		0x11e8, 0x0001, 0x0c33,         /* move.b ($0001,A0), ($0c33) */
-		0x4a38, 0x0c32,                 /* tst.b ($0c32)              */
-		0x6b18,                         /* bmi.b ($00FF196C)          */
-		0x13fc, 0x0001, 0x00e9, 0xa007, /* move.b #$01, ($00e9a007)   */
-		0x13fc, 0x0003, 0x00e9, 0xa007, /* move.b #$03, ($00e9a007)   */
-		0x13fc, 0x0001, 0x00e9, 0x2001, /* move.b #$01, ($00e92001)   */
-		0x4a10,                         /* tst.b (a0)                 */
-		0x50d0,                         /* st (a0)                    */
-		0x4238, 0x0c32,                 /* clr.b ($0c32)              */
-		0x205f,                         /* movea.l (a7)+, a0          */
-		0x4e73,                         /* rte                        */
+	const uint16_t fake_ipl[] = {
+#include "fake_ipl.inc"
 	};
 
-	write_ipl_16(DMA3_INT_ADDR, dma3_int, sizeof(dma3_int) / sizeof(dma3_int[0]));
-	m68k_write_memory_32(DMA3_VEC_END * 4, DMA3_INT_ADDR);
-	m68k_write_memory_32(DMA3_VEC_ERR * 4, DMA3_INT_ADDR);
+	write_ipl_16(0xff0000, fake_ipl, sizeof(fake_ipl) / sizeof(fake_ipl[0]));
+	/* IOCS work setting */
+	m68k_write_memory_16(0x970, 79);       /* Number of columns on screen -1 */
+	m68k_write_memory_16(0x972, 24);       /* Number of lines on screen -1 */
 }
 
 uint8_t v68_ipl_read_8(uint32_t addr) {

@@ -1,5 +1,6 @@
 #include "v68.h"
 #include "v68periph.h"
+#include "v68iocscall.h"
 #include "musashi/m68kcpu.h"
 #include "tools.h"
 
@@ -7,10 +8,28 @@
 #define OPM_CLOCK 4000000
 static uint32_t v68_opm_calc_timera(void);
 static uint32_t v68_opm_calc_timerb(void);
+unsigned int v68_read_periph_32(unsigned int addr);
+unsigned int v68_read_periph_16(unsigned int addr);
+unsigned int v68_read_periph_8(unsigned int addr);
+void v68_write_periph_32(unsigned int addr, unsigned int data);
+void v68_write_periph_16(unsigned int addr, unsigned int data);
+void v68_write_periph_8(unsigned int addr, unsigned int data);
+void v68_opm_write_8(uint32_t addr, uint8_t data);
+uint8_t v68_opm_read_8(uint32_t addr);
+void v68_mfp_write_8(uint32_t addr, uint8_t value);
+uint8_t v68_mfp_read_8(uint32_t addr);
+void v68_adpcm_write_8(uint32_t addr, uint8_t value);
+uint8_t v68_adpcm_read_8(uint32_t addr);
+void v68_ppi_write_8(uint32_t addr, uint8_t value);
+uint8_t v68_ppi_read_8(uint32_t addr);
+void v68_emu_write_16(uint32_t addr, uint8_t data);
 
 void v68_periph_init() {
 	verbose1("v68_periph_init\n");
 	v68.periph_timers_altered = 0;
+
+	// for mapping $ff0000 at $000000 at startup
+	v68.reset_pulsed = 0;
 
 	ym2151_init(&v68.opm, OPM_CLOCK, v68.sample_rate);
 	ym2151_reset_chip(&v68.opm);
@@ -172,13 +191,260 @@ void v68_periph_advance(uint32_t cycles) {
 		}
 	}
 
-	v68_render_tstates(v68.periph_cycles - v68.prev_sound_cycles);
-	v68.prev_sound_cycles = v68.periph_cycles;
+	v68_render_tstates(cycles - v68.prev_sound_cycles);
 
 	verbose2("v68_periph_advance done periph_cycles=%d\n", v68.periph_cycles);
 
 	v68.in_periph_timing = 0;
 }
+
+static void v68_periph_before_read(uint32_t addr) {
+	(void)addr;
+	verbose1("v68_periph_before_read addr=0x%08x prev_sound_cycles=%d in_periph_timing=%d\n", addr, v68.prev_sound_cycles, v68.in_periph_timing);
+
+	if(v68.in_periph_timing) {
+		verbose2("v68_periph_before_read periph_cycles=%d prev_sound_cycles=%d periph_cycles-prev_sound_cycles=%d\n", v68.periph_cycles, v68.prev_sound_cycles, v68.periph_cycles - v68.prev_sound_cycles);
+		v68_render_tstates(v68.periph_cycles - v68.prev_sound_cycles);
+		v68.prev_sound_cycles = v68.periph_cycles;
+	} else {
+		verbose2("v68_periph_before_read cycles_run=%d prev_sound_cycles=%d cycles_run-prev_sound_cycles=%d\n", m68k_cycles_run(), v68.prev_sound_cycles, m68k_cycles_run() - v68.prev_sound_cycles);
+		v68.periph_cycles = v68.prev_sound_cycles;
+		v68_periph_advance(m68k_cycles_run() - v68.prev_sound_cycles);
+		v68.prev_sound_cycles = m68k_cycles_run();
+	}
+}
+
+static void v68_periph_before_write(uint32_t addr) {
+	/* Check for OKIM6258 or Y2151 writes */
+	// if(addr == 0xe92001 || addr == 0xe92003 || addr == 0xe90003) {
+		verbose1("v68_periph_before_write addr=0x%08x in_periph_timing=%d prev_sound_cycles=%d periph_cycles=%d\n", addr, v68.in_periph_timing, v68.prev_sound_cycles, v68.periph_cycles);
+		v68_periph_before_read(addr);
+	// }
+}
+
+static void v68_periph_after_write(void) {
+	if(v68.periph_timers_altered) {
+		verbose1("timers altered at %d cycles, %d remaining\n", m68k_cycles_run(), m68k_cycles_remaining());
+		v68.periph_timers_altered = 0;
+		v68.cpu_ended_timeslice = 1;
+		m68k_end_timeslice();
+	}
+}
+
+unsigned int v68_read_periph_32(unsigned int addr) {
+	v68_periph_before_read(addr);
+	if(addr < 0xe82000) { /* ＣＲＴコントローラ ◆ CRT controller */
+	} else if(addr < 0xe84000) { /* ビデオコントローラ ◆ Video controller */
+	} else if(addr < 0xe86000) { /* ＤＭＡＣ ◆ DMA controller */
+		return (dmac_read_16(addr & 0xfe, 0xffff) << 16) | dmac_read_16((addr & 0xfe) + 2, 0xffff);
+	} else if(addr < 0xe88000) { /* エリアセット ◆ Area set */
+	} else if(addr < 0xe8a000) { /* ＭＦＰ ◆ Multi-function peripheral */
+		return
+			(v68_mfp_read_8((addr & 0xff) + 0) << 24) |
+			(v68_mfp_read_8((addr & 0xff) + 1) << 16) |
+			(v68_mfp_read_8((addr & 0xff) + 2) <<  8) |
+			(v68_mfp_read_8((addr & 0xff) + 3)      );
+	} else if(addr < 0xe8c000) { /* ＲＴＣ ◆ Realtime clock */
+	} else if(addr < 0xe8e000) { /* プリンタ ◆ Printer */
+	} else if(addr < 0xe90000) { /* システムポート ◆ System port */
+	} else if(addr < 0xe92000) { /* ＦＭ音源 ◆ FM sound source (OPM) */
+		return
+			(v68_opm_read_8((addr & 0xff) + 0) << 24) |
+			(v68_opm_read_8((addr & 0xff) + 1) << 16) |
+			(v68_opm_read_8((addr & 0xff) + 2) <<  8) |
+			(v68_opm_read_8((addr & 0xff) + 3)      );
+	} else if(addr < 0xe94000) { /* ＡＤＰＣＭ ◆ OKI M6258 ADPCM */
+		return
+			(v68_adpcm_read_8((addr & 0xff) + 0) << 24) |
+			(v68_adpcm_read_8((addr & 0xff) + 1) << 16) |
+			(v68_adpcm_read_8((addr & 0xff) + 2) <<  8) |
+			(v68_adpcm_read_8((addr & 0xff) + 3)      );
+	} else if(addr < 0xe96000) { /* ＦＤＣ ◆ Floppy drive controller */
+	} else if(addr < 0xe98000) { /* ＨＤＣ ◆ Hard disk controller */
+	} else if(addr < 0xe9a000) { /* ＳＣＣ ◆ Serial communications */
+	} else if(addr < 0xe9C000) { /* ｉ８２５５ ◆ Programmable peripheral interface */
+		return
+			(v68_ppi_read_8((addr & 0xff) + 0) << 24) |
+			(v68_ppi_read_8((addr & 0xff) + 1) << 16) |
+			(v68_ppi_read_8((addr & 0xff) + 2) <<  8) |
+			(v68_ppi_read_8((addr & 0xff) + 3)      );
+	} else if(addr < 0xe9e000) { /* Ｉ／Ｏ コントローラ ◆ I/O controller */
+	}
+
+	return 0xffffffff;
+}
+
+unsigned int v68_read_periph_16(unsigned int addr) {
+	v68_periph_before_read(addr);
+	if(addr < 0xe82000) { /* ＣＲＴコントローラ ◆ CRT controller */
+	} else if(addr < 0xe84000) { /* ビデオコントローラ ◆ Video controller */
+	} else if(addr < 0xe86000) { /* ＤＭＡＣ ◆ DMA controller */
+		return dmac_read_16(addr & 0xfe, 0xffff);
+	} else if(addr < 0xe88000) { /* エリアセット ◆ Area set */
+	} else if(addr < 0xe8a000) { /* ＭＦＰ ◆ Multi-function peripheral */
+		return
+			(v68_mfp_read_8((addr & 0xff) + 0) <<  8) |
+			(v68_mfp_read_8((addr & 0xff) + 1)      );
+	} else if(addr < 0xe8c000) { /* ＲＴＣ ◆ Realtime clock */
+	} else if(addr < 0xe8e000) { /* プリンタ ◆ Printer */
+	} else if(addr < 0xe90000) { /* システムポート ◆ System port */
+	} else if(addr < 0xe92000) { /* ＦＭ音源 ◆ FM sound source (OPM) */
+		return
+			(v68_opm_read_8((addr & 0xff) + 0) <<  8) |
+			(v68_opm_read_8((addr & 0xff) + 1)      );
+	} else if(addr < 0xe94000) { /* ＡＤＰＣＭ ◆ OKI M6258 ADPCM */
+		return
+			(v68_adpcm_read_8((addr & 0xff) + 0) <<  8) |
+			(v68_adpcm_read_8((addr & 0xff) + 1)      );
+	} else if(addr < 0xe96000) { /* ＦＤＣ ◆ Floppy drive controller */
+	} else if(addr < 0xe98000) { /* ＨＤＣ ◆ Hard disk controller */
+	} else if(addr < 0xe9a000) { /* ＳＣＣ ◆ Serial communications */
+	} else if(addr < 0xe9C000) { /* ｉ８２５５ ◆ Programmable peripheral interface */
+		return
+			(v68_ppi_read_8((addr & 0xff) + 0) <<  8) |
+			(v68_ppi_read_8((addr & 0xff) + 1)      );
+	} else if(addr < 0xe9e000) { /* Ｉ／Ｏ コントローラ ◆ I/O controller */
+	}
+
+	return 0xffff;
+}
+
+unsigned int v68_read_periph_8(unsigned int addr) {
+	v68_periph_before_read(addr);
+	if(addr < 0xe82000) {        /* ＣＲＴコントローラ ◆ CRT controller */
+	} else if(addr < 0xe84000) { /* ビデオコントローラ ◆ Video controller */
+	} else if(addr < 0xe86000) { /* ＤＭＡＣ ◆ DMA controller */
+		return dmac_read_16(addr & 0xfe, (addr & 1) ? 0x00ff : 0xff00);
+	} else if(addr < 0xe88000) { /* エリアセット ◆ Area set */
+	} else if(addr < 0xe8a000) { /* ＭＦＰ ◆ Multi-function peripheral */
+		return v68_mfp_read_8(addr & 0xff);
+	} else if(addr < 0xe8c000) { /* ＲＴＣ ◆ Realtime clock */
+	} else if(addr < 0xe8e000) { /* プリンタ ◆ Printer */
+	} else if(addr < 0xe90000) { /* システムポート ◆ System port */
+	} else if(addr < 0xe92000) { /* ＦＭ音源 ◆ FM sound source (OPM) */
+		return v68_opm_read_8(addr & 0xff);
+	} else if(addr < 0xe94000) { /* ＡＤＰＣＭ ◆ OKI M6258 ADPCM */
+		return v68_adpcm_read_8(addr & 0xff);
+	} else if(addr < 0xe96000) { /* ＦＤＣ ◆ Floppy drive controller */
+	} else if(addr < 0xe98000) { /* ＨＤＣ ◆ Hard disk controller */
+	} else if(addr < 0xe9a000) { /* ＳＣＣ ◆ Serial communications */
+	} else if(addr < 0xe9C000) { /* ｉ８２５５ ◆ Programmable peripheral interface */
+		return v68_ppi_read_8(addr & 0xff);
+	} else if(addr < 0xe9e000) { /* Ｉ／Ｏ コントローラ ◆ I/O controller */
+	}
+
+	return 0xff;
+}
+
+void v68_write_periph_32(unsigned int addr, unsigned int data) {
+	verbose2("write_periph_32 addr=0x%08x data=0x%08x cycles=%d remaining=%d\n", addr, data, m68k_cycles_run(), m68k_cycles_remaining());
+
+	v68_periph_before_write(addr);
+
+	if(addr < 0xe82000) {        /* ＣＲＴコントローラ ◆ CRT controller */
+	} else if(addr < 0xe84000) { /* ビデオコントローラ ◆ Video controller */
+	} else if(addr < 0xe86000) { /* ＤＭＡＣ ◆ DMA controller */
+		dmac_write_16((addr & 0x0fff) + 0, data >> 16, 0xffff);
+		dmac_write_16((addr & 0x0fff) + 2, data, 0xffff);
+	} else if(addr < 0xe88000) { /* エリアセット ◆ Area set */
+	} else if(addr < 0xe8a000) { /* ＭＦＰ ◆ Multi-function peripheral */
+		v68_mfp_write_8((addr & 0xff) + 0, (data >> 24) & 0xff);
+		v68_mfp_write_8((addr & 0xff) + 1, (data >> 16) & 0xff);
+		v68_mfp_write_8((addr & 0xff) + 2, (data >>  8) & 0xff);
+		v68_mfp_write_8((addr & 0xff) + 3, (data      ) & 0xff);
+	} else if(addr < 0xe8c000) { /* ＲＴＣ ◆ Realtime clock */
+	} else if(addr < 0xe8e000) { /* プリンタ ◆ Printer */
+	} else if(addr < 0xe90000) { /* システムポート ◆ System port */
+	} else if(addr < 0xe92000) { /* ＦＭ音源 ◆ FM sound source (OPM) */
+		v68_opm_write_8((addr & 0xff) + 0, (data >> 24) & 0xff);
+		v68_opm_write_8((addr & 0xff) + 1, (data >> 16) & 0xff);
+		v68_opm_write_8((addr & 0xff) + 2, (data >>  8) & 0xff);
+		v68_opm_write_8((addr & 0xff) + 3, (data      ) & 0xff);
+	} else if(addr < 0xe94000) { /* ＡＤＰＣＭ ◆ OKI M6258 ADPCM */
+		v68_adpcm_write_8((addr & 0xff) + 0, (data >> 24) & 0xff);
+		v68_adpcm_write_8((addr & 0xff) + 1, (data >> 16) & 0xff);
+		v68_adpcm_write_8((addr & 0xff) + 2, (data >>  8) & 0xff);
+		v68_adpcm_write_8((addr & 0xff) + 3, (data      ) & 0xff);
+	} else if(addr < 0xe96000) { /* ＦＤＣ ◆ Floppy drive controller */
+	} else if(addr < 0xe98000) { /* ＨＤＣ ◆ Hard disk controller */
+	} else if(addr < 0xe9a000) { /* ＳＣＣ ◆ Serial communications */
+	} else if(addr < 0xe9C000) { /* ｉ８２５５ ◆ Programmable peripheral interface */
+		v68_ppi_write_8((addr & 0xff) + 0, (data >> 24) & 0xff);
+		v68_ppi_write_8((addr & 0xff) + 1, (data >> 16) & 0xff);
+		v68_ppi_write_8((addr & 0xff) + 2, (data >>  8) & 0xff);
+		v68_ppi_write_8((addr & 0xff) + 3, (data      ) & 0xff);
+	} else if(addr < 0xe9e000) { /* Ｉ／Ｏ コントローラ ◆ I/O controller */
+	}
+
+	v68_periph_after_write();
+}
+
+void v68_write_periph_16(unsigned int addr, unsigned int data) {
+	verbose2("write_periph_16 addr=0x%08x data=0x%04x cycles=%d remaining=%d\n", addr, data, m68k_cycles_run(), m68k_cycles_remaining());
+
+	v68_periph_before_write(addr);
+
+	if(addr < 0xe82000) {        /* ＣＲＴコントローラ ◆ CRT controller */
+	} else if(addr < 0xe84000) { /* ビデオコントローラ ◆ Video controller */
+	} else if(addr < 0xe86000) { /* ＤＭＡＣ ◆ DMA controller */
+		dmac_write_16(addr & 0xff, data, 0xffff);
+	} else if(addr < 0xe88000) { /* エリアセット ◆ Area set */
+	} else if(addr < 0xe8a000) { /* ＭＦＰ ◆ Multi-function peripheral */
+		v68_mfp_write_8((addr & 0xff) + 0, (data >> 8) & 0xff);
+		v68_mfp_write_8((addr & 0xff) + 1, (data     ) & 0xff);
+	} else if(addr < 0xe8c000) { /* ＲＴＣ ◆ Realtime clock */
+	} else if(addr < 0xe8e000) { /* プリンタ ◆ Printer */
+	} else if(addr < 0xe90000) { /* システムポート ◆ System port */
+	} else if(addr < 0xe92000) { /* ＦＭ音源 ◆ FM sound source (OPM) */
+		v68_opm_write_8((addr & 0xff) + 0, (data >> 8) & 0xff);
+		v68_opm_write_8((addr & 0xff) + 1, (data     ) & 0xff);
+	} else if(addr < 0xe94000) { /* ＡＤＰＣＭ ◆ OKI M6258 ADPCM */
+		v68_adpcm_write_8((addr & 0xff) + 0, (data >> 8) & 0xff);
+		v68_adpcm_write_8((addr & 0xff) + 1, (data     ) & 0xff);
+	} else if(addr < 0xe96000) { /* ＦＤＣ ◆ Floppy drive controller */
+	} else if(addr < 0xe98000) { /* ＨＤＣ ◆ Hard disk controller */
+	} else if(addr < 0xe9a000) { /* ＳＣＣ ◆ Serial communications */
+	} else if(addr < 0xe9C000) { /* ｉ８２５５ ◆ Programmable peripheral interface */
+		v68_ppi_write_8((addr & 0xff) + 0, (data >> 8) & 0xff);
+		v68_ppi_write_8((addr & 0xff) + 1, (data     ) & 0xff);
+	} else if(addr < 0xe9e000) { /* Ｉ／Ｏ コントローラ ◆ I/O controller */
+	} else if(addr < 0xeb0000) { /* Emulator port */
+		v68_emu_write_16(addr & 0xff, data);
+	}
+
+	v68_periph_after_write();
+}
+
+void v68_write_periph_8(unsigned int addr, unsigned int data) {
+	verbose2("v68_write_periph_8 addr=0x%08x data=0x%02x cycles=%d remaining=%d\n", addr, data, m68k_cycles_run(), m68k_cycles_remaining());
+
+	v68_periph_before_write(addr);
+
+	if(addr < 0xe82000) {        /* ＣＲＴコントローラ ◆ CRT controller */
+	} else if(addr < 0xe84000) { /* ビデオコントローラ ◆ Video controller */
+	} else if(addr < 0xe86000) { /* ＤＭＡＣ ◆ DMA controller */
+		dmac_write_16(addr & 0xfe, (addr & 1) ? data : (data << 8), (addr & 1) ? 0x00ff : 0xff00);
+	} else if(addr < 0xe88000) { /* エリアセット ◆ Area set */
+	} else if(addr < 0xe8a000) { /* ＭＦＰ ◆ Multi-function peripheral */
+		v68_mfp_write_8(addr & 0xff, data);
+	} else if(addr < 0xe8c000) { /* ＲＴＣ ◆ Realtime clock */
+	} else if(addr < 0xe8e000) { /* プリンタ ◆ Printer */
+	} else if(addr < 0xe90000) { /* システムポート ◆ System port */
+	} else if(addr < 0xe92000) { /* ＦＭ音源 ◆ FM sound source (OPM) */
+		v68_opm_write_8(addr & 0xff, data);
+	} else if(addr < 0xe94000) { /* ＡＤＰＣＭ ◆ OKI M6258 ADPCM */
+		v68_adpcm_write_8(addr & 0xff, data);
+	} else if(addr < 0xe96000) { /* ＦＤＣ ◆ Floppy drive controller */
+	} else if(addr < 0xe98000) { /* ＨＤＣ ◆ Hard disk controller */
+	} else if(addr < 0xe9a000) { /* ＳＣＣ ◆ Serial communications */
+	} else if(addr < 0xe9C000) { /* ｉ８２５５ ◆ Programmable peripheral interface */
+		v68_ppi_write_8(addr & 0xff, data);
+	} else if(addr < 0xe9e000) { /* Ｉ／Ｏ コントローラ ◆ I/O controller */
+	}
+
+	v68_periph_after_write();
+}
+
 
 /* ＦＭ音源 ◆ FM sound source (OPM) */
 static uint32_t v68_opm_calc_timera() {
@@ -327,245 +593,16 @@ uint8_t v68_ppi_read_8(uint32_t addr) {
 	return 0x00;
 }
 
-static void v68_periph_before_read(uint32_t addr) {
-	(void)addr;
-	verbose1("v68_periph_before_read addr=0x%08x prev_sound_cycles=%d in_periph_timing=%d\n", addr, v68.prev_sound_cycles, v68.in_periph_timing);
-
-	if(v68.in_periph_timing) {
-		v68_render_tstates(v68.periph_cycles - v68.prev_sound_cycles);
-		v68.prev_sound_cycles = v68.periph_cycles;
-	} else {
-		v68.periph_cycles = v68.prev_sound_cycles;
-		v68_periph_advance(m68k_cycles_run() - v68.prev_sound_cycles);
-		v68.prev_sound_cycles = m68k_cycles_run();
+/* Emulator specific ports */
+void v68_emu_write_16(uint32_t addr, uint8_t data) {
+	if(addr == 0x00) {
+		if((data & 0xff00) == 0xff00)
+			v68_dos_call(data);
+		else if((data & 0xff00) == 0xfe00)
+			v68_fe_call(data);
+	} else if(addr == 0x04) {
+		v68_iocs_call(data);
+	} else if(addr == 0x08) {
+		v68_queue_next_command();
 	}
-}
-
-unsigned int v68_read_periph_32(unsigned int addr) {
-	v68_periph_before_read(addr);
-	if(addr < 0xe82000) { /* ＣＲＴコントローラ ◆ CRT controller */
-	} else if(addr < 0xe84000) { /* ビデオコントローラ ◆ Video controller */
-	} else if(addr < 0xe86000) { /* ＤＭＡＣ ◆ DMA controller */
-		return (dmac_read_16(addr & 0xfe, 0xffff) << 16) | dmac_read_16((addr & 0xfe) + 2, 0xffff);
-	} else if(addr < 0xe88000) { /* エリアセット ◆ Area set */
-	} else if(addr < 0xe8a000) { /* ＭＦＰ ◆ Multi-function peripheral */
-		return
-			(v68_mfp_read_8((addr & 0xff) + 0) << 24) |
-			(v68_mfp_read_8((addr & 0xff) + 1) << 16) |
-			(v68_mfp_read_8((addr & 0xff) + 2) <<  8) |
-			(v68_mfp_read_8((addr & 0xff) + 3)      );
-	} else if(addr < 0xe8c000) { /* ＲＴＣ ◆ Realtime clock */
-	} else if(addr < 0xe8e000) { /* プリンタ ◆ Printer */
-	} else if(addr < 0xe90000) { /* システムポート ◆ System port */
-	} else if(addr < 0xe92000) { /* ＦＭ音源 ◆ FM sound source (OPM) */
-		return
-			(v68_opm_read_8((addr & 0xff) + 0) << 24) |
-			(v68_opm_read_8((addr & 0xff) + 1) << 16) |
-			(v68_opm_read_8((addr & 0xff) + 2) <<  8) |
-			(v68_opm_read_8((addr & 0xff) + 3)      );
-	} else if(addr < 0xe94000) { /* ＡＤＰＣＭ ◆ OKI M6258 ADPCM */
-		return
-			(v68_adpcm_read_8((addr & 0xff) + 0) << 24) |
-			(v68_adpcm_read_8((addr & 0xff) + 1) << 16) |
-			(v68_adpcm_read_8((addr & 0xff) + 2) <<  8) |
-			(v68_adpcm_read_8((addr & 0xff) + 3)      );
-	} else if(addr < 0xe96000) { /* ＦＤＣ ◆ Floppy drive controller */
-	} else if(addr < 0xe98000) { /* ＨＤＣ ◆ Hard disk controller */
-	} else if(addr < 0xe9a000) { /* ＳＣＣ ◆ Serial communications */
-	} else if(addr < 0xe9C000) { /* ｉ８２５５ ◆ Programmable peripheral interface */
-		return
-			(v68_ppi_read_8((addr & 0xff) + 0) << 24) |
-			(v68_ppi_read_8((addr & 0xff) + 1) << 16) |
-			(v68_ppi_read_8((addr & 0xff) + 2) <<  8) |
-			(v68_ppi_read_8((addr & 0xff) + 3)      );
-	} else if(addr < 0xe9e000) { /* Ｉ／Ｏ コントローラ ◆ I/O controller */
-	}
-
-	return 0xffffffff;
-}
-
-unsigned int v68_read_periph_16(unsigned int addr) {
-	v68_periph_before_read(addr);
-	if(addr < 0xe82000) { /* ＣＲＴコントローラ ◆ CRT controller */
-	} else if(addr < 0xe84000) { /* ビデオコントローラ ◆ Video controller */
-	} else if(addr < 0xe86000) { /* ＤＭＡＣ ◆ DMA controller */
-		return dmac_read_16(addr & 0xfe, 0xffff);
-	} else if(addr < 0xe88000) { /* エリアセット ◆ Area set */
-	} else if(addr < 0xe8a000) { /* ＭＦＰ ◆ Multi-function peripheral */
-		return
-			(v68_mfp_read_8((addr & 0xff) + 0) <<  8) |
-			(v68_mfp_read_8((addr & 0xff) + 1)      );
-	} else if(addr < 0xe8c000) { /* ＲＴＣ ◆ Realtime clock */
-	} else if(addr < 0xe8e000) { /* プリンタ ◆ Printer */
-	} else if(addr < 0xe90000) { /* システムポート ◆ System port */
-	} else if(addr < 0xe92000) { /* ＦＭ音源 ◆ FM sound source (OPM) */
-		return
-			(v68_opm_read_8((addr & 0xff) + 0) <<  8) |
-			(v68_opm_read_8((addr & 0xff) + 1)      );
-	} else if(addr < 0xe94000) { /* ＡＤＰＣＭ ◆ OKI M6258 ADPCM */
-		return
-			(v68_adpcm_read_8((addr & 0xff) + 0) <<  8) |
-			(v68_adpcm_read_8((addr & 0xff) + 1)      );
-	} else if(addr < 0xe96000) { /* ＦＤＣ ◆ Floppy drive controller */
-	} else if(addr < 0xe98000) { /* ＨＤＣ ◆ Hard disk controller */
-	} else if(addr < 0xe9a000) { /* ＳＣＣ ◆ Serial communications */
-	} else if(addr < 0xe9C000) { /* ｉ８２５５ ◆ Programmable peripheral interface */
-		return
-			(v68_ppi_read_8((addr & 0xff) + 0) <<  8) |
-			(v68_ppi_read_8((addr & 0xff) + 1)      );
-	} else if(addr < 0xe9e000) { /* Ｉ／Ｏ コントローラ ◆ I/O controller */
-	}
-
-	return 0xffff;
-}
-
-unsigned int v68_read_periph_8(unsigned int addr) {
-	v68_periph_before_read(addr);
-	if(addr < 0xe82000) {        /* ＣＲＴコントローラ ◆ CRT controller */
-	} else if(addr < 0xe84000) { /* ビデオコントローラ ◆ Video controller */
-	} else if(addr < 0xe86000) { /* ＤＭＡＣ ◆ DMA controller */
-		return dmac_read_16(addr & 0xfe, (addr & 1) ? 0x00ff : 0xff00);
-	} else if(addr < 0xe88000) { /* エリアセット ◆ Area set */
-	} else if(addr < 0xe8a000) { /* ＭＦＰ ◆ Multi-function peripheral */
-		return v68_mfp_read_8(addr & 0xff);
-	} else if(addr < 0xe8c000) { /* ＲＴＣ ◆ Realtime clock */
-	} else if(addr < 0xe8e000) { /* プリンタ ◆ Printer */
-	} else if(addr < 0xe90000) { /* システムポート ◆ System port */
-	} else if(addr < 0xe92000) { /* ＦＭ音源 ◆ FM sound source (OPM) */
-		return v68_opm_read_8(addr & 0xff);
-	} else if(addr < 0xe94000) { /* ＡＤＰＣＭ ◆ OKI M6258 ADPCM */
-		return v68_adpcm_read_8(addr & 0xff);
-	} else if(addr < 0xe96000) { /* ＦＤＣ ◆ Floppy drive controller */
-	} else if(addr < 0xe98000) { /* ＨＤＣ ◆ Hard disk controller */
-	} else if(addr < 0xe9a000) { /* ＳＣＣ ◆ Serial communications */
-	} else if(addr < 0xe9C000) { /* ｉ８２５５ ◆ Programmable peripheral interface */
-		return v68_ppi_read_8(addr & 0xff);
-	} else if(addr < 0xe9e000) { /* Ｉ／Ｏ コントローラ ◆ I/O controller */
-	}
-
-	return 0xff;
-}
-
-static void v68_periph_before_write(uint32_t addr) {
-	/* Check for OKIM6258 or Y2151 writes */
-	// if(addr == 0xe92001 || addr == 0xe92003 || addr == 0xe90003) {
-		verbose1("v68_periph_before_write addr=0x%08x in_periph_timing=%d prev_sound_cycles=%d periph_cycles=%d\n", addr, v68.in_periph_timing, v68.prev_sound_cycles, v68.periph_cycles);
-		v68_periph_before_read(addr);
-	// }
-}
-
-static void v68_periph_after_write(void) {
-	if(v68.periph_timers_altered) {
-		verbose1("timers altered at %d cycles, %d remaining\n", m68k_cycles_run(), m68k_cycles_remaining());
-		v68.periph_timers_altered = 0;
-		v68.cpu_ended_timeslice = 1;
-		m68k_end_timeslice();
-	}
-}
-
-void v68_write_periph_32(unsigned int addr, unsigned int data) {
-	verbose2("write_periph_32 addr=0x%08x data=0x%08x cycles=%d remaining=%d\n", addr, data, m68k_cycles_run(), m68k_cycles_remaining());
-
-	v68_periph_before_write(addr);
-
-	if(addr < 0xe82000) {        /* ＣＲＴコントローラ ◆ CRT controller */
-	} else if(addr < 0xe84000) { /* ビデオコントローラ ◆ Video controller */
-	} else if(addr < 0xe86000) { /* ＤＭＡＣ ◆ DMA controller */
-		dmac_write_16((addr & 0x0fff) + 0, data >> 16, 0xffff);
-		dmac_write_16((addr & 0x0fff) + 2, data, 0xffff);
-	} else if(addr < 0xe88000) { /* エリアセット ◆ Area set */
-	} else if(addr < 0xe8a000) { /* ＭＦＰ ◆ Multi-function peripheral */
-		v68_mfp_write_8((addr & 0xff) + 0, (data >> 24) & 0xff);
-		v68_mfp_write_8((addr & 0xff) + 1, (data >> 16) & 0xff);
-		v68_mfp_write_8((addr & 0xff) + 2, (data >>  8) & 0xff);
-		v68_mfp_write_8((addr & 0xff) + 3, (data      ) & 0xff);
-	} else if(addr < 0xe8c000) { /* ＲＴＣ ◆ Realtime clock */
-	} else if(addr < 0xe8e000) { /* プリンタ ◆ Printer */
-	} else if(addr < 0xe90000) { /* システムポート ◆ System port */
-	} else if(addr < 0xe92000) { /* ＦＭ音源 ◆ FM sound source (OPM) */
-		v68_opm_write_8((addr & 0xff) + 0, (data >> 24) & 0xff);
-		v68_opm_write_8((addr & 0xff) + 1, (data >> 16) & 0xff);
-		v68_opm_write_8((addr & 0xff) + 2, (data >>  8) & 0xff);
-		v68_opm_write_8((addr & 0xff) + 3, (data      ) & 0xff);
-	} else if(addr < 0xe94000) { /* ＡＤＰＣＭ ◆ OKI M6258 ADPCM */
-		v68_adpcm_write_8((addr & 0xff) + 0, (data >> 24) & 0xff);
-		v68_adpcm_write_8((addr & 0xff) + 1, (data >> 16) & 0xff);
-		v68_adpcm_write_8((addr & 0xff) + 2, (data >>  8) & 0xff);
-		v68_adpcm_write_8((addr & 0xff) + 3, (data      ) & 0xff);
-	} else if(addr < 0xe96000) { /* ＦＤＣ ◆ Floppy drive controller */
-	} else if(addr < 0xe98000) { /* ＨＤＣ ◆ Hard disk controller */
-	} else if(addr < 0xe9a000) { /* ＳＣＣ ◆ Serial communications */
-	} else if(addr < 0xe9C000) { /* ｉ８２５５ ◆ Programmable peripheral interface */
-		v68_ppi_write_8((addr & 0xff) + 0, (data >> 24) & 0xff);
-		v68_ppi_write_8((addr & 0xff) + 1, (data >> 16) & 0xff);
-		v68_ppi_write_8((addr & 0xff) + 2, (data >>  8) & 0xff);
-		v68_ppi_write_8((addr & 0xff) + 3, (data      ) & 0xff);
-	} else if(addr < 0xe9e000) { /* Ｉ／Ｏ コントローラ ◆ I/O controller */
-	}
-
-	v68_periph_after_write();
-}
-
-void v68_write_periph_16(unsigned int addr, unsigned int data) {
-	verbose2("write_periph_16 addr=0x%08x data=0x%04x cycles=%d remaining=%d\n", addr, data, m68k_cycles_run(), m68k_cycles_remaining());
-
-	v68_periph_before_write(addr);
-
-	if(addr < 0xe82000) {        /* ＣＲＴコントローラ ◆ CRT controller */
-	} else if(addr < 0xe84000) { /* ビデオコントローラ ◆ Video controller */
-	} else if(addr < 0xe86000) { /* ＤＭＡＣ ◆ DMA controller */
-		dmac_write_16(addr & 0xff, data, 0xffff);
-	} else if(addr < 0xe88000) { /* エリアセット ◆ Area set */
-	} else if(addr < 0xe8a000) { /* ＭＦＰ ◆ Multi-function peripheral */
-		v68_mfp_write_8((addr & 0xff) + 0, (data >> 8) & 0xff);
-		v68_mfp_write_8((addr & 0xff) + 1, (data     ) & 0xff);
-	} else if(addr < 0xe8c000) { /* ＲＴＣ ◆ Realtime clock */
-	} else if(addr < 0xe8e000) { /* プリンタ ◆ Printer */
-	} else if(addr < 0xe90000) { /* システムポート ◆ System port */
-	} else if(addr < 0xe92000) { /* ＦＭ音源 ◆ FM sound source (OPM) */
-		v68_opm_write_8((addr & 0xff) + 0, (data >> 8) & 0xff);
-		v68_opm_write_8((addr & 0xff) + 1, (data     ) & 0xff);
-	} else if(addr < 0xe94000) { /* ＡＤＰＣＭ ◆ OKI M6258 ADPCM */
-		v68_adpcm_write_8((addr & 0xff) + 0, (data >> 8) & 0xff);
-		v68_adpcm_write_8((addr & 0xff) + 1, (data     ) & 0xff);
-	} else if(addr < 0xe96000) { /* ＦＤＣ ◆ Floppy drive controller */
-	} else if(addr < 0xe98000) { /* ＨＤＣ ◆ Hard disk controller */
-	} else if(addr < 0xe9a000) { /* ＳＣＣ ◆ Serial communications */
-	} else if(addr < 0xe9C000) { /* ｉ８２５５ ◆ Programmable peripheral interface */
-		v68_ppi_write_8((addr & 0xff) + 0, (data >> 8) & 0xff);
-		v68_ppi_write_8((addr & 0xff) + 1, (data     ) & 0xff);
-	} else if(addr < 0xe9e000) { /* Ｉ／Ｏ コントローラ ◆ I/O controller */
-	}
-
-	v68_periph_after_write();
-}
-
-void v68_write_periph_8(unsigned int addr, unsigned int data) {
-	verbose2("v68_write_periph_8 addr=0x%08x data=0x%02x cycles=%d remaining=%d\n", addr, data, m68k_cycles_run(), m68k_cycles_remaining());
-
-	v68_periph_before_write(addr);
-
-	if(addr < 0xe82000) {        /* ＣＲＴコントローラ ◆ CRT controller */
-	} else if(addr < 0xe84000) { /* ビデオコントローラ ◆ Video controller */
-	} else if(addr < 0xe86000) { /* ＤＭＡＣ ◆ DMA controller */
-		dmac_write_16(addr & 0xfe, (addr & 1) ? data : (data << 8), (addr & 1) ? 0x00ff : 0xff00);
-	} else if(addr < 0xe88000) { /* エリアセット ◆ Area set */
-	} else if(addr < 0xe8a000) { /* ＭＦＰ ◆ Multi-function peripheral */
-		v68_mfp_write_8(addr & 0xff, data);
-	} else if(addr < 0xe8c000) { /* ＲＴＣ ◆ Realtime clock */
-	} else if(addr < 0xe8e000) { /* プリンタ ◆ Printer */
-	} else if(addr < 0xe90000) { /* システムポート ◆ System port */
-	} else if(addr < 0xe92000) { /* ＦＭ音源 ◆ FM sound source (OPM) */
-		v68_opm_write_8(addr & 0xff, data);
-	} else if(addr < 0xe94000) { /* ＡＤＰＣＭ ◆ OKI M6258 ADPCM */
-		v68_adpcm_write_8(addr & 0xff, data);
-	} else if(addr < 0xe96000) { /* ＦＤＣ ◆ Floppy drive controller */
-	} else if(addr < 0xe98000) { /* ＨＤＣ ◆ Hard disk controller */
-	} else if(addr < 0xe9a000) { /* ＳＣＣ ◆ Serial communications */
-	} else if(addr < 0xe9C000) { /* ｉ８２５５ ◆ Programmable peripheral interface */
-		v68_ppi_write_8(addr & 0xff, data);
-	} else if(addr < 0xe9e000) { /* Ｉ／Ｏ コントローラ ◆ I/O controller */
-	}
-
-	v68_periph_after_write();
 }

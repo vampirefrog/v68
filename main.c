@@ -133,8 +133,6 @@ int main(int argc, char **argv, char **envp) {
 
 	signal(SIGINT, sighandler);
 
-	v68_queue_next_command();
-
 	/* -- Play some stuff -- */
 	while(running) {
 		int16_t bufL[BUF_SIZE], bufR[BUF_SIZE];

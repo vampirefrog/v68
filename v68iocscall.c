@@ -465,10 +465,7 @@ static const char *iocs_call_names[256] = {
 };
 
 void v68_iocs_init() {
-	/* Set the IOCS call addresses at 0x400 */
-	for(int i = 0; i < 256; i++) {
-		m68k_write_memory_32(0x400 + i * 4, 0xff0000);
-	}
+
 }
 
 int v68_iocs_call(uint16_t instr) {

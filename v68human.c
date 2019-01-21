@@ -7,78 +7,28 @@
 #include "musashi/m68kcpu.h"
 
 void v68_human_init() {
+	verbose1("v68_human_init\n");
 	v68.log_calls = 0;
-
-	/* Init file info */
-	memset(v68.file_info, 0, sizeof(v68.file_info));
-	v68.file_info[0].fh   = stdin;
-	v68.file_info[0].mode = 0;
-	v68.file_info[1].fh   = stdout;
-	v68.file_info[1].mode = 1;
-	v68.file_info[2].fh   = stderr;
-	v68.file_info[2].mode = 1;
 
 	v68.cmd_queue_pos = 0;
 	v68.running = 0;
 
-	/* Init trap vectors */
-	FLAG_S = 1;
-
-	/* Interrupts */
-	m68k_write_memory_32(0x28, HUMAN_WORK);        /* A traps */
-	m68k_write_memory_32(0x2C, HUMAN_WORK);        /* F traps */
-	m68k_write_memory_32(0x80, TRAP0_WORK);        /* trap0 */
-	m68k_write_memory_32(0x84, TRAP1_WORK);        /* trap1 */
-	m68k_write_memory_32(0x88, TRAP2_WORK);        /* trap2 */
-	m68k_write_memory_32(0x8C, TRAP3_WORK);        /* trap3 */
-	m68k_write_memory_32(0x90, TRAP4_WORK);        /* trap4 */
-	m68k_write_memory_32(0x94, TRAP5_WORK);        /* trap5 */
-	m68k_write_memory_32(0x98, TRAP6_WORK);        /* trap6 */
-	m68k_write_memory_32(0x9C, TRAP7_WORK);        /* trap7 */
-	m68k_write_memory_32(0xA0, TRAP8_WORK);        /* trap8 */
-	m68k_write_memory_32(0x118, 0);                /* vdisp */
-	m68k_write_memory_32(0x138, 0);                /* crtc */
-
-
-	uint16_t human_work[] = {
-		/* HUMAN_WORK + 0x00: Default exception handler */
-		0x4e73,                         /* rte                        */
-
-		/* HUMAN_WORK + 0x02: Default subroutine handler */
-		0x4e75,                         /* rts                        */
-
-		/* HUMAN_WORK + 0x04: Stop loop */
-		0x4e72, 0x2000,                 /* stop $2000                 */
-		0x60fa,                         /* bra -4                     */
+	uint16_t fake_human[] = {
+#include "fake_human.inc"
 	};
 
-	for(int i = 0; i < sizeof(human_work) / sizeof(human_work[0]); i++) {
-		m68k_write_memory_16(HUMAN_WORK + i * 2, human_work[i]);
+	for(int i = 0; i < sizeof(fake_human) / sizeof(fake_human[0]); i++) {
+		v68.ram[HUMAN_HEAD + i * 2] = fake_human[i] >> 8;
+		v68.ram[HUMAN_HEAD + i * 2 + 1] = fake_human[i] & 0xff;
 	}
-
-	/* IOCS call vector setting */
-	for(int i = 0; i < 256; i++) {
-		m68k_write_memory_32(0x400 + i * 4, HUMAN_WORK + 0x02);
-	}
-
-	/* IOCS work setting */
-	m68k_write_memory_16(0x970, 79);       /* Number of columns on screen -1 */
-	m68k_write_memory_16(0x972, 24);       /* Number of lines on screen -1 */
-
-	/* DOS call vector setting */
-	for(int i = 0; i < 256; i++) {
-		m68k_write_memory_32(0x1800 + i * 4, HUMAN_WORK + 0x02);
-	}
-
-	FLAG_S = 0;
 
 	v68.heap_start = v68.heap_top = STACK_TOP + STACK_SIZE;
 
 	/* Init mem chain */
-	m68k_write_memory_32(HUMAN_HEAD + 0x00, 0);
-	m68k_write_memory_32(HUMAN_HEAD + 0x04, 0);
-	m68k_write_memory_32(HUMAN_HEAD + 0x08, HUMAN_WORK);
-	m68k_write_memory_32(HUMAN_HEAD + 0x0c, 0);
+	m68k_write_memory_32(HUMAN_HEAD - 0x10 + 0x00, 0);
+	m68k_write_memory_32(HUMAN_HEAD - 0x10 + 0x04, 0);
+	m68k_write_memory_32(HUMAN_HEAD - 0x10 + 0x08, HUMAN_WORK);
+	m68k_write_memory_32(HUMAN_HEAD - 0x10 + 0x0c, 0);
 }
 
 int v68_run_command(char *cmd) {
@@ -257,6 +207,12 @@ int v68_run_command(char *cmd) {
 
 		/* 0x10: Environment vars pointer */
 		m68k_write_memory_32(m + 0x00, ENV_TOP);
+		/* 0x14: Return PC */
+		if(v68.cur_prog_addr) {
+			m68k_write_memory_32(m + 0x04, m68k_read_memory_32(v68.cur_prog_addr + 0x04));
+		} else {
+			m68k_write_memory_32(m + 0x04, m68k_get_reg(0, M68K_REG_PC));
+		}
 		/* 0x20: Command line pointer */
 		m68k_write_memory_32(m + 0x10, STACK_TOP);
 		/* 0x30: Start address of BSS */
@@ -318,9 +274,8 @@ void v68_queue_next_command() {
 		return;
 	}
 
-	/* Last command, HALT */
-	m68k_set_reg(M68K_REG_SR, 0x2000);
-	m68k_set_reg(M68K_REG_PC, HUMAN_WORK + 4);
+	/* Last command, restore PC*/
+	m68k_set_reg(M68K_REG_PC, m68k_read_memory_32(v68.cur_prog_addr + 0x04));
 }
 
 int v68_env_append(char *env) {
@@ -345,7 +300,7 @@ uint32_t v68_mem_alloc(int size, uint32_t parent_addr) {
 	/* Align to 4 bytes */
 	size = (size + 3) & 0xfffffc;
 
-	uint32_t first = m68k_read_memory_32(HUMAN_HEAD + 0x0c);
+	uint32_t first = m68k_read_memory_32(HUMAN_HEAD - 0x04);
 
 	uint32_t prev = first;
 	if(first) {
@@ -389,7 +344,7 @@ uint32_t v68_mem_alloc(int size, uint32_t parent_addr) {
 }
 
 int v68_mem_shrink(uint32_t addr, uint32_t new_size) {
-	uint32_t first = m68k_read_memory_32(HUMAN_HEAD + 0x0c);
+	uint32_t first = m68k_read_memory_32(HUMAN_HEAD - 0x04);
 
 	addr -= 16;
 
@@ -429,7 +384,7 @@ int v68_mem_shrink(uint32_t addr, uint32_t new_size) {
 }
 
 int v68_mem_free(uint32_t addr, uint32_t parent_addr) {
-	uint32_t first = m68k_read_memory_32(HUMAN_HEAD + 0x0c);
+	uint32_t first = m68k_read_memory_32(HUMAN_HEAD - 0x04);
 
 	addr -= 16;
 
@@ -480,7 +435,7 @@ int v68_mem_free(uint32_t addr, uint32_t parent_addr) {
 
 uint32_t v68_mem_remaining() {
 	uint32_t min = v68.heap_start;
-	uint32_t first = m68k_read_memory_32(HUMAN_HEAD + 0x0c);
+	uint32_t first = m68k_read_memory_32(HUMAN_HEAD - 0x04);
 	for(uint32_t cur = first; cur; cur = m68k_read_memory_32(cur + 0x0c)) {
 		uint32_t end = m68k_read_memory_32(cur + 0x08);
 		if(end > min) min = end;
@@ -491,7 +446,7 @@ uint32_t v68_mem_remaining() {
 }
 
 void v68_mem_dump() {
-	for(uint32_t cur = HUMAN_HEAD; cur; cur = m68k_read_memory_32(cur + 0x0c)) {
+	for(uint32_t cur = HUMAN_HEAD - 0x10; cur; cur = m68k_read_memory_32(cur + 0x0c)) {
 		verbose1("block @%06x addr=%06x prev=%06x parent=%06x end=%06x len=%d next=%06x\n",
 			cur, cur + 16,
 			m68k_read_memory_32(cur),
