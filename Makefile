@@ -18,6 +18,9 @@ v68: main.o tools.o v68.o v68ipl.o v68io.o v68periph.o v68human.o v68doscall.o v
 xinfo: xinfo.o md5.o cmdline.o
 	gcc $^ -o $@
 
+xdump: xdump.o tools.o
+	gcc $^ -o $@
+
 sjis2utf8: sjis2utf8.o sjis.o sjis_unicode.o utf8.o
 	gcc $^ -o $@
 
