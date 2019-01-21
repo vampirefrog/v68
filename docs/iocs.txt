@@ -11,28 +11,28 @@ $03	_KEY_INIT	Initialization of input relation
 $04	_BITSNS		Acquisition of key states
 $05	_SKEYSET	Key input occurrence
 $06	_LEDCTRL	Keyboard LED setting
-$07	_LEDSET		キーボード LED をキー入力モードに合わせる
-$08	_KEYDLY		キーリピートの開始時間設定
-$09	_KEYREP		キーリピートの間隔設定
-$0a	(Unused)	OPT.2 によるテレビコントロール許可
-$0b	(Unused)	OPT.2 によるテレビコントロール禁止
-$0c	_TVCTRL		テレビコントロール
-$0d	_LEDMOD		LED モードの設定
-$0e	_TGUSEMD	画面の使用状態の設定
-$0f	_DEFCHR		外字定義
-$10	_CRTMOD		CRT モード設定
-$11	_CONTRAST	コントラスト設定
-$12	_HSVTORGB	HSV→RGB 変換
-$13	_TPALET		テキストパレット設定
-$14	_TPALET2	テキストパレット独立設定
-$15	_TCOLOR		テキストプレーン指定
-$16	_FNTADR		フォントアドレスの収得
-$17	_VRAMGET	テキスト VRAM のバイト単位読み込み
-$18	_VRAMPUT	テキスト VRAM のバイト単位書き込み
-$19	_FNTGET		フォント読み込み
-$1a	_TEXTGET	テキスト VRAM のドット単位読み込み
-$1b	_TEXTPUT	テキスト VRAM のドット単位書き込み
-$1c	_CLIPPUT	テキスト VRAM のドット単位書き込み(クリッピング処理あり)
+$07	_LEDSET		Fit keyboard LED to key input mode
+$08	_KEYDLY		Set start time of key repeat
+$09	_KEYREP		Set key repeat interval
+$0a	(Unused)	Enable TV control by OPT.2
+$0b	(Unused)	Disable TV control by OPT.2
+$0c	_TVCTRL		TV control
+$0d	_LEDMOD		Setting of LED mode
+$0e	_TGUSEMD	Set screen usage state
+$0f	_DEFCHR		Definition of external character
+$10	_CRTMOD		CRT mode setting
+$11	_CONTRAST	Contrast setting
+$12	_HSVTORGB	HSV to RGB conversion
+$13	_TPALET		Text palette setting
+$14	_TPALET2	Independent setting of text palette
+$15	_TCOLOR		Specify text plane
+$16	_FNTADR		Acquisition of font address
+$17	_VRAMGET	Text Read byte of VRAM
+$18	_VRAMPUT	Write byte unit of text VRAM
+$19	_FNTGET		Font loading
+$1a	_TEXTGET	Read text VRAM in dot units
+$1b	_TEXTPUT	Dot writing of text VRAM
+$1c	_CLIPPUT	Dot unit writing of text VRAM (with clipping processing)
 $1d	_SCROLL		Setting display coordinates
 $1e	_B_CURON	Cancel cursor temporary stop
 $1f	_B_CUROFF	Pause cursor
@@ -223,8 +223,8 @@ $ff	_ABORTJOB	Abort
 
 ・Key scanning code
 
-キーコード	キー入力状態ビット
- グループ	7	6	5	4	3	2	1	0
+Key code	Key input status bit
+	group	7	6	5	4	3	2	1	0
 
 	0	6&	5%	4$	3#	2"	1!	ESC
 	1	BS	\|	^~	-=	0	9)	8(	7'
@@ -236,13 +236,13 @@ $ff	_ABORTJOB	Abort
 	7	CLR	↓	→	↑	←	UNDO	R_DOWN	R_UP
 	8	4	+	9	8	7	-	*	/
 	9	0	ENTER	3	2	1	=	6	5
-	a	XF3	XF2	XF1	HELP	登録	記号	.	,
-	b	ひら	INS	CAPS	コード	ﾛ-ﾏ字	かな	XF5	XF4
-	c	F5	F4	F3	F2	F1	COPY	BREAK	全角
+	a	XF3	XF2	XF1	HELP	登録	symbol	.	,
+	b	ひら	INS	CAPS	コード	ﾛ-ﾏ字	Wonder	XF5	XF4
+	c	F5	F4	F3	F2	F1	COPY	BREAK	Full-width
 	d				F10	F9	F8	F7	F6
 	e					OPT.2	OPT.1	CTRL	SHIFT
 
-	スキャンコード = キーコードグループ×８＋キー入力状態ビット
+	Scan code = Key code group × 8 + Key input status bit
 
           10:TAB    20:D      30:M      40:/      50:,      60:全角   70:SHIFT
 01:ESC    11:Q      21:F      31:,<     41:*      51:.      61:BREAK  71:CTRL
@@ -265,9 +265,9 @@ $ff	_ABORTJOB	Abort
 
 ==============================================================================
 
-$00	_B_KEYINP	キーデータの読み込み
+$00	_B_KEYINP	Read key data
 
-Ret	キーデータ
+Ret	Key data
 	d0.hb	スキャンコード
 	d0.b	ASCII コード
 
@@ -732,29 +732,29 @@ Ret	パターンの存在するアドレス(転送元)
 
 ==============================================================================
 
-$1a	_TEXTGET	テキスト VRAM のドット単位読み込み
+$1a	_TEXTGET	Read text VRAM in dot units
 
-Arg	d1.w	X 座標
-	d2.w	Y 座標
-	a1.l	データバッファのアドレス
-		(0,a1)	パターンの X 方向のドット数
+Arg	d1.w	X coordinate
+	d2.w	Y coordinate
+	a1.l	Address of data buffer
+		(0,a1)	Number of dots in X direction of pattern
 		(2,a1)		   Y 〃
-		(4,a1)	(パターンデータ)
+		(4,a1)	(Pattern data)
 
-	テキスト VRAM からドット単位で読み込む.
+	Read from text VRAM in dot unit.
 
 ==============================================================================
 
-$1b	_TEXTPUT	テキスト VRAM のドット単位書き込み
+$1b	_TEXTPUT	Dot writing of text VRAM
 
-Arg	d1.w	X 座標
-	d2.w	Y 座標
-	a1.l	データバッファのアドレス
-		(0,a1)	パターンの X 方向のドット数
+Arg	d1.w	X coordinate
+	d2.w	Y coordinate
+	a1.l	Address of data buffer
+		(0,a1)	Number of dots in X direction of pattern
 		(2,a1)		   Y 〃
-		(4,a1)	パターンデータ
+		(4,a1)	Pattern data
 
-	テキスト VRAM へドット単位で書き込む.
+	Write to text VRAM in dot units.
 
 ==============================================================================
 
@@ -2360,21 +2360,21 @@ Ret	d0.l	Hour of elapsed time (0〜23:59:59"99=8639999, 1/100 unit)
 	d1.l	Days of elapsed time (0〜65535)
 
 	Check the time since the ROM started up.
-	ROM IOCS では、ショートカットで呼び出すと割り込み禁止状態になったままで帰るので注意すること.
+	Please note that in ROM IOCS, if you call it with a shortcut it will return with interrupt disabled status.
 
 ==============================================================================
 
-$80	_B_INTVCS	ベクタ設定
+$80	_B_INTVCS	Vector setting
 
-Arg	d1.w	ベクタ番号($0000〜$00ff:割り込み $0100〜$01ff:IOCS コール)
-	a1.l	処理アドレス
+Arg	d1.w	Vector number($0000〜$00ff:interrupt $0100〜$01ff:IOCS call)
+	a1.l	Processing address
 
-Ret	変更前の処理アドレス
+Ret	Processing address before change
 
-	ベクタの処理アドレスを設定する.
-	設定したアドレスはスーパーバイザモードで呼び出される.
-	割り込みからは rte で、IOCS コールは rts で戻る.
-	ROM IOCS version 1.3 のみ、ベクタ番号が異常な場合に -1 を返す.
+	Set processing address of vector.
+	The set address is called in supervisor mode.
+	From the interrupt rte, the IOCS call returns with rts.
+	Only ROM IOCS version 1.3 returns -1 if the vector number is abnormal.
 
 ==============================================================================
 
