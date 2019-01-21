@@ -24,6 +24,9 @@ xdump: xdump.o tools.o
 sjis2utf8: sjis2utf8.o sjis.o sjis_unicode.o utf8.o
 	gcc $^ -o $@
 
+sjisstat: sjisstat.o sjis.o sjis_unicode.o utf8.o
+	gcc $^ -o $@
+
 test-mem: test-mem.o v68.o v68human.o v68opm.o v68io.o v68doscall.o v68fecall.o v68iocscall.o okim6258.o ym2151.o vgm.o sjis.o sjis_unicode.o $(MUSASHIOBJS) $(MUSASHIGENOBJS)
 	gcc $^ -lao -lm -o $@
 
