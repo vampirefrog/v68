@@ -2,257 +2,256 @@
 
 ==============================================================================
 
-・IOCS ワーク一覧(ROM IOCS version 1.00)
+・IOCS Work List(ROM IOCS version 1.00)
 
 address	size
-$800	16.b	キーの押し下げ状態
-$810	 1.b	キーボード LED の点灯状態
-$811	 1.b	シフトキー押し下げ状態
-$812	 1.w	キーバッファデータバイト数
-$814	 1.l	〃	    書き込みポインタ
-$818	 1.l	〃	    読み込みポインタ
-$81c	64.w	キーバッファ
+$800	16.b	Key depression state
+$810	 1.b	Keyboard LED lit status
+$811	 1.b	Shift key pushed down state
+$812	 1.w	Number of key buffer data bytes
+$814	 1.l	〃	    Write pointer
+$818	 1.l	〃	    Read pointer
+$81c	64.w	Key buffer
 
-$89c	 1.w	RS-232C 受信バッファデータバイト数
-$89e	 1.l	〃	〃	    書き込みポインタ
-$8a2	 1.l	〃	〃	    読み込みポインタ
-$8a6	64.w	〃	受信バッファ
-$926	 1.w	〃	通信モード
-$928	 1.b	〃	 SI/SO   状態 0:SO   1:SI (bit0:受信 bit1:送信)
-$929	 1.b	〃	XON/XOFF 状態 0:XOFF 1:XON(〃)
+$89c	 1.w	Number of RS-232C receive buffer data bytes
+$89e	 1.l	〃	〃	    Write pointer
+$8a2	 1.l	〃	〃	    Read pointer
+$8a6	64.w	〃	Receive buffer
+$926	 1.w	〃	Communication mode
+$928	 1.b	〃	 SI/SO   State 0:SO   1:SI (bit0:Reception bit1:Send)
+$929	 1.b	〃	XON/XOFF State 0:XOFF 1:XON(〃)
 
-$92a	 1.w	マウスデータ受信カウンタ
-$92c	 1.l	〃	    受信バッファ書き込みポインタ
-$930	 3.b	〃	    受信バッファ
-$933	 1.b	現在の MSCTRL 端子の状態
-$934	 1.l	マウス受信データ処理アドレス(ソフトキーボード)
-$948	 1.l	〃			    (マウスカーソル)
-$93c	 1.b	CRT モード
+$92a	 1.w	Mouse data reception counter
+$92c	 1.l	〃	    Receive buffer write pointer
+$930	 3.b	〃	    Receive buffer
+$933	 1.b	Current MSCTRL terminal status
+$934	 1.l	Mouse reception data processing address (soft keyboard)
+$948	 1.l	〃			    (Mouse cursor)
+$93c	 1.b	CRT mode
 
-$93d	 1.b	グラフィック画面のページ数
-$93e	 1.l	テキスト１ラインのバイト数
-$942	 1.w	テキスト操作対象ページ番号
-$944	 1.l	〃		プレーンの先頭アドレス
-$948	 1.l	テキスト表示開始アドレスオフセット
-$94c	 1.l	ソフトキーボード描画プレーンの先頭アドレス(X68000 only)
-$950	 1.w	〃		表示Ｘ座標
+$93d	 1.b	Number of pages of graphic screen
+$93e	 1.l	Text 1 byte number of lines
+$942	 1.w	Text Operation target page number
+$944	 1.l	〃		Start address of plane
+$948	 1.l	Text display start address offset
+$94c	 1.l	Start address of soft keyboard drawing plane(X68000 only)
+$950	 1.w	〃		Indicates the X coordinate
 $952	 1.w	〃		    Ｙ
-$954	 1.w	テキストクリッピング範囲(Ｘ最小値)
-$956	 1.w	〃			(Ｙ最小値)
-$958	 1.w	〃			(Ｘ最大値+1)
-$95a	 1.w	〃			(Ｙ最大値+1)
-$95c	 1.l	グラフィック操作対象ページの先頭アドレス
-$960	 1.l	〃	    １ラインのバイト数
-$964	 1.w	〃	    画面の色数-1(0なら使用不可)
-$966	 1.w	〃	    描画カラーコード
-$968	 1.w	〃	    クリッピング範囲(Ｘ最小値)
-$96a	 1.w	〃			    (Ｙ最小値)
-$96c	 1.w	〃			    (Ｘ最大値)
-$96e	 1.w	〃			    (Ｙ最大値)
+$954	 1.w	Text clipping range (X minimum value)
+$956	 1.w	〃			(Y minimum value)
+$958	 1.w	〃			(X maximum value + 1)
+$95a	 1.w	〃			(Y maximum value + 1)
+$95c	 1.l	Start address of graphics operation target page
+$960	 1.l	〃	    Number of bytes per line
+$964	 1.w	〃	    Number of colors on screen -1(Can not be used if 0)
+$966	 1.w	〃	    Drawing color code
+$968	 1.w	〃	    Clipping range(X minimum value)
+$96a	 1.w	〃			    (Y minimum value)
+$96c	 1.w	〃			    (X maximum value)
+$96e	 1.w	〃			    (Y maximum value)
 
-$970	 1.w	テキスト桁数-1
-$972	 1.w	〃	行数-1
-$974	 1.w	カーソルＸ座標
-$976	 1.w	〃	Ｙ座標
-$978	 1.l	BEEP 音 PCM データアドレス
-$97c	 1.w	〃	    データ長
-$97e	 1.l	拡張 ESC シーケンス処理アドレス
-$982	 1.l	ESC シーケンスバッファ書き込みポインタ
-$986	10.b	ESC シーケンスバッファ(ESC の次から)
-$990	 1.b	２バイト文字の１バイト目
-$991	 1.b	カーソル表示状態(0:消灯 !0:点灯)
-$992	 1.b	カーソル点滅スイッチ(0:off !0:on)
-$993	 1.b	アプリケーション用カーソル点滅スイッチ(0:on !0:off)
-$994	 1.b	テキスト表示色
-$995	 1.b	〃	      保存バッファ
-$996	 1.l	カーソル座標保存バッファ
+$970	 1.w	Number of text digits -1
+$972	 1.w	〃	Number of rows -1
+$974	 1.w	Cursor X coordinate
+$976	 1.w	〃	Y coordinate
+$978	 1.l	BEEP sound PCM data address
+$97c	 1.w	〃	    Data length
+$97e	 1.l	Extended ESC sequence processing address
+$982	 1.l	ESC sequence buffer write pointer
+$986	10.b	ESC Sequence Buffer (from ESC Next)
+$990	 1.b	1st byte of double-byte character
+$991	 1.b	Cursor display state (0: turns off !0: lights up)
+$992	 1.b	Cursor flashing switch(0:off !0:on)
+$993	 1.b	Application cursor flashing switch(0:on !0:off)
+$994	 1.b	Text display color
+$995	 1.b	〃	      Save buffer
+$996	 1.l	Cursor coordinate storage buffer
 
-$99a	 1.l	外字グループ０のフォントアドレス
+$99a	 1.l	Font address of external character group 0
 $99e	 1.l	〃	    １〃
 $9a2	 1.l	〃	    ２〃
 $9a6	 1.l	〃	    ３〃
 $9aa	 1.l	〃	    ４〃
 $9ae	 1.l	〃	    ５〃
 
-$9b2	 1.w	マウスデータ受信タイマ初期値
-$9b4	 1.w	〃		タイマカウンタ
-$9b6	 1.l	〃		処理アドレス
-$9ba	 1.w	カーソル点滅	タイマ初期値
-$9bc	 1.w	〃		タイマカウンタ
-$9be	 1.l	〃		処理アドレス
-$9c2	 1.w	FDモータ停止	タイマ初期値
-$9c4	 1.w	〃		タイマカウンタ
-$9c6	 1.l	〃		処理アドレス
-$9ca	 1.w	アラーム電源オフタイマ初期値
-$9cc	 1.w	〃		タイマカウンタ
-$9ce	 1.l	〃		処理アドレス
+$9b2	 1.w	Initial value of mouse data reception timer
+$9b4	 1.w	〃		Timer counter
+$9b6	 1.l	〃		Processing address
+$9ba	 1.w	Cursor blink	Timer initial value
+$9bc	 1.w	〃		Timer counter
+$9be	 1.l	〃		Processing address
+$9c2	 1.w	FD motor stop	Timer initial value
+$9c4	 1.w	〃		Timer counter
+$9c6	 1.l	〃		Processing address
+$9ca	 1.w	Alarm power off timer Initial value
+$9cc	 1.w	〃		Timer counter
+$9ce	 1.l	〃		Processing address
 
-$9d2	 1.l	電源オフまでの時間
-$9d6	 1.l	稼働時間(１分単位)
-$9da	 1.b	OPM レジスタ $1b の設定値
-$9db	 1.b	未使用
-$9dc	 1.b	グラフィック画面使用モード
-$9dd	 1.b	テキスト    〃
-$9de	 1.b	ROM デバッガ起動スイッチ(0:off !0:on)
-$9df	 1.b	起動方法
-$9e0	 1.b	起動ユニット番号(PDA)
+$9d2	 1.l	Time to power off
+$9d6	 1.l	Operating time(1 minute increments)
+$9da	 1.b	Set value of OPM register $1b
+$9db	 1.b	Unused
+$9dc	 1.b	Graphics screen usage mode
+$9dd	 1.b	text    〃
+$9de	 1.b	ROM debugger startup switch(0:off !0:on)
+$9df	 1.b	Starting method
+$9e0	 1.b	Activation unit number (PDA)
 
-$9e1	 1.b	FD ドライブの状態(bit7=1:アクセス中 bit6=1:モータ on)
-		%10...	アクセス中、モータ on
-		%01...	アクセス終了、モータ on(Timer-C 割り込みで off にする)
-		%00...	アクセス終了、モータ off
-$9e2	 1.b	FDC LEDCTRL/EJECTMASK の設定
-$9e6	 4.w	〃  ドライブステータス/ディスク交換フラグ
-$9ee	10.b	〃  コマンド生成用バッファ
-$9f8	 6.b	SASI コマンド生成用バッファ
-$9fe	16.b	〃   容量フラグ
-$a0e	 1.w	実行中の IOCS コール番号(-1なら実行していない)
+$9e1	 1.b	Status of the FD drive(bit7=1:Accessing bit6=1:Motor on)
+		%10...	During access, motor on
+		%01...	Access end, Motor on(Turn off with Timer-C interrupt)
+		%00...	Access end, motor off
+$9e2	 1.b	Setting of FDC LEDCTRL/EJECTMASK
+$9e6	 4.w	〃  Drive status / Disk exchange flag
+$9ee	10.b	〃  Command generation buffer
+$9f8	 6.b	SASI command generation buffer
+$9fe	16.b	〃   Capacity flag
+$a0e	 1.w	IOCS call number being executed (if -1 is not running)
+$a10	 1.b	Printer abort flag
+$a11	 1.b	〃	Kanji mode flag (0: alphanumeric character !0: kanji)
+$a12	 1.b	〃	1st byte of double-byte character
+$a13	 1.b	Number of printed lines to date
+$a14	 1.w	〃	  Number of print digits
+$a16	98.b	Printer parameters
+$a78	 1.b	Number of rows per page - 1
+$a79	 1.b	Number of digits in one line - 1
 
-$a10	 1.b	プリンタアボートフラグ
-$a11	 1.b	〃	漢字モードフラグ(0:英数字 !0:漢字)
-$a12	 1.b	〃	２バイト文字の１バイト目
-$a13	 1.b	現在までの印刷行数
-$a14	 1.w	〃	  印刷桁数
-$a16	98.b	プリンタパラメータ
-$a78	 1.b	１頁の行数-1
-$a79	 1.b	１行の桁数-1
+$a7a	 1.l	Soft keyboard display plane start address(Plane 3)
+$a7e	 1.l	〃					(Plane 2)
+$a82	 1.w	Vertical synchronization check flag when mouse cursor is drawn(0:off !0:on)
+$a84	 1.w	Minimum movement to be considered as dragging -1
+$a86	 1.w	Animation speed of mouse cursor
+$a88	 1.w	unknown($0000)
+$a8a	 1.w	unknown($00f6)
+$a8c	 1.w	Column start position at which mouse cursor can be displayed(0)
+$a8e	 1.w	〃			  Line start position(0)
+$a90	 1.w	〃			  Column end position(128)
+$a92	 1.w	〃			  Line end position(1008)
+$a94	 1.w	unknown(1024)
+$a96	 1.w	unknown(1008)
+$a98	 1.w	Text 1 byte number of lines
+$a9a	 1.w	Mouse cursor movement range(X minimum value)
+$a9c	 1.w	〃		      (Y minimum value)
+$a9e	 1.w	〃		      (X maximum value)
+$aa0	 1.w	〃		      (Y maximum value)
+$aa2	 1.b	Mouse Cursor Display Switch(0:Erase !0:Express)
+$aa3	 1.b	Unused
+$aa4	 7.l	Pointer to pattern data body(6+1 Points)
+$ac0	 1.w	Display number of mouse cursor animation
+$ac2	 1.w	〃			      Speed counter
+$ac4	 1.w	Animation flag of mouse cursor(-1:Animate)
+$ac6	 1.w	State of left mouse button(0:Not pushing -1:Pushing)
+$ac8	 1.w	〃    Right button "
+$aca	 1.w	Movement amount in mouse X direction
+$acc	 1.w	〃    Y direction〃
+$ace	 1.w	Mouse cursor X coordinate
+$ad0	 1.w	〃	      Y coordinate
+$ad2	 1.w	〃	      X coordinate storage buffer
+$ad4	 1.w	〃	      Y coordinate
+$ad6	 1.w	Hot spot X coordinate
+$ad8	 1.w	〃	      Y coordinate
+$ada	 1.w	Mouse cursor display start column
+$adc	 1.w	〃		      line
+$ade	 1.w	Mouse IOCS call processing flag(-1:processing)
+$ae4	 6.w	〃	    Register temporary storage buffer
+$af0	64.b	Text save buffer (plane 2)
+$b30	64.b	〃		    (Plane 3)
+$b70	16.l	Pointer to pattern data of mouse cursor
+$bb0	 1.w	Soft keyboard X coordinate
+$bb2	 1.w	〃		Y coordinate
+$bb4	 1.w	X coordinate of the start of dragging
+$bb6	 1.w	〃		Y coordinate
+$bb8	 1.w	Key code of the key pressed on the soft keyboard
+$bba	 1.l	〃				    Key data address
+$bbe	 1.b	Mouse status during last processing(Button state)
+$bbf	 1.b	Mouse receive data processing flag(bit7=1:Mouse reception data being processed
+					   bit0=1:Displaying soft keyboard)
+$bc0	 1.b	Key input repeat counter of soft keyboard
+$bc1	 1.b	Soft keyboard control mode
+$bc2	 1.b	Mouse cursor/Soft keyboard display status
+$bc3	 1.b	Key depression flag of soft keyboard
+						(0:Not pushing 1:Pushing)
+$bc4	 1.b	Soft keyboard processing flag(-1:processing)
+$bc5	 1.b	Special key processing flag(bit0〜3:Corresponds to trap#10〜13)
 
-$a7a	 1.l	ソフトキーボード表示プレーン開始アドレス(プレーン３)
-$a7e	 1.l	〃					(プレーン２)
-$a82	 1.w	マウスカーソル描画時の垂直同期検査フラグ(0:off !0:on)
-$a84	 1.w	ドラッグと見なす最小移動量-1
-$a86	 1.w	マウスカーソルのアニメーション速度
-$a88	 1.w	不明($0000)
-$a8a	 1.w	不明($00f6)
-$a8c	 1.w	マウスカーソルが表示可能なカラム開始位置(0)
-$a8e	 1.w	〃			  ライン開始位置(0)
-$a90	 1.w	〃			  カラム終了位置(128)
-$a92	 1.w	〃			  ライン終了位置(1008)
-$a94	 1.w	不明(1024)
-$a96	 1.w	不明(1008)
-$a98	 1.w	テキスト１ラインのバイト数
-$a9a	 1.w	マウスカーソル移動範囲(Ｘ最小値)
-$a9c	 1.w	〃		      (Ｙ最小値)
-$a9e	 1.w	〃		      (Ｘ最大値)
-$aa0	 1.w	〃		      (Ｙ最大値)
-$aa2	 1.b	マウスカーソル表示スイッチ(0:消去 !0:表示)
-$aa3	 1.b	未使用
-$aa4	 7.l	パターンデータ本体へのポインタ(6+1 個分)
-$ac0	 1.w	マウスカーソルアニメーションの表示番号
-$ac2	 1.w	〃			      速度カウンタ
-$ac4	 1.w	マウスカーソルのアニメーションフラグ(-1:アニメーションする)
-$ac6	 1.w	マウス左ボタンの状態(0:押していない -1:押している)
-$ac8	 1.w	〃    右ボタン〃
-$aca	 1.w	マウスＸ方向移動量
-$acc	 1.w	〃    Ｙ方向〃
-$ace	 1.w	マウスカーソルＸ座標
-$ad0	 1.w	〃	      Ｙ座標
-$ad2	 1.w	〃	      Ｘ座標保存バッファ
-$ad4	 1.w	〃	      Ｙ座標〃
-$ad6	 1.w	ホットスポットＸ座標
-$ad8	 1.w	〃	      Ｙ座標
-$ada	 1.w	マウスカーソル表示開始カラム
-$adc	 1.w	〃		      ライン
-$ade	 1.w	マウス IOCS コール処理フラグ(-1:処理中)
-$ae4	 6.w	〃	    レジスタ一時保存バッファ
-$af0	64.b	テキスト保存バッファ(プレーン２)
-$b30	64.b	〃		    (プレーン３)
-$b70	16.l	マウスカーソルのパターンデータへのポインタ
-$bb0	 1.w	ソフトキーボードＸ座標
-$bb2	 1.w	〃		Ｙ座標
-$bb4	 1.w	ドラッグ開始時のＸ座標
-$bb6	 1.w	〃		Ｙ座標
-$bb8	 1.w	ソフトキーボード上で押しているキーのキーコード
-$bba	 1.l	〃				    キーデータアドレス
-$bbe	 1.b	前回処理時のマウスステータス(ボタンの状態)
-$bbf	 1.b	マウス受信データ処理フラグ(bit7=1:マウス受信データ処理中
-					   bit0=1:ソフトキーボード表示中)
-$bc0	 1.b	ソフトキーボードのキー入力リピートカウンタ
-$bc1	 1.b	ソフトキーボード制御モード
-$bc2	 1.b	マウスカーソル/ソフトキーボード表示状態
-$bc3	 1.b	ソフトキーボードのキー押し下げフラグ
-						(0:押していない 1:押している)
-$bc4	 1.b	ソフトキーボード処理フラグ(-1:処理中)
-$bc5	 1.b	特殊キー処理フラグ(bit0〜3:trap #10〜13に対応)
-
-$bc6	 1.b	電卓表示フラグ(0:消去 1:表示)
-$bc7	 1.b	〃  基数(0:10進数 1:16進数)
-$bc8	 1.b	〃  加減乗除(1:+ 2:- 3:* 4:/)
-$bc9	 1.b	〃  小数点フラグ(0:整数 1:小数)
-$bca	 1.w	〃  出力カウンタ
-$bcc	 1.l	〃  出力読み込みポインタ
-$bd0	22.w	〃  出力バッファ
-$bfc	 1.w	〃  Ｘ座標
-$bfe	 1.w	〃  Ｙ座標
-$c00	 2.l	〃  記憶数値(浮動小数点数値)
-$c08	 2.l	〃  計算結果(〃)
-$c10	 2.l	〃  作業用  (〃)
-$c18	 1.w	〃  入力桁数
-$c1a	 1.b	〃  エラー発生フラグ(0:正常 1:エラー)
-$c1b	16.b	〃  数字文字列バッファ
-$c2b	 6.b	〃  基数〃
-$c31	 1.b	未使用
+$bc6	 1.b	Calculator Display Flag(0:Erase 1:Express)
+$bc7	 1.b	〃  Cardinal number(0:Decimal number 1:Hexadecimal)
+$bc8	 1.b	〃  Addition, subtraction, multiplication(1:+ 2:- 3:* 4:/)
+$bc9	 1.b	〃  Decimal point flag(0:Integer 1:Decimal)
+$bca	 1.w	〃  Output counter
+$bcc	 1.l	〃  Output read pointer
+$bd0	22.w	〃  Output buffer
+$bfc	 1.w	〃  X coordinate
+$bfe	 1.w	〃  Y coordinate
+$c00	 2.l	〃  Stored numerical value(Floating point number)
+$c08	 2.l	〃  Calculation results(〃)
+$c10	 2.l	〃  For work  (〃)
+$c18	 1.w	〃  Number of input digits
+$c1a	 1.b	〃  Error occurrence flag(0:normal 1:error)
+$c1b	16.b	〃  Numeric string buffer
+$c2b	 6.b	〃  Base number〃
+$c31	 1.b	Unused
 
 $c32	 1.b	ADPCM playback / record mode (bit8=1:Split transfer mode)
 $c33	 1.b	〃    DMA transfer error status
 $c34	 1.b	DMA channel 2 transfer mode
 $c35	 1.b	〃		error status
 
-$c36	16.b	6*12フォント収得用バッファ
-$c46	72.b	フォント作成用バッファ
-$c8e	 1.b	未使用
+$c36	16.b	6 * 12 Buffer for obtaining font
+$c46	72.b	Buffer for font creation
+$c8e	 1.b	Unused
 
-$c8f	 1.b	FDD リザルト受信フラグ
-$c90	 8.b	FD0 リザルトステータス受信バッファ
+$c8f	 1.b	FDD result reception flag
+$c90	 8.b	FD0 Result Status Receive Buffer
 $c98	 8.b	FD1 〃
 $ca0	 8.b	FD2 〃
 $ca8	 8.b	FD3 〃
 
-$cb0	 1.b	未使用
-$cb1	 3.b	マウス受信データ(３バイト揃った後に転送)
-$cb4	 1.b	SASI-HD 接続台数
-$cb5	 1.b	RS-232C 受信データマスク(ビット長だけ下位ビットが 1 になる)
+$cb0	 1.b	Unused
+$cb1	 3.b	Mouse receive data(Transfer after aligning 3 bytes)
+$cb4	 1.b	Number of SASI-HD connections
+$cb5	 1.b	RS-232C receive data mask(Lower bit is set to 1 by bit length)
 
 ==============================================================================
 
-・IOCS ワーク一覧(ROM IOCS version 1.10 以降)
+・IOCS Work List(ROM IOCS version 1.10 Or later)
 
-$cb6	 1.b	システムポート MPU の種類
+$cb6	 1.b	Type of system port MPU
 				(0:68000 1:68010 2:68020 3:68030 4:68040)
-$cb7	 1.b	〃	       MPU クロック
+$cb7	 1.b	〃	       MPU clock
 				(0:10 1:16 2:20 3:25 4:33 5:40 6:50、MHz 単位)
-$cb8	 1.w	ROM ウェイトループ回数(dbra 空ループで 1ms になる回数)
+$cb8	 1.w	Number of ROM wait loops(dbra Number of times 1ms will be lost in an empty loop)
 $cba	 1.w	RAM 〃
 
 ==============================================================================
 
-・IOCS ワーク一覧(ROM IOCS version 1.30 以降)
+・IOCS Work List(ROM IOCS version 1.30 Or later)
 
-$cbc	 1.b	MPU 種別(0:68000 1:68010 2:68020 3:68030 4:68040 6:68060)
-$cbd	 1.b	FPU 有無(0:無し -1:有り)
-$cbe	 1.b	MMU 有無(0:無し -1:有り)
-$cbf	 1.b	起動情報(0:電源オン -1:リセット -2:ホットスタート)
-$cc0	 1.w	SCSI 転送サイズ
-$cc2	 1.b	本体 ID 適合性検査フラグ(-1:検査済み)
-$cc3	 1.b	SCSI 未接続フラグ(ID ごとのビットが 1 で使用不可能)
+$cbc	 1.b	MPU type(0:68000 1:68010 2:68020 3:68030 4:68040 6:68060)
+$cbd	 1.b	FPU presence(0:None -1:Present)
+$cbe	 1.b	MMU presence(0:None -1:Present)
+$cbf	 1.b	Activation information(0:Power on -1:reset -2:Hot start)
+$cc0	 1.w	SCSI transfer size
+$cc2	 1.b	Main body ID conformance check flag(-1:Inspection)
+$cc3	 1.b	SCSI not connected flag(Bit per ID is unusable)
 
-$d00	 1.l	FD 拡張 PDA の定数表アドレス収得処理アドレス
-$d04	 1.l	拡張 FDD モータオン処理のアドレス
-$d08	 1.w	テキストスクロール方法(0:ラスタコピー -1:ソフトスクロール)
-$d0a	 1.w	スムーススクロールモード(0:ジャンプ 4,8,16:スムース)
-$d0c	 1.w	カーソル点滅許可スイッチ(0:点滅 -1:表示したまま)
-$d0e	 1.w	〃	反転開始ライン×4
-$d10	 2.b	〃	反転パターン
-$d12	 1.l	BEEP 音処理アドレス(BEEP 音アドレスが -1 の時に有効)
-$d16	 1.l	ESC 処理アドレス(^[[ 系のみ、0 なら標準)
-$d1a	 1.w	グラフィック描画モード(0:通常 1:反転)
-$d1c	 1.w	_TXXLINE/_TXYLINE 長さ減少値
+$d00	 1.l	FD extended PDA constant table address acquisition processing address
+$d04	 1.l	Address of extended FDD motor on processing
+$d08	 1.w	Text scrolling method(0:Raster copy -1:Soft scroll)
+$d0a	 1.w	Smooth scroll mode(0:Jump 4,8,16:smooth)
+$d0c	 1.w	Cursor blink enable switch(0:Flashing -1:Keep displayed)
+$d0e	 1.w	〃	Inversion starting line × 4
+$d10	 2.b	〃	Inversion pattern
+$d12	 1.l	BEEP sound processing address(Valid when BEEP sound address is -1)
+$d16	 1.l	ESC processing address(^[[ System only、0 Standard)
+$d1a	 1.w	Graphics drawing mode(0:Normal 1:Flip)
+$d1c	 1.w	_TXXLINE/_TXYLINE Length decrease value
 
 ==============================================================================
 
 ・SCHDISK(version 1.04)
 
-$cc0	 1.l	IOCS _B_SEEK 処理アドレス保存バッファ
+$cc0	 1.l	IOCS _B_SEEK processing address storage buffer
 $cc4	 1.l	IOCS _B_VERIFY	〃
 $cc8	 1.l	IOCS _B_DSKINI	〃
 $ccc	 1.l	IOCS _B_DRVSNS	〃
@@ -264,9 +263,9 @@ $ce0	 1.l	IOCS _B_BADFMT	〃
 $ce4	 1.l	IOCS _B_FORMAT	〃
 $ce8	 1.l	IOCS _B_EJECT	〃
 
-$cec	 1.b	SCHDISK 組み込み済みフラグ(ID ごとのビットが 1 で組み込み済み)
+$cec	 1.b	SCHDISK built-in flag(Bit for each ID is 1 with built-in)
 
-注意:$cc0〜$cc3 は X68030 の ROM では別の用途で使われているが、SCHDISK の持つ
-     SCSI IOCS は組み込まれないので問題はない.
+note:$cc0〜$cc3 Is used for another purpose in the ROM of X68030, but since
+SCSI IOCS of SCHDISK is not incorporated, there is no problem.
 
 ==============================================================================

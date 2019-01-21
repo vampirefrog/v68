@@ -22,9 +22,9 @@
   The mnemonic notation method used in this document conforms to Motorola's Syntax.
 
 
-●Symbols (not included in Motorola's Syntax)
+● Symbols (not included in Motorola's Syntax)
 
-	a|b	a または b
+	a | b a or b
 
 	bw	B|W
 	bwl	B|W|L
@@ -36,75 +36,72 @@
 	<d8>	-128〜127
 	<d16>	-32768〜32767
 
-	〜;〜	本来は複数の行に分けて書くものを詰めて記述したもの
-		（この場合は“;”の右側も注釈ではありません）
+	〜;〜	Originally divided into multiple lines and written stuffed down
+		（In this case the right side of ";" is also not an annotation）
 
 
-●Notation of addressing mode with displacement
+● Notation of addressing mode with displacement
 
-  ディスプレースメント付きのアドレッシングモードの表記には、d16(An) のよ
-うにディスプレースメントを括弧の外側に書く方法と、(d16,An) のように括弧
-の内側に書く方法の 2 通りがあります。このドキュメントでは 68020 以上の
-Syntax に合わせて、(d16,An) のようにディスプレースメントを括弧の内側に書
-く方法に統一しています。ただし、アセンブラはどちらも同じアドレッシングモ
-ードとして解釈します。
-
+  There are two ways of writing addressing modes with displacement, such as
+writing displacement to the outside of parentheses as in d16 (An), or writing
+inside parentheses as (d16, An). In this document, it is consistent with the
+method of writing displacement inside brackets like (d16, An) according to
+Syntax of 68020 or more. However, the assembler interprets them as
+the same addressing mode.
 
 
 ━＜ Correspondence to 68060 and ColdFire ＞━━━━━━━━━━━━━━━━━━━
 
-  68060 と ColdFire への対応に関連する新しい機能をまとめて説明します。
+  I will summarize the new functions related to 68060 and ColdFire correspondence.
 
 
-●New command line switch
+● New command line switch
 
-  次のコマンドラインスイッチに対応しています。
+  It corresponds to the following command line switch.
 
-	-m68060		アセンブル対象のCPUを68060にする
-	-m5200		アセンブル対象のCPUをColdFire V2にする
-	-m5300		アセンブル対象のCPUをColdFire V3にする
-	-m5400		アセンブル対象のCPUをColdFire V4にする
+	-m68060		Set the CPU to be assembled to 68060
+	-m5200		Set the CPU to be assembled to ColdFire V2
+	-m5300		Set the CPU to be assembled to ColdFire V3
+	-m5400		Set the CPU to be assembled to ColdFire V4
 
 
 ●Newly created pseudo instruction
 
-  次の疑似命令に対応しています。
+  It corresponds to the following pseudo-instruction.
 
-	.CPU 68060	アセンブル対象のCPUを68060にする
-	.CPU 5200	アセンブル対象のCPUをColdFire V2にする
-	.CPU 5300	アセンブル対象のCPUをColdFire V3にする
-	.CPU 5400	アセンブル対象のCPUをColdFire V4にする
-	.68060		アセンブル対象のCPUを68060にする
-	.5200		アセンブル対象のCPUをColdFire V2にする
-	.5300		アセンブル対象のCPUをColdFire V3にする
-	.5400		アセンブル対象のCPUをColdFire V4にする
+	.CPU 68060	Set the CPU to be assembled to 68060
+	.CPU 5200	Set the CPU to be assembled to ColdFire V2
+	.CPU 5300	Set the CPU to be assembled to ColdFire V3
+	.CPU 5400	Set the CPU to be assembled to ColdFire V4
+	.68060		Set the CPU to be assembled to 68060
+	.5200		Set the CPU to be assembled to ColdFire V2
+	.5300		Set the CPU to be assembled to ColdFire V3
+	.5400		Set the CPU to be assembled to ColdFire V4
 
 
 ●A newly created order
 
-  次の命令は 68060 で新設されたものです。アセンブル対象の CPU が 68060
-のとき、これらの命令を記述できます。
+  The next command is newly established at 68060. When the target CPU to be assembled is 68060, these instructions can be described.
 
 	LPSTOP.W #<data>
 	PLPAR (An)
 	PLPAW (An)
 
-  次の命令は ColdFire で新設されたものです。アセンブル対象の CPU が 5200
-〜5400 のとき、これらの命令を記述できます。
+  The next command is newly established in ColdFire. These instructions can be written when the assembling target CPU is 5200 to 5400.
 
-	一般命令
+	General order
 		MOV3Q.L #<data>,<ea>			5400
 		MVS.bw <ea>,Dn				5400
 		MVZ.bw <ea>,Dn				5400
 		SATS.L Dn				5400
 
-	特権命令
+	Privileged instruction
 		HALT					5200/5300/5400
 		PULSE					5200/5300/5400
 		WDDATA.wl <ea>				5200/5300/5400
 		WDEBUG.L <ea>				5200/5300/5400
 
-	MAC 命令
+	MAC command
 		MAC.wl Ry.ul,Rx.ul			5200/5300/5400
 		MAC.wl Ry.ul,Rx.ul,<shift>		5200/5300/5400
 		MACL.wl Ry.ul,Rx.ul,<ea>,Rw		5200/5300/5400
@@ -128,17 +125,14 @@ Syntax に合わせて、(d16,An) のようにディスプレースメントを�
 
 ●The newly created control register
 
-  次の命令は 68060 で新設された制御レジスタを使用しています。アセンブル
-対象の CPU が 68060 のとき、これらの命令を記述できます。
+  The next instruction uses the control register newly established at 68060. When the target CPU to be assembled is 68060, these instructions can be described.
 
 	MOVEC.L BUSCR,Rn
 	MOVEC.L Rn,BUSCR
 	MOVEC.L PCR,Rn
 	MOVEC.L Rn,PCR
 
-  次の命令は ColdFire で新設された制御レジスタまたは既存の制御レジスタと
-は異なる表記を使用しています。アセンブル対象の CPU が 5200〜5400 のとき、
-これらの命令を記述できます。
+  The following instructions use a notation different from the control register newly established in ColdFire or the existing control register. These instructions can be written when the assembling target CPU is 5200 to 5400.
 
 	MOVEC.L	PC,Rn
 	MOVEC.L	Rn,PC
@@ -164,9 +158,7 @@ Syntax に合わせて、(d16,An) のようにディスプレースメントを�
 
 ● Unimplemented integer instruction
 
-  次の整数命令は 68060 に実装されておらず、68060 ではソフトウェアエミュ
-レーションによって処理されます。アセンブル対象の CPU が 68060 のとき、こ
-れらの未実装整数命令を記述するとワーニングで通知されます。
+  The following integer instructions are not implemented in 68060, but in 68060 they are processed by software emulation. When assembling target CPU is 68060, when these unimplemented integer instructions are described, it is notified by warning.
 
 	CAS2.wl Dc1:Dc2,Du1:Du2,(Rn1):(Rn2)
 	CHK2.bwl <ea>,Rn
@@ -178,17 +170,15 @@ Syntax に合わせて、(d16,An) のようにディスプレースメントを�
 	MULS.L <ea>,Dh:Dl
 	MULU.L <ea>,Dh:Dl
 
-  なお、CAS.wl Dc,Du,<ea> の misaligned <ea> のチェックはしていません。
+  In addition, CAS.wl Dc, Du, <ea> Of misaligned <ea> It is not checked.
 
 
 ●Unimplemented floating point instructions
 
-  次の浮動小数点命令は 68040 および 68060 に実装されておらず、これらの
-CPU ではソフトウェアエミュレーションによって処理されます。アセンブル対象
-の CPU が 68040 または 68060 のとき、これらの未実装浮動小数点命令を記述
-するとワーニングで通知されます。
+  The following floating point instructions are not implemented in 68040 and 68060, and are processed by software emulation in these CPUs.
+  When assembling target CPU is 68040 or 68060, when these unfixed floating point instructions are described, it is notified by warning.
 
-	未実装浮動小数点単項演算命令
+	Unimplemented floating point unary operation instruction
 		FACOS
 		FASIN
 		FATAN
@@ -199,8 +189,8 @@ CPU ではソフトウェアエミュレーションによって処理されま�
 		FETOXM1
 		FGETEXP
 		FGETMAN
-		FINT		(68040のみ通知)
-		FINTRZ		(68040のみ通知)
+		FINT		(Notify only 68040)
+		FINTRZ		(Notify only 68040)
 		FLOG10
 		FLOG2
 		FLOGN
@@ -217,18 +207,18 @@ CPU ではソフトウェアエミュレーションによって処理されま�
 		FMOD
 		FREM
 		FSCALE
-		FSGLDIV		(68040のみ通知)
-		FSGLMUL		(68040のみ通知)
+		FSGLDIV		(Notify only 68040)
+		FSGLMUL		(Notify only 68040)
 
 	条件付き未実装浮動小数点命令
-		FDBcc		(68060のみ通知)
-		FScc		(68060のみ通知)
-		FTRAPcc		(68060のみ通知)
+		FDBcc		(Notify only 68060)
+		FScc		(Notify only 68060)
+		FTRAPcc		(Notify only 68060)
 
-	その他の未実装浮動小数点命令
+	Other unimplemented floating point instructions
 		FMOVECR
 
-	未実装浮動小数点実効アドレス
+	Unimplemented floating point effective address
 		FMOVEM.X Dn,<ea>
 		FMOVEM.X <ea>,Dn
 		FMOVEM.L #<data>,#<data>,FPcr/FPcr
@@ -236,65 +226,64 @@ CPU ではソフトウェアエミュレーションによって処理されま�
 		F<op>.X #<data>,FPn
 		F<op>.P #<data>,FPn
 
-	未実装浮動小数点データ型
-		F<op>.P		(未実装浮動小数点実効アドレスを除く)
+	Unimplemented floating point data type
+		F<op>.P		(Excludes unimplemented floating point effective address)
 
-  なお、浮動小数点数の denormalized（.S/.D/.X）および unnormalized（.X）
-のチェックはしていません。
+  We do not check denormalized (.S / .D / .X) and unnormalized (.X) floating point numbers.
 
 
 ● Instruction deleted with ColdFire
 
   The following command was deleted with ColdFire. If these instructions are written when the assembling target CPU is 5200 to 5400, an error will occur.
 
-	BCD 命令
+	BCD command
 		ABCD	SBCD	PACK	UNPK
 
-	ビットフィールド命令
+	Bit field instructions
 		BFCHG	BFCLR	BFEXTS	BFEXTU	BFFFO	BFINS	BFSET
 		BFTST
 
-	ブレークポイント命令
+	Breakpoint instruction
 		BKPT
 
-	比較命令
+	Comparison command
 		CAS	CAS2	CHK	CHK2	CMPM
 
-	コプロセッサ命令
-		すべて
+	Coprocessor instructions
+		all
 
-	デクリメントブランチ命令
+	Decrement branch instruction
 		DBRA	DBcc
 
-	レジスタ交換命令
+	Register change instruction
 		EXG
 
-	FPU 関連の命令
-		すべて
+	FPU related instructions
+		all
 
-	転送命令
+	Transfer instruction
 		MOVE16	MOVEP
 
-	MMU 関連の命令
-		すべて
+	MMU related instructions
+		all
 
-	ローテート命令
+	Rotate instruction
 		ROL	ROR	ROXL	ROXR
 
-	復帰命令
+	Return instruction
 		RTD	RTR
 
-	テストアンドセット命令
-		TAS	(5200/5300のみ通知)
+	Test and set instruction
+		TAS	(Notice of 5200/5300 only)
 
-	トラップ命令
+	Trap instruction
 		TRAPcc	(TRAPF以外)
 		TRAPV
 
-	キャッシュ関連の命令
+	Cache related instructions
 		CPUSHA	CPUSHP
 
-	リセット命令
+	Reset command
 		RESET
 
 
@@ -484,17 +473,14 @@ MOVEA.L A0,A0 命令を挿入したことを通知します。
       ┃		    │	ット 14 が 1 のとき		      ┃
       ┗━━━━━━━━━━┷━━━━━━━━━━━━━━━━━━━━┛
 
-  例えば、MOVE #%01111,CCR を MOVE #$01111,CCR と書き間違えたときなどに、
-このワーニングが通知されます。
+  For example, this warning will be notified when MOVE #% 01111, CCR is mistakenly written as MOVE # $ 01111, CCR, and so on.
 
-  MOVE #%00011,CCR を MOVE #$00011,CCR と書き間違えたときは、上記の条件
-に該当しないので、ワーニングは通知されません。
+  When MOVE #% 00011, CCR is mistakenly written as MOVE # $ 00011, CCR, the above conditions are not met, so a warning is not notified.
 
 
-●「シンボル %s を set(=) で上書きしました」(レベル1)
+● "Overwritten symbol %s with set (=)" (level 1)
 
-  %s の所にはシンボル名が入ります。-j を指定していないとき、疑似命令 set
-以外で定義されたシンボルを set で再定義しようとしたときに通知されます。
+  The symbol name is entered at% s. When -j is not specified, it will be notified when trying to redefine the symbol defined by any other than the pseudo instruction set with set.
 
   疑似命令 set は、set 以外で定義されたシンボルでも上書きすることができ
 てしまうので、使用中のシンボルを間違って指定してしまっても二重定義エラー
@@ -505,7 +491,7 @@ MOVEA.L A0,A0 命令を挿入したことを通知します。
   -j を指定すると、このワーニングはエラーに格上げされます。
 
 
-●「シンボル %s を offsym で上書きしました」(レベル1)
+●"Overwritten symbol %s with offsym" (level 1)
 
   %s の所にはシンボル名が入ります。-j を指定していないとき、疑似命令
 offsym 以外で定義されたシンボルを offsym で再定義しようとしたときに通知
@@ -518,7 +504,7 @@ offsym 以外で定義されたシンボルを offsym で再定義しようと�
   -j を指定すると、このワーニングはエラーに格上げされます。
 
 
-●「.offsym の中に %s は指定できません」(レベル1)
+●"%s can not be specified in .offsym" (level 1)
 
   %s の所には .even/.quad/.align のいずれかが入ります。現在、.offsym で
 初期値を与えるシンボルを指定して開始した abs セクションでは、アラインメ
@@ -526,7 +512,7 @@ offsym 以外で定義されたシンボルを offsym で再定義しようと�
 の暫定処置です。
 
 
-●「.ds の引数が負数です」(レベル1)
+●"Argument of. Ds is negative number" (level 1)
 
   .text/.data 以外のセクションで .ds の引数に負数を指定すると、このワー
 ニングが通知されます。
@@ -669,7 +655,7 @@ optional PC 間接と見なされません。
 されます。
 
 
-●コマンドラインスイッチ -b2
+● Command line switch-b2
 
   -b2 を指定すると、サイズ指定のない定数でないディスプレースメントを伴っ
 た (<label>,PC) を (<label>).L に変換します。ただし、LEA/PEA/JMP/JSR の
@@ -686,9 +672,9 @@ optional PC 間接と見なされません。
 を同時に指定したい場合は -b3 を使用して下さい。
 
 
-●コマンドラインスイッチ -b3
+●Command line switch -b3
 
-  -b3 には -b1 と -b2 の両方の効果があります。
+  -b3 has both -b1 and -b2 effects.
 
 
 ●コマンドラインスイッチ -b4
@@ -1864,10 +1850,9 @@ I11 の影響です。具体的には、A0 レジスタの値が 4→2→0 と�
       │	.dc.b	.sizeof.('2.'version),'2.'version,0
 
 
-● .DEFINED.（シンボルが定義されているかどうかを調べる）
+● .DEFINED. (Check if symbols are defined)
 
-  .DEFINED. は、シンボルが定義されているかどうかを調べる演算子です。次の
-いずれかの形式で使用します。
+  .DEFINED. Is an operator that checks if a symbol is defined. Use one of the following formats:
 
 	.DEFINE.<symbol>
 	.DEFINE.(<symbol>)
@@ -2729,8 +2714,7 @@ note:
 
 ●The default for the CPU to be assembled is always 68000
 
-  アセンブル対象の CPU のデフォルトは、アセンブル時の CPU に因らず常に
-68000 になります。
+  The default for the CPU to be assembled is always 68000 regardless of the CPU at the time of assembly.
 
   HAS.X v3.09 は、CPU が 68020 以上の機種でアセンブルした場合は 68030 を、
 それ以外ならば 68000 をアセンブル対象の CPU のデフォルトとしています。し
@@ -2832,8 +2816,7 @@ HAS.X v3.09 でやると無条件に 68030 が指定されたことになって�
 
 ●Relaxing restrictions on numeric arguments of pseudo-instructions
 
-  .DCB、.DS、.REPT などの疑似命令の数値引数に文字定数を含んだ式を指定し
-てもエラーになりません。
+  Specifying an expression including a character constant as a numeric argument of a directive such as .DCB, .DS, .REPT or the like does not cause an error.
 
 	例: .DCB 疑似命令の数値引数に文字定数を含める
       ┌────────────────────────────

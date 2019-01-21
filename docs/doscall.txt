@@ -123,21 +123,15 @@ $fffd   _SEND_PR    Thread command / data transmission
 $fffe   _TIME_PR    Timer counter value acquisition
 $ffff   _CHANGE_PR  Abandonment of execution rights
 
-```
 
-```
-注意	Human68k verion 2 で $ff50〜$ff7f に配置されていたコールは、verion 3
-	以降では $ff80〜$ffaf に移動された.
+note    Calls placed in $ ff 50 to $ ff 7f in Human 68k version 2 were moved to $ ff 80 to $ ffaf in verion 3 and later.
 
-	$fff5〜$fff7,$fffa〜$fffe のコールの処理アドレスは変更不可(無視される).
-	$fff8,$ffff は本来の処理が正常終了した後に、設定したアドレスが実行され
-	る. $fff9 は一つのスレッドを削除するごとに呼び出される.
-```
+	Processing address of calls of $fff5 to $fff7, $fffa ~ $fffe can not be changed (ignored).
+	$fff8, $ffff is executed after the original processing is normally completed. $fff9 is called each time one thread is deleted.
 
-```
 ==============================================================================
 
-・Error code一覧
+・Error code list
 
 $ffffffff	 -1	I executed an invalid function code
 $fffffffe	 -2	The specified file can not be found.
@@ -175,37 +169,33 @@ $ffffffdd	-35	Symbolic link nesting exceeded 16 times (lndrv)
 $ffffffb0	-80	File exists
 
 ==============================================================================
-```
 
-```
-==============================================================================
+$ff00	_EXIT		End of program
 
-$ff00	_EXIT		プログラムの終了
-
-	プログラムを終了する. オープンしたファイルハンドルはクローズされ、使用
-	中のメモリブロックは全て解放される.
-	終了コードは 0 となる.
+	Exit the program. The opened filehandle is closed and all the memory blocks in use are released.
+	The end code is 0.
 
 ==============================================================================
 
-$ff01	_GETCHAR	キーボードの入力を待つ(エコーあり)
+$ff01	_GETCHAR	Wait for keyboard input (with echo)
 
-Ret	キーコード
+Ret	Key code
 
-	キーの入力を待ち、入力したキーコードを標準出力に出力する.
-	入力されたキーが ^C(親プロセスに戻る)、^P(以後の標準出力をプリンタにも
-	出力する)、^N(^P 状態をやめる)のいずれであるか調べる.
+	Waits for key input and outputs the input key code to standard output.
+It examines whether the entered key is ^C (return to parent process), ^P
+(to output the subsequent standard output to the printer), ^N (to stop the
+^P state).
 
 ==============================================================================
 
-$ff02	_PUTCHAR	指定文字コードの表示
+$ff02	_PUTCHAR	Display of specified character code
 
-Arg	CODE.w		1 バイト文字コード
+Arg	CODE.w		Single-byte character code
 
-Ret	常に 0
+Ret	always 0
 
-	CODE で指定した文字コードを標準出力に出力する.
-	表示中に入力されたキーが ^C、^S、^P、^N であるか調べる.
+	Outputs the character code specified by CODE to standard output.
+	It checks whether the key entered during display is ^C, ^S, ^P, ^N.
 
 	move	CODE,-(sp)
 	DOS	_PUTCHAR
@@ -213,20 +203,19 @@ Ret	常に 0
 
 ==============================================================================
 
-$ff03	_COMINP		RS-232C 回線から 1 バイト入力
+$ff03	_COMINP		1 byte input from RS-232C line
 
-Ret	入力した 1 バイト
+Ret	1 byte entered
 
-	RS-232C 回線から 1 バイト入力する(ブレークチェックあり).
+	Enter 1 byte from the RS-232C line (with break check).
 
 ==============================================================================
 
-$ff04	_COMOUT		RS-232C 回線へ 1 バイト出力
+$ff04	_COMOUT		1 byte output to RS-232C line
 
-Arg	CODE.w		1 バイトコード
+Arg	CODE.w		1 byte code
 
-	CODE で指定した 1 バイトのコードを RS-232C 回線に出力する(ブレークチェ
-	ックあり).
+	Output 1 byte code specified by CODE to RS-232C line (with break check).
 
 	move	CODE,-(sp)
 	DOS	_COMOUT
@@ -276,22 +265,21 @@ Ret	キーコード
 
 ==============================================================================
 
-$ff08	_GETC		キーボードから 1 文字入力(ブレークチェックあり)
+$ff08	_GETC		One character input from the keyboard (with break check)
 
-Ret	キーコード
+Ret	Key code
 
-	キーが押されるまで待ち、そのキーコードを返す. ^C、^P、^N について調べ
-	る.
+	Wait until the key is pressed and return the key code. Look for ^C, ^P, ^N.
 
 ==============================================================================
 
-$ff09	_PRINT		文字列の表示
+$ff09	_PRINT		Display string
 
-Arg	MESPTR.l	文字列のポインタ
+Arg	MESPTR.l	String pointer
 
 Ret	Always 0
 
-	MESPTR で指定した文字列を表示する. ^C、^S、^P、^N について調べる.
+	Display the character string specified by MESPTR. ^C、^S、^P、^N について調べる.
 
 	pea	(MESPTR)
 	DOS	_PRINT
@@ -299,11 +287,11 @@ Ret	Always 0
 
 ==============================================================================
 
-$ff0a	_GETS		文字列の入力
+$ff0a	_GETS		Input of character string
 
-Arg	BUFFER.l	入力バッファのポインタ
+Arg	BUFFER.l	Input buffer pointer
 
-Ret	入力文字数
+Ret	Number of input characters
 
 	BUFFER で指定した入力バッファに、改行までの入力文字列を書き込む.
 	改行文字はヌル文字に置き換えられる. ^C、^P、^N について調べる.
@@ -382,23 +370,22 @@ MODE = 10
 
 ==============================================================================
 
-$ff0d	_FFLUSH		ディスクのリセット
+$ff0d	_FFLUSH		Resetting the disk
 
-Ret	常に 0
+Ret	always 0
 
-	ディスクバッファの内容と標準入力からの行入力バッファを初期化する. ファ
+	Initialize the contents of the disk buffer and the line input buffer from standard input. ファ
 	イルのクローズはしない. fflush = off であれば何もしない.
 
 ==============================================================================
 
-$ff0e	_CHGDRV		カレントドライブの設定
+$ff0e	_CHGDRV		Setting of the current drive
 
-Arg	DRIVE.w		ドライブ番号(0:A 1:B … 25:Z)
+Arg	DRIVE.w		Drive number (0: A 1: B ... 25: Z)
 
-Ret	指定可能ドライブ数(1〜26)
+Ret	Number of drives that can be specified (1 to 26)
 
-	カレントドライブを変更する. Retが指定したドライブ番号以下であれば失敗
-	したことになる.
+	Change the current drive. Retが指定したドライブ番号以下であれば失敗したことになる.
 
 	move	DRIVE,-(sp)
 	DOS	_CHGDRV
@@ -406,21 +393,21 @@ Ret	指定可能ドライブ数(1〜26)
 
 ==============================================================================
 
-$ff0f	_DRVCTRL	ドライブの状態検査/設定
+$ff0f	_DRVCTRL	Drive status check / setting
 
 Arg	MODE.w		(MD.b×256＋DRIVE.b)
-		MB.b		モード
-		DRIVE.b		ドライブ番号(0:カレント 1:A 2:B … 26:Z)
+		MB.b		mode
+		DRIVE.b		Drive number (0: Current 1: A 2: B ... 26: Z)
 	P1.l		Arg 1
 	P2.l		Arg 2
 	…
 	Pn.l		Arg n
 
 Ret	MD = 0
-		指定ドライブの状態
+		Specified drive status
 
-			bit 7	LED 点滅
-			bit 6	イジェクト禁止
+			bit 7	LED flashing
+			bit 6	Eject prohibition
 			bit 5	バッファあり
 			bit 4	ユーザーによるイジェクト禁止
 			bit 3	PRO(プロテクト = 1)
@@ -1501,7 +1488,7 @@ Ret	File handle of open file (negative number if an error occurred)
 
 	Open the file specified by FILE in the access mode specified by MODE.
 	It is not possible to open a file with system/read-only attribute in write or read/write mode.
-	THe contents of MODE are as follows:
+	The contents of MODE are as follows:
 
 	bit    8	Dictionary access mode
 			%1	Use a special file handle for the dictionary (user prohibited).
@@ -1517,9 +1504,15 @@ Ret	File handle of open file (negative number if an error occurred)
 			%01	Write mode
 			%00	Read mode
 
-	The sharing mode specified by bit 6〜4 regulates the sharing of files by multiple processes. When multiple processes are executed in parallel, multiple processes can read and write to the same file at the same time There is a risk of doing so, it is necessary to designate an appropriate sharing mode and exclusive control of file access.
+	The sharing mode specified by bit 6〜4 regulates the sharing of files by
+multiple processes. When multiple processes are executed in parallel, multiple
+processes can read and write to the same file at the same time There is a risk
+of doing so, it is necessary to designate an appropriate sharing mode and
+exclusive control of file access.
 
-	In the dictionary access mode specified by bit 7, two files can be opened simultaneously. Since ASK68K ver.3.0 uses one ASK68K body, another can be used with an accessory.
+	In the dictionary access mode specified by bit 7, two files can be opened
+simultaneously. Since ASK68K ver.3.0 uses one ASK68K body, another can be used
+with an accessory.
 
 	move	MODE,-(sp)
 	pea	(FILE)
@@ -1536,7 +1529,9 @@ Ret	Error code
 
 	Close the file handle specified by FILENO.
 
-	In Human68k version 3.00 or later, even when the handle copied with _DUP is closed, the file name and update date and time are written to the standard block device.
+	In Human68k version 3.00 or later, even when the handle copied with _DUP
+is closed, the file name and update date and time are written to the standard
+block device.
 
 	move	FILENO,-(sp)
 	DOS	_CLOSE
@@ -1544,19 +1539,19 @@ Ret	Error code
 
 ==============================================================================
 
-$ff3f	_READ		ファイルから読み込む
+$ff3f	_READ		Read from file
 
-Arg	FILENO.w	ファイルハンドル
-	BUFFER.l	読み込みバッファのポインタ
-	LEN.l		読み込むバイト数
+Arg	FILENO.w	File handle
+	BUFFER.l	Pointer to read buffer
+	LEN.l		Number of bytes to read
 
-Ret	実際に読み込んだバイト数(負数ならError code)
+Ret	The actual number of bytes read (Error code if negative number)
 
-	FILENO で指定したファイルハンドルから、LEN で指定するバイト数を BUFFER
-	で指定するバッファに読み込む. 実行後、ファイルポインタは読み込んだバイ
-	ト数だけ後方に移動する.
-	Retが指定したバイト数より小さければ、ファイルを終わりまで読み込んだこ
-	とを意味する.
+	From the file handle specified by FILENO, read the number of bytes
+specified by LEN into the buffer specified by BUFFER. After execution, the
+file pointer moves backward by the number of bytes read.
+	If the return value is less than the specified number of bytes, it means
+that the file has been read to the end.
 
 	move.l	LEN,-(sp)
 	pea	(BUFFER)
@@ -1608,15 +1603,15 @@ Arg	FILENO.w	File handle
 	OFFSET.l	Offset
 	MODE.w		Move mode
 
-Ret	先頭からのオフセット(負数ならError code)
+Ret	Offset from the beginning (Error code if negative number)
 
-	FILENO で指定したファイルのポインタを、MODE で指定した位置から OFFSETで指定したバイト数だけ移動する.
-	ポインタをファイル終端以降若しくは先頭より前方に移動するとエラーになる.
-	キャラクタデバイスはシーク出来ず、現在位置は常に 0 が返る.
+	Moves the pointer of the file specified by FILENO by the number of bytes specified by OFFSET from the position specified by MODE.
+	Moving the pointer after the end of the file or forward from the beginning causes an error.
+	The character device can not seek, and the current position always returns 0.
 
-	MODE = 0	Lead
+	MODE = 0	Start
 	MODE = 1	Current position
-	MODE = 2	終端(オフセットは 0 若しくは負数のみ指定可能)
+	MODE = 2	End (Offset can be specified only 0 or negative number)
 
 	move	MODE,-(sp)
 	move.l	OFFSET,-(sp)
@@ -1878,8 +1873,7 @@ Ret	Address of allocated memory block (MSP＋$10)
 					($00?????? は確保可能なバイト数)
 		d0.l = $8200000?	完全に確保不可能($? は不定)
 
-	LEN で指定したバイト数のメモリを確保する. LEN が $1000000 以上の場合は
-	必ずエラーになり、確保可能な最大バイト数を調べる事が出来る.
+	Reserve memory with the number of bytes specified by LEN. If LEN is more than $1000000, it will always result in an error, and you can check the maximum number of bytes that can be secured.
 
 	move.l	LEN,-(sp)
 	DOS	_MALLOC

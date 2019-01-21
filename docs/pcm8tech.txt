@@ -357,7 +357,7 @@ Note:   It should not be used in general programs.
 
 　　　・With a $60 call, we return immediately even if the length is over $FF00.
 
-　　　・Bread will follow the latest designation.
+　　　・Pan will follow the latest designation.
 
         Reverberation during output is also affected. However, designation of output cutting is completely ignored.
 

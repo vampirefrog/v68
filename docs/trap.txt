@@ -35,8 +35,10 @@ Arg	d0.l =	$58363801('X68'<<8+1)	Power off by front switch
 		$58363803('X68'<<8+3)	Power off with soft switch
 		Other than those above	Software reset
 
-	It is called from the power off interrupt and keyboard processing, or from the user program, and performs power off and reset processing by software.
-	It is hooked at Human 68k startup, it will not be executed immediately even if it is called during DOS call execution, and it will be called after it ends.
+	It is called from the power off interrupt and keyboard processing, or
+from the user program, and performs power off and reset processing by software.
+It is hooked at Human 68k startup, it will not be executed immediately even if
+it is called during DOS call execution, and it will be called after it ends.
 
 ==============================================================================
 
@@ -45,10 +47,10 @@ Arg	d0.l =	$58363801('X68'<<8+1)	Power off by front switch
 Arg	d0.b	Shift key status
 
 	Called from the keyboard process when the BREAK key is pressed.
-	However, it is ignored while executing disk related IOCS of $ 40 to $ 4f.
-	It is hooked at Human 68k startup, it will not be executed immediately even if it is called during DOS call execution, and it will be called after it ends.
-	If you press the BREAK key without pressing SHIFT, trap # 13 is also executed after trap # 11.
-	Since multiple calls are not made, there is no need to have a reentrant structure.
+	However, it is ignored while executing disk related IOCS of $40 to $4f.
+It is hooked at Human 68k startup, it will not be executed immediately even if it is called during DOS call execution, and it will be called after it ends.
+If you press the BREAK key without pressing SHIFT, trap # 13 is also executed after trap # 11.
+Since multiple calls are not made, there is no need to have a reentrant structure.
 
 ==============================================================================
 
@@ -56,10 +58,11 @@ Arg	d0.b	Shift key status
 
 Arg	d0.b	Shift key status
 
-	  When the COPY key is pressed, it is called from the keyboard processing and performs the hard copy processing of the screen.
-	  Since multiple calls are not made, there is no need to have a reentrant structure.
+  When the COPY key is pressed, it is called from the keyboard processing and
+performs the hard copy processing of the screen. Since multiple calls are not
+made, there is no need to have a reentrant structure.
 
-	  The following operations are performed depending on the shift key state.
+  The following operations are performed depending on the shift key state.
 
 	COPY		Reduced copy (1 color)
 	SHIFT + COPY	Enlarged copy (1 color)

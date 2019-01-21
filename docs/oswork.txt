@@ -1,5 +1,326 @@
+	- OS WORK MANUAL -
 
-Memory management pointer
+==============================================================================
+
+・OS work list
+
+$1c00	1.l	Memory end address + 1 in current process
+$1c04	1.l	〃		      Memory start address (PSP)
+$1c08	1.w	inDOS flag (DOS call recursion count)
+$1c0a	1.b	DOS call number being executed (Not changed during DOS call recursion)
+$1c0b	1.b	newfat setting (0/2)
+$1c0c	1.w	_IOCTRL (11) First argument: Number of retries
+$1c0e	1.w	〃	   Second argument: wait time
+$1c10	1.w	verify mode
+$1c12	1.b	break mode
+$1c13	1.b	CTRL-P flag (0: off - 1: on)
+$1c14	1.b	Thread switching request flag
+$1c15	1.b	Current drive number
+$1c16	1.b	stop key flag (bit7=1:trap#11 Was called bit0=1:shift+break)
+$1c17	1.b	trap #10 execution flag
+$1c18	1.l	d0.l When executing trap#10
+$1c1c	1.l	Address of the device header of the last device driver
+$1c20	1.l	Address of process management pointer of Human68k (=first memory block)
+$1c24	1.l	Last address of memory used by Human68k+1 (The addresses up to this address adjusted to the 8 KB boundary are set in the supervisor area)
+$1c28	1.l	The address of the work that stores the address of the process management pointer of the current process ($13d0 a for Human68k ver 3.02)
+$1c2c	1.l	Address of FCB index table of standard FCB (Handle of 6 or more)
+$1c30	1.l	Address of FCB table
+$1c34	1.l	Address of disk I / O buffer
+$1c38	1.l	Address of the current directory table
+$1c3c	1.l	Address of DPB table
+$1c40	1.l	Address of the share management structure
+$1c44	1.l	Address of common area
+$1c48	1.l	End address of common area being used + 1
+$1c4c	1.l	Common address end address
+$1c50	1.l	Address of thread management structure table
+$1c54	1.l	Address of thread management structure of current thread
+$1c58	1.w	Maximum number of threads -1 (process setting value)
+$1c5a	1.w	Number of currently generated threads
+$1c5c	1.l	The value of ssp just before DOS call branch (not changed during DOS call recursion)
+$1c60	1.w	SR at abort
+$1c62	1.l	〃	     ssp
+$1c66	1.l	Trap#11 processing address before Human68k start
+$1c6a	1.l	〃		  trap #10 〃
+$1c6e	1.w	Maximum handle file (files set value + 2)
+$1c70	1.w	buffers second argument: sector size
+$1c72	1.b	〃	First argument: Number of buffers
+$1c73	1.b	lastdrive setting value
+$1c74	1.b	Maximum number of drives (26)
+$1c75	1.b	Number of connected drives -1 (0 for no connection)
+$1c76	1.w	share second argument: number of files
+$1c78	1.w	〃    First argument: Number of lock areas
+$1c7a	1.l	〃    Number of bytes per management structure (lock * 12 + 92)
+$1c7e	26.b	Drive replacement table
+$1c98	1.l	FCB opened during DOS call (closed at abort)
+$1c9c	1.l	〃			  File handle
+$1ca0	1.b	_EXEC transition state flag(0:Not loading -1:in load or loadexec
+		    -2:Process being generated -3:In pspset)
+$1ca1	1.b	_EXEC module number
+$1ca2	1.b	ins key mode(0:off -1:on)
+$1ca3	1.b	Error processing executing flag(0:Running -1:End)
+$1ca4	1.l	Read pointer of row input buffer used with _READ from standard input
+$1ca8	1.w	〃					       Number of remaining bytes
+$1caa	1.l	_EXEC Address of the process management pointer of the process being executed
+$1cae	1.l	Process end code (Resident end if upper word is 1)
+$1cb2	1.l	_EXEC Command line address under execution
+$1cb6	1.l	Address of device header of CLOCK device
+$1cba	1.b	fflush mode(0:on 1:off)
+$1cbb	1.b	(未使用)
+$1cbc	1.w	Break key code (CTRL - C)
+$1cbe	1.w	Code to turn off printer output: CTRL-N (high byte is invalid with 1)
+$1cc0	1.w	〃	      Switch code:CTRL-P(〃)
+$1cc2	1.w	Code to restart output to the screen: CTRL-Q (not referenced)
+$1cc4	1.w	〃	      Stop code: CTRL-S (high byte is invalid with 1)
+
+==============================================================================
+
+・Stack content immediately before DOS call branch
+
+offset	size
+$00(0)	1.l	d1
+$04(4)	1.l	d2
+$08(8)	1.l	d3
+$0c(12)	1.l	d4
+$10(16)	1.l	d5
+$14(20)	1.l	d6
+$18(24)	1.l	d7
+$1c(28)	1.l	a0
+$20(32)	1.l	a1
+$24(36)	1.l	a2
+$28(40)	1.l	a3
+$2c(44)	1.l	a4
+$30(48)	1.l	a5
+$34(52)	1.l	a6
+$38(56)	1.w	sr
+$3a(58)	1.l	pc
+$3e(62)	1.w	Vector number(Only after 68010)
+
+　The top address of the stack is stored in $1c5c.
+
+==============================================================================
+
+・Disk I / O buffer
+
+offset	size
+$00(0)	1.l	Address of next structure
+$04(4)	1.b	Drive number
+$05(5)	3.b	Sector number
+$08(8)	1.l	Address of previous structure
+$0c(12)	1.b	State flag(bit 7=1:Writing	bit 6=1:FAT
+			   bit 5=1:directory	bit 4=1:File)
+$0d(13)	3.b	DPB
+$10(16)	???.b	Data buffer(buffers Size specified by the second argument)
+
+　A structure consisting of a 16 byte header and buffers second argument is
+　arranged in the number specified by the first argument of buffers and its
+　start address is stored in $1c34. The data of the 0th byte and the 8th
+　byte are bidirectional lists based on the longest nonuse method.
+
+  In Human68k version 3, disk input / output is independent of the OS, so you
+should not refer / change this buffer directly.
+
+==============================================================================
+
+・Current directory table
+
+offset	size
+$00(0)	 2.b	Drive name "d:"
+$02(2)	62.b	Path name (path delimiter $09)
+		Assignment directory + virtual directory for virtual drive
+$40(64)	 1.l	(Unused)
+$44(68)	 1.b	〃
+$45(69)	 1.b	Assignment status($00:Unused
+			     $40:Actual drive
+			     $50:Virtual drive
+			     $60:Virtual directory)
+$46(70)	 1.l	Address of DPB
+$4a(74)	 1.w	First FAT number of the current directory(0:Not accessed -1:Immediately after initialization)
+$4c(76)	 1.w	Length of path name of root directory(Actual drive = 2)
+
+　26 heads of 78 bytes each are stored, and its starting address is stored in
+　$1c38. The path name must start with a path delimiter ($09) and not at the
+　end except in the case of only the root directory.
+
+　The address of the DPB of the unused drive is set to an indefinite value, but
+　once it allocates and releases the virtual drive / directory, it becomes -1.
+
+==============================================================================
+
+・Drive replacement table
+
+offset	size
+0	1.b	Physical drive number corresponding to logical drive number 0
+1	1.b		〃	 1 〃
+…	…
+24	1.b		〃	24 〃
+25	1.b		〃	25 〃
+
+26 one byte tables are arranged one by one, and its head address is $1c7e.
+
+※Physical drive number = Drive number given in order of device incorporation
+Logical drive number = the drive number that the user specifies with A: to Z:
+
+==============================================================================
+
+・Drive parameter block
+
+offset	size	●Common to local drives / remote drives
+$00(0)	1.b	Drive number
+$01(1)	1.b	Unit number
+$02(2)	1.l	Address of device driver (device header)
+$06(6)	1.l	Next DPB address
+$0a(10)	1.w	Number of bytes per sector
+
+		●Local drive only
+$0c(12)	1.b	Number of sectors per cluster -1
+$0d(13)	1.bNumber of shift of cluster → sector
+		If bit 7=1 16 bit Intel FAT
+$0d(14)	1.w	First sector number of FAT
+$10(16)	1.b	Number of FAT regions
+$11(17)	1.b	Number of sectors per FAT area
+$12(18)	1.w	Number of files in the root directory
+$14(20)	1.w	First sector number of data area
+$16(22)	1.w	Total number of clusters + 1
+$18(24)	1.w	First sector number of root directory
+$1a(26)	1.b	Media byte
+$1b(27)	1.b	Number of shift of sector → byte
+$1c(28)	1.w	FAT search start position
+
+		●DIRSCH for searching free entries
+$1e(30)	1.l	First FAT number of target directory
+$22(34)	1.w	Number of sectors per cluster -1
+$24(36)	1.l	The sector number of the next search start position
+$28(40)	1.w	Number of remaining sectors in the cluster of interest -1
+
+		●For searching DIRSCH files
+$2a(42)	1.l	First FAT number of target directory
+$2e(46)	1.w	Number of sectors per cluster -1
+$30(48)	1.l	The sector number of the next search start position
+$34(52)	1.w	Number of remaining sectors in the cluster of interest -1
+$36(54)	1.w	Next search starting position offset (multiple of 32)
+
+　There are two types of DPB, one for local drive and one for remote drive,
+　which are different in size, DPB for remote drive is smaller, and only a
+　small amount of information is stored.
+
+If the number of bytes per sector is nonzero, it is the DPB of the local drive
+and the size is 56 bytes.If the number of bytes per sector is 0, it is the DPB
+of the remote drive and the size is 12 bytes.The number of bytes per sector is
+56 or 12 There are as many as the number of drives recognized by the DPB of
+the byte and its starting address is stored in $ 1 c 3 c Since it is not
+created in consecutive addresses, in order to obtain a specific DPB, it is
+calculated in the following way There is a need.
+
+・Acquisition method of DPB(Common to Human68k version 2/3)
+
+1) Acquire the drive number (A = 0, B = 1, ..., Z = 25) on DOS and let it be A.
+2) Human68k's work (0x1c7e+A).b is obtained and set as B. This is the drive number inside the OS.
+3) Human68k's work (0x1c38). L is obtained and set as C.
+4) Obtain (C+(0x4e*B)+0x46).l and let it be D.
+5) D is a pointer to the DPB of the drive number A.
+
+※ In the method of tracing the DPB in order from the top, it is not possible
+   to cope with the case where DPB is connected by skipping midway unused
+   drives in GRAD.r or the like.
+
+==============================================================================
+
+・File handle replication table
+
+offset	size
+0	1.b	Logical file handle(Changed only with _DUP 0).
+		There is no particular reference.
+1	1.b	Physical file handle(Changed by _DUP / _ DUP 0 / _ DUP 2).
+		If both bytes are $ff, the corresponding logical file handle is unused.
+
+　A table of 2 bytes per file is arranged (files specified value -3) and the
+　start address is stored in $1c2c (-3 is based on the standard file handle
+　by -5, dictionary handle by + 2) Basically, the logical file handle is more
+　than 6 and indicates the element number of the table.
+
+※Physical file handle = File handle attached in order from the first FCB
+　Logical file handle = File handle used by the user
+
+==============================================================================
+
+・File control block
+
+offset	size
+$00(0)	1.b	Number of file handles corresponding to this FCB
+$01(1)	1.b	Device information(bit 7=0 When bit 4〜0 Keep the drive name in)
+			bit 7	0:Block device 1:Character device
+			bit 6	Update flag
+			bit 5	0:Local 1:Remote  In case of block device
+			bit 5	0:COOKED 1:RAW	┐
+			bit 3	CLOCK	Device │
+			bit 2	NUL	〃	│For character devices
+			bit 1	Standard output 〃	│
+			bit 0	Standard input 〃	┘
+$02(2)	1.l	Block device   : Address of DPB
+		Character device : Pointer to device driver
+$06(6)	1.l	File pointer
+$0a(10)	1.l	Pointer to exclusive control information
+$0e(14)	1.b	Access mode
+$0f(15)	1.b	Location on directory(Number from the beginning of the sector:0〜31)
+		(Not used in character devices)
+$10(16)	1.b	Sectors in the cluster being accessed
+$11(17)	1.b	(Unused)
+$12(18)	1.w	Cluster number being accessed
+$14(20)	1.l	Sector number being accessed
+$18(24)	1.l	Top of I / O buffer
+$1c(28)	1.l	Sector number of corresponding directory entry
+		(Not used in character devices)
+$20(32)	1.l	Last access pointer(If _SEEK is not done the same value as the file pointer)
+$24(36)	8.b	File name 1(The margin is $20)
+$2c(44)	3.b	File name extension(〃)
+$2f(47)	1.b	File attributes
+$30(48)	10.b	File name 2(〃)
+$3a(58)	1.w	Final update moment
+$3c(60)	1.w	Last update date
+$3e(62)	1.w	First FAT number
+$40(64)	1.l	file size
+$44(68)	7.l	FAT Cache(Upper word:Number of clusters from the beginning Lower word:FAT number)
+
+　A table of 96 bytes per file is arranged (file specified value -3) and its
+　head address is stored in $1c30. FCB of file handles 0 to 5 is statically
+　reserved in the internal data area of Human 68 k .
+
+For the seven sets of caches from the 68th byte, the number of clusters and
+the FAT number corresponding to positions 1/8, 2/8, ..., 7/8 from the
+beginning of the file are written (0/8 corresponds to the 62nd byte ).
+Depending on the access order, FAT at exactly n / 8 cluster position can not
+be obtained. In that case, FAT number is saved for cluster position N that
+satisfies n / 8 ≦ N / 8 <(n + 1) / 8. Once access is repeated, it finally
+settles to 1/8, 2/8, ..., 7/8.
+
+==============================================================================
+
+・File exclusive control management structure
+
+offset	size
+$00(0)	1.b	Number of corresponding FCBs (unused if 0)
+$01(1)	1.b	Access mode when first opened
+$02(2)	1.w	Number of locks
+$04(4)	88.b	NAMESTS buffer
+$5c(92)	???.b	share The number of lock structures specified by the second argument
+
+In the header of 92 bytes, a structure with 12 bytes of lock structure aligned
+as much as specified by the second argument is arranged as many as the number
+specified by the share first argument, the start address of which is stored in
+$ 1 c 40 If share first / second argument is SHARE / LOCK respectively, the
+overall size is (92 + LOCK * 12) * SHARE. ・Lock structure
+
+offset	size
+0	1.l	Lock start position
+4	1.l	Number of bytes to lock
+8	1.l	FCB
+
+It is a buffer for setting the lock area of the file and is written at the end
+of the file exclusion control management structure.
+
+==============================================================================
+
+・Memory management pointer
 
 offset  size
 $00(0)  1.l     Previous memory management pointer (leading with 0)
@@ -17,7 +338,7 @@ represents the attribute of that memory block.
     $fe     unknown (MEMDRV)
     $fd     Sub memory block
 
-Process management pointer
+・Process management pointer
 
 offset   size
 $00(0)    4.l   (memory management pointer)
@@ -51,4 +372,60 @@ $82(130) 66.b   Path name of executable file
 $c4(196) 24.b   File name of executable file
 $dc(220)  9.l   (unused)
 
-A 256-byte structure (including a memory management pointer) for holding process information, which is created at the beginning of the memory block for each process.
+A 256-byte structure (including a memory management pointer) for holding
+process information, which is created at the beginning of the memory block for
+each process.
+
+
+==============================================================================
+
+・Thread management structure
+
+offset	 size
+$00(0)	  1.l	Address of the next thread management structure
+$04(4)	  1.b	Weight flag(0:Normal -1:Wait)
+$05(5)	  1.b	Subtraction counter
+$06(6)	  1.b	Initial counter value
+$07(7)	  1.b	DOS call number
+$08(8)	  1.l	PSP address
+$0c(12)	  1.l	usp
+$10(16)	  8.l	d0-d7
+$30(48)	  7.l	a0-a6
+$4c(76)	  1.w	sr
+$4e(78)	  1.l	pc
+$52(82)	  1.l	ssp
+$56(86)	  1.w	INDOS flag (OS running level)
+$58(88)	  1.l	INDOS pointer (OS running stack)
+$5c(92)	  1.l	Address of inter-thread communication buffer
+$60(96)	 16.b	Thread name
+$70(112)  1.l	Wait time remaining(In milliseconds)
+$74(116)  1.l	Start address of memory block of process
+$78(120)  1.l		〃		Last address + 1
+
+　A table of 124 bytes per one is arranged by the number specified by the first
+　argument of process and its starting address is saved in $1c50. The head
+　table is used in the child process started by Human68k and DOS_EXEC This is
+　the main thread.
+
+==============================================================================
+
+・Common area
+
+　The common area is reserved as one area from Human 68k and its starting
+　address is stored in $1c44. Each common area is secured for the first time
+　when requested by the user and a 32 byte header is provided at the head of
+　the data area. The structure of the header is as follows:
+
+offset	size
+$00(0)	 1.l	The total number of bytes in this area
+$04(4)	12.b	Distinguished name of this area
+$10(16)	 1.l	Data size of this area
+$14(20)	 1.l	Offset to lock start position
+$18(24)	 1.l	Number of bytes to lock
+$1c(28)	 1.l	The process that secured this area PSP + 16
+
+　In order to search for a specific common area, it is necessary to compare the
+　distinguished names sequentially from the beginning.When the common area is
+　deleted, the following area is moved forward and the gap is shortened.
+
+==============================================================================

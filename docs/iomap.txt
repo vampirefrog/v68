@@ -302,21 +302,21 @@ CRTC R21($e8002a):
                                     │  │      AP3〜AP0 CP3〜CP0
                                     MEN SA
 
-        bit 9   MEN     テキスト画面アクセスマスク
+        bit 9   MEN     Text screen access mask
                         %0 : 無効
                         %1 : 有効
-        bit 8   SA      テキスト画面同時アクセス
+        bit 8   SA      Simultaneous text screen access
                         %0 : 無効
                         %1 : 有効
         bit 7〜4 AP3〜AP0
-                        テキスト画面同時アクセス対象プレーン選択
+                        Text screen Simultaneous access target plane selection
                         %0 : 非選択
                         %1 : 選択
         bit 3〜0 CP3〜CP0
-                        ┌ テキスト画面ラスタコピー対象プレーン選択
-                        └ グラフィック画面高速クリア対象ページ選択
-                        %0 : 非選択
-                        %1 : 選択
+                        ┌ Text screen Raster copy target plane selection
+                        └ Graphic screen High speed clear target page selection
+                        %0 : Unselected
+                        %1 : Choice
 
 CRTC R22($e8002c):
         bit 15                           8   7                           0
@@ -847,21 +847,18 @@ Area set register($e86001):
           0 is set to this register when the main unit is reset.
 
 Extended area set register:
-          $200000 番地から 256KB 単位でスーパバイザ領域にするかどうかを指定す
-        る. レジスタ #0 の bit 0 から bit 7、…、レジスタ #4 の bit 0 から bit
-        7 の順に各ビットがそれぞれ $200000〜$23ffff、$240000〜$27ffff、…、
-        $bc0000〜$bfffff というように 256KB 単位で対応する.
-          本体リセット時、このレジスタには全て 0 が設定される.
+  Specify whether to make it supervisor area in increments of 256 KB from the address of $200000.
+  In the order of bits 0 to 7 of register #0, bit 0 to bit 7 of register #4 in
+the order of bit 0 to bit 7, each bit is set in units of 256 KB such as
+$200000〜$23ffff, $240000〜$27ffff, ..., $bc0000 to $bfffff correspond.
+  When the main unit is reset, 0 is set to this register.
 
-          拡張エリアセットレジスタ番号を R、ビット番号を N とすると、対応する
-        アドレスは (R＋1)×$200000＋N×$40000 からの 256KB 分となる.
+          If the extension area set register number is R and the bit number is N, the corresponding address is 256 KB from (R + 1) × $ 200000 + N × $ 40000.
 
-        ※X68030 で追加されたレジスタであるが、X68000 用の増設メモリでも対応し
-          ているものがある(CZ-6BEn、PIO-6BEn 等). また、対応していても本体リセ
-          ット時に設定が初期化されないものも存在する. Xsimm10 はコスト削減のた
-          め対応していない.
-        ※Human68k では常に $e86001 しか使われず、保護すべきメモリが 2MB を超
-          えた場合でも無視されてユーザ領域のままとなる.
+※ It is a register added in X68030, but there are some supported extra memory for X68000 (CZ - 6 BEn, PIO - 6 BEn etc).
+In addition, even if it supports it, some settings are not initialized at the time of main unit reset.
+Xsimm 10 does not correspond to cost reduction.
+※ Human68k always uses only $e86001, and even if the memory to be protected exceeds 2MB, it is ignored and remains in the user area.
 
 ==============================================================================
 
@@ -1647,10 +1644,10 @@ $e8c003 1.b       W     Printer strobe
 ・System port
 
 address size    R/W
-$e8e001 1.b     R/W     #1      コンピュータ画面コントラスト
+$e8e001 1.b     R/W     #1      Computer screen contrast
 $e8e003 1.b     R/W     #2      ディスプレイ/3D スコープ制御
 $e8e005 1.b       W     #3      カラーイメージユニット制御
-$e8e007 1.b     R/W     #4      キーボード/NMI/ドットクロック制御
+$e8e007 1.b     R/W     #4      Keyboard / NMI / dot clock control
 $e8e009 1.b       W     #5      ROM/DRAM ウェイト数制御
 $e8e00b 1.b     R       #6      MPU 種別/動作クロック読み出し
 $e8e00d 1.b       W     #7      SRAM 書き込み制御
@@ -1795,9 +1792,9 @@ System Port #8($e8e00f):
 
 
 address size    R/W
-$e90001 1.b       W     レジスタ番号設定ポート
-$e90003 1.b     R       ステータスレジスタ
-〃      〃        W     データポート
+$e90001 1.b       W     Register number setting port
+$e90003 1.b     R       Status register
+〃      〃        W     Data port
 
 
 レジスタ番号設定ポート($e90001):
@@ -2300,8 +2297,8 @@ $e94001 1.b     R       FDC ステータスレジスタ
 〃      〃        W     FDC コマンドレジスタ
 $e94003 1.b     R       FDC データレジスタ
 〃      〃        W     FDC コマンドレジスタ
-$e94005 1.b     R       ドライブステータス
-〃      〃        W     ドライブオプション信号制御
+$e94005 1.b     R       Drive status
+〃      〃        W     Drive option signal control
 $e94007 1.b       W     アクセスドライブセレクト等
 
 
@@ -2477,7 +2474,7 @@ $e96039 1.b     R/W     TCH  (Transfer Counter High)
 $e9603b 1.b     R/W     TCM  (Transfer Counter Mid)
 $e9603d 1.b     R/W     TCL  (Transfer Counter Low)
 
-※SCSI ボードの場合は $ea0001〜$ea001d.
+※For SCSI boards, $ea0001〜$ea001d.
 
 
 BDID read($e96021):

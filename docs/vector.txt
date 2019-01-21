@@ -6,7 +6,7 @@
 
 address	vector
 $000000	  $00	SSP after reset
-$000004	  $01	〃	     PC
+$000004	  $01	PC      〃
 $000008	  $02	Bus error / access fault
 $00000c	  $03	Address error
 $000010	  $04	Improper order
@@ -15,11 +15,11 @@ $000018	  $06	CHK command
 $00001c	  $07	TRAPV、TRAPcc、cpTRAPcc command
 $000020	  $08	Privilege violation
 $000024	  $09	Trace exception handling
-$000028	  $0a	未実装命令 line 1010 emulator (SX コール)
-$00002c	  $0b	〃	   line 1111 emulator (DOS コール,浮動小数点演算)
+$000028	  $0a	Unimplemented command line 1010 emulator (SX call)
+$00002c	  $0b	〃                    line 1111 emulator (DOS call, floating point operation)
 $000030	  $0c	Unused
-$000034	  $0d	FPU プロトコルバイオレーション例外処理
-$000038	  $0e	〃  フォーマットエラー例外処理
+$000034	  $0d	FPU protocol violation exception handling
+$000038	  $0e	〃  Format error exception handling
 $00003c	  $0f	Uninitialized interrupt
 $000040	  $10	Unused
 $000044	  $11	〃
@@ -91,39 +91,39 @@ $000130	  $4c	MFP key With serial input
 $000134	  $4d	MFP Timer-A
 $000138	  $4e	MFP CRTC · IRQ
 $00013c	  $4f	MFP H-SYNC
-$000140	  $50	SCC(B)	送信バッファ空
+$000140	  $50	SCC(B)	Transmit buffer empty
 $000144	  $51	SCC(B)	〃 ※
-$000148	  $52	SCC(B)	外部ステータス変化
+$000148	  $52	SCC(B)	External status change
 $00014c	  $53	SCC(B)	〃 ※
-$000150	  $54	SCC(B)	受信キャラクタ有効(マウス 1 バイト入力)
+$000150	  $54	SCC(B)	Received Character Enabled (Mouse 1 byte Input)
 $000154	  $55	SCC(B)	〃 ※
-$000158	  $56	SCC(B)	スペシャル Rx コンディション
+$000158	  $56	SCC(B)	Special Rx condition
 $00015c	  $57	SCC(B)	〃 ※
-$000160	  $58	SCC(A)	送信バッファ空
+$000160	  $58	SCC(A)	Transmit buffer empty
 $000164	  $59	SCC(A)	〃 ※
-$000168	  $5a	SCC(A)	外部ステータス変化
+$000168	  $5a	SCC(A)	External status change
 $00016c	  $5b	SCC(A)	〃 ※
-$000170	  $5c	SCC(A)	受信キャラクタ有効(RS-232C 1 バイト入力)
+$000170	  $5c	SCC(A)	Received character valid (RS-232C 1 byte input)
 $000174	  $5d	SCC(A)	〃 ※
-$000178	  $5e	SCC(A)	スペシャル Rx コンディション
+$000178	  $5e	SCC(A)	Special Rx condition
 $00017c	  $5f	SCC(A)	〃 ※
-$000180	  $60	I/O	FDC ステータス割り込み
-$000184	  $61	I/O	FDD 挿入/排出割り込み
-$000188	  $62	I/O	HDC ステータス割り込み
-$00018c	  $63	I/O	プリンタレディー割り込み
-$000190	  $64	DMAC	#0 終了  (FDD)
-$000194	  $65	DMAC	#0 エラー(〃 )
-$000198	  $66	DMAC	#1 終了  (SASI/SCSI)
-$00019c	  $67	DMAC	#1 エラー(〃	   )
-$0001a0	  $68	DMAC	#2 終了  (IOCS _DMAMOVE,_DMAMOV_A,_DMAMOV_L)
-$0001a4	  $69	DMAC	#2 エラー(〃				   )
+$000180	  $60	I/O	FDC status interrupt
+$000184	  $61	I/O	FDD insertion / ejection interrupt
+$000188	  $62	I/O	HDC status interrupt
+$00018c	  $63	I/O	Printer ready interrupt
+$000190	  $64	DMAC	#0 End  (FDD)
+$000194	  $65	DMAC	#0 error(〃 )
+$000198	  $66	DMAC	#1 End  (SASI/SCSI)
+$00019c	  $67	DMAC	#1 error(〃	   )
+$0001a0	  $68	DMAC	#2 End  (IOCS _DMAMOVE,_DMAMOV_A,_DMAMOV_L)
+$0001a4	  $69	DMAC	#2 error(〃				   )
 $0001a8	  $6a	DMAC	#3 End (ADPCM)
 $0001ac	  $6b	DMAC	#3 Error (ADPCM)
-$0001b0	  $6c	SPC	SCSI 割り込み(内蔵 SCSI)
-$0001b4	  $6d	未使用
+$0001b0	  $6c	SPC SCSI interrupt (internal SCSI)
+$0001b4	  $6d	Unused
 …	  …	…
-$0001fc	  $7f	未使用
-$000200	  $80	MIDI	MIDI ボード (#0) MIDI real-time message detected
+$0001fc	  $7f	Unused
+$000200	  $80	MIDI	MIDI board (#0) MIDI real-time message detected
 $000204	  $81	MIDI	〃 ※
 $000208	  $82	MIDI	〃		 Click Counter / MIDI-clock detected
 $00020c	  $83	MIDI	〃 ※
@@ -139,10 +139,10 @@ $000230	  $8c	MIDI	〃		 FIFO-Tx empty
 $000234	  $8d	MIDI	〃 ※
 $000238	  $8e	MIDI	〃		 General Timer
 $00023c	  $8f	MIDI	〃 ※
-$000240	  $90	未使用
+$000240	  $90	Unused
 …	  …	…
-$00027c	  $9f	未使用
-$000280	  $a0	MIDI	MIDI ボード (#1) MIDI real-time message detected
+$00027c	  $9f	Unused
+$000280	  $a0	MIDI	MIDI board (#1) MIDI real-time message detected
 $000284	  $a1	MIDI	〃 ※
 $000288	  $a2	MIDI	〃		 Click Counter / MIDI-clock detected
 $00028c	  $a3	MIDI	〃 ※
@@ -158,7 +158,7 @@ $0002b0	  $ac	MIDI	〃		 FIFO-Tx empty
 $0002b4	  $ad	MIDI	〃 ※
 $0002b8	  $ae	MIDI	〃		 General Timer
 $0002bc	  $af	MIDI	〃 ※
-$0002c0	  $b0	RS232C	拡張 RS-232C (#0) チャンネル B
+$0002c0	  $b0	RS232C extended RS-232C (#0) channel B
 $0002c4	  $b1	〃	〃
 $0002c8	  $b2	〃	〃
 $0002cc	  $b3	〃	〃
@@ -166,7 +166,7 @@ $0002d0	  $b4	〃	〃
 $0002d4	  $b5	〃	〃
 $0002d8	  $b6	〃	〃
 $0002dc	  $b7	〃	〃
-$0002e0	  $b8	RS232C	拡張 RS-232C (#0) チャンネル A
+$0002e0	  $b8	RS232C extended RS-232C (#0) Channel A
 $0002e4	  $b9	〃	〃
 $0002e8	  $ba	〃	〃
 $0002ec	  $bb	〃	〃
@@ -174,7 +174,7 @@ $0002f0	  $bc	〃	〃
 $0002f4	  $bd	〃	〃
 $0002f8	  $be	〃	〃
 $0002fc	  $bf	〃	〃
-$000300	  $c0	RS232C	拡張 RS-232C (#1) チャンネル B
+$000300	  $c0	RS232C extended RS-232C (#1) channel B
 $000304	  $c1	〃	〃
 $000308	  $c2	〃	〃
 $00030c	  $c3	〃	〃
@@ -182,7 +182,7 @@ $000310	  $c4	〃	〃
 $000314	  $c5	〃	〃
 $000318	  $c6	〃	〃
 $00031c	  $c7	〃	〃
-$000320	  $c8	RS232C	拡張 RS-232C (#1) チャンネル A
+$000320	  $c8	RS232C extended RS-232C (#1) Channel A
 $000324	  $c9	〃	〃
 $000328	  $ca	〃	〃
 $00032c	  $cb	〃	〃
@@ -190,32 +190,30 @@ $000330	  $cc	〃	〃
 $000334	  $cd	〃	〃
 $000338	  $ce	〃	〃
 $00033c	  $cf	〃	〃
-$000340	  $d0	未使用
+$000340	  $d0	Unused
 …	  …	…
-$0003bc	  $ef	未使用
-$0003c0	  $f0	PSX	PSX16550 / PSX16750 受信割り込み
-$0003c4	  $f1	未使用
+$0003bc	  $ef	Unused
+$0003c0	  $f0	PSX PSX16550 / PSX16750 Receive interrupt
+$0003c4	  $f1	Unused
 …	  …	…
 $0003d4	  $f5	未使用
-$0003d8	  $f6	SPC	SCSI 割り込み(SCSI ボード)
-$0003dc	  $f7	TS-6BSI	パラレルポート
+$0003d8	  $f6	SPC SCSI interrupt(SCSI Board)
+$0003dc	  $f7	TS-6BSI	Parallel port
 $0003e0	  $f8	ETHER	Nereid (#1) Ethernet
 $0003e4	  $f9	ETHER	Nereid (#0) Ethernet / Neptune-X / Neptune-Evolution
-	  $f9	PARA	パラレルボード (#0)
-$0003e8	  $fa	PARA	パラレルボード (#1)
+	  $f9	PARA	Parallel board (#0)
+$0003e8	  $fa	PARA	Parallel board (#1)
 	  $fa	USB	Nereid (#1) USB
 $0003ec	  $fb	USB	Nereid (#0) USB
-$0003f0	  $fc	U-I/O	ユニバーサル I/O (#0)
+$0003f0	  $fc	U-I/O	Universal I / O (#0)
 $0003f4	  $fd	〃	〃		 (#1)
 $0003f8	  $fe	〃	〃		 (#2)
 $0003fc	  $ff	〃	〃		 (#3)
-		MU	MK-MU1O(Mercury-Unit V4 OPNA) OPNA タイマ割り込み
+		MU	MK-MU1O(Mercury-Unit V4 OPNA) OPNA timer interrupt
 
-※SCC	　SCC は各割り込みに二つずつ同じアドレスが設定されるが、実際に割り込み
-	を発生させて使用するのは偶数ベクタである.
-※MIDI	　MIDI ボードの割り込みは偶数ベクタのみが使用される.
-※ETHER	　Neptune-X の実装によっては、DIP SW やジャンパで任意のベクタを設定で
-	きる(アマルテア版、Evolution など).
+※SCC	　Two SCCs are set for each interrupt, but the same address is set. However, it is the even vector which actually generates an interrupt and uses it.
+※MIDI	　For even MIDI board interrupts, only even vectors are used.
+※ETHER	　Depending on the implementation of Neptune-X, you can set arbitrary vectors with DIP SW or jumper (Amaltea version, Evolution, etc.).
 
 ==============================================================================
 
@@ -248,12 +246,12 @@ DMAC(#3)
 device	address	r/w
 MFP	$e88017	R/W	%PPPP_XXXX (Default = $40)
  VR			※ Lower 4 bits are changed by interrupt vector
-			%0000: GPIP0		%1000: タイマ B
-			%0001: GPIP1		%1001: 送信エラー
-			%0010: GPIP2		%1010: 送信バッファ空
-			%0011: GPIP3		%1011: 受信エラー
-			%0100: タイマ D		%1100: 受信バッファフル
-			%0101: タイマ C		%1101: タイマ A
+			%0000: GPIP0		%1000: Timer B
+			%0001: GPIP1		%1001: sending error
+			%0010: GPIP2		%1010: Transmit buffer empty
+			%0011: GPIP3		%1011: Reception error
+			%0100: Timer D		%1100: Receive buffer full
+			%0101: Timer C		%1101: Timer A
 			%0110: GPIP2		%1110: GPIP6
 			%0111: GPIP3		%1111: GPIP7
 
@@ -266,48 +264,40 @@ device	address	r/w
 SCC(B)	$e98001	R/W	%PPPP_XXXP (Default = $50)
  WR2/RR2
 SCC(A)	$e98005	R/W	%PPPP_XXXP (Default = $50)
- WR2/RR2		※ビット 3〜1 は割り込み要因で変化
-			%000: チャンネル B 送信バッファ空
-			%001:	〃	   外部ステータス変化
-			%010:	〃	   受信キャラクタ有効
-			%011:	〃	   スペシャル Rx コンディション
-			%100: チャンネル A 送信バッファ空
-			%101:	〃	   外部ステータス変化
-			%110:	〃	   受信キャラクタ有効
-			%111:	〃	   スペシャル Rx コンディション
+ WR2/RR2		※Bits 3 and 1 are changed by interrupt factor
+			%000: Channel B transmit buffer empty
+			%001:	〃	   External status change
+			%010:	〃	   Received Character Effective
+			%011:	〃	   Special Rx condition
+			%100: Channel A transmit buffer empty
+			%101:	〃	   External status change
+			%110:	〃	   Received Character Effective
+			%111:	〃	   Special Rx condition
 
-　SCC へのベクタ番号の設定は、まず $e98001(チャンネル B)、$e98005(同 A)のコマ
-ンドポートに WR2(書き込みレジスタ 2)の番号 2 を書き込み、続いて設定したいベク
-タ番号を同じポートに書き込む.
+　To set the vector number to SCC, first write the number 2 of WR 2 (write register 2) to the command port of $ e 98001 (channel B) and $ e 98005 (same A), and then write the vector number you want to set to the same port .
 
-　コマンドポートに 2 を書き込んでから同じポートを読むと RR2(読み込みレジスタ 2)
-が読み出されるが、その内容は、チャンネル A のポートでは WR2 の設定値そのもの、
-チャンネル B のポートでは最後に発生した割り込みのベクタ番号となっている.
+　RR 2 (read register 2) is read when 2 is written to the command port and then read from the same port, but its contents are the setting value itself of WR 2 on the port of channel A, the setting value of WR 2 itself at the port of channel A, It is a vector number.
 
-　SCC が発生させる割り込みのベクタ番号はチャンネルと割り込み要因で 8 通りある
-が、指定したベクタ番号のうちビット 3〜1 を変化させるモードと、ビット 4〜6(ビッ
-トの順番が違うことに注意)を変化させるモードが選択できる. 後者の場合は上記の表
-中の %PPPP_XXXP は %PXXX_PPPP となり、割り込み要因別の数値も読み換える必要があ
-る. Human68k ではビット 3〜1 を変化させるモードで使用している.
+　The interrupt vector numbers generated by the SCC are eight channels depending on the channel and interrupt factor, but the mode to change bits 3 to 1 among the specified vector numbers and bits 4 to 6 (note that the order of bits is different) In the latter case, %PPPP_XXXP in the above table is %PXXX_PPPP, it is necessary to read also the numerical value by interrupt factors Human 68k uses it in the mode to change bits 3 to 1 .
 
-・I/O コントローラ
+・I/O controller
 
 device	address	r/w
 I/O	$e9c003	R	%PPPP_PPXX  (Default = $60)
-			※下位 2 ビットは割り込み要因で変化
+			※Lower 2 bits are changed by interrupt factor
 			%00: FDC		%10: HD
-			%01: FDD		%11: プリンタ
+			%01: FDD		%11: Printer
 
-・MIDI ボード
+・MIDI board
 
-device	address	r/w	(MIDI ボード)
+device	address	r/w	(MIDI board)
 MIDI	$eafa09	R	%PPPX_XXXX  (Default = $80)
  ID=0
 MIDI	$eafa19	R	%PPPX_XXX0  (Default = $a0)
- ID=1			※ビット 4〜1 は割り込み要因で変化(ビット 0 は常に %0)
+ ID=1			※Bits 4 to 1 are changed by an interrupt factor (bit 0 is always% 0)
 		%0000: MIDI real time message detected
-		       (FIFO-IRx の最古データが $f9〜$fd)
-		%0001: Click Counter(カウント値が 0 になった) /
+		       (The oldest data of FIFO-IRx is $f9 to $fd)
+		%0001: Click Counter(Count value reached 0) /
 		       MIDI-clock detected(The oldest data of FIFO-IRx is $f8)
 		%0010: Play-back Counter(Playback counter becomes negative)
 		%0011: Recording Counter(Recording counter reached 0)
@@ -321,22 +311,22 @@ Write $00 in the RGR of $eafa03 (ID = 1), $eafa13 (ID = 2) and write the vector 
 
 ・Parallel board
 
-device	address	r/w	(パラレルボード CZ-6BN1)
+device	address	r/w	(Parallel board CZ-6BN1)
 PARA	$eafb0b	?/W	%PPPP_PPPP (Default = $f9)
  ID=0
 PARA	$eafb1b	?/W	%PPPP_PPPP (Default = $fa)
  ID=1
 
-・拡張 RS-232C ボード
+・Extended RS-232C board
 
-device	address	r/w	(拡張 RS-232C ボード CZ-6BF1)
-RS232C	$eafc00	R/W	%PPPP_XXXP (Default = $b0 ※未確認)
+device	address	r/w	(Extended RS-232C board CZ-6BF1)
+RS232C	$eafc00	R/W	%PPPP_XXXP (Default = $b0 ※unconfirmed)
  ID=0(B)
-RS232C	$eafc04	R/W	%PPPP_XXXP (Default = $b8 ※未確認)
+RS232C	$eafc04	R/W	%PPPP_XXXP (Default = $b8 ※unconfirmed)
  ID=0(A)
-RS232C	$eafc10	R/W	%PPPP_XXXP (Default = $c0 ※未確認)
+RS232C	$eafc10	R/W	%PPPP_XXXP (Default = $c0 ※unconfirmed)
  ID=1(B)
-RS232C	$eafc14	R/W	%PPPP_XXXP (Default = $c8 ※未確認)
+RS232C	$eafc14	R/W	%PPPP_XXXP (Default = $c8 ※unconfirmed)
  ID=1(A)
 RS232C	$eafc20	R/W	%PPPP_XXXP
  ID=2(B)
@@ -347,33 +337,32 @@ RS232C	$eafc30	R/W	%PPPP_XXXP
 RS232C	$eafc34	R/W	%PPPP_XXXP
  ID=3(A)
 
-　X680x0 内蔵の SCC と同一につき、SCC の項を参照のこと.
+　It is the same as the built-in SCC of X680x0, see the SCC section.
 
 ・Universal I / O board
 
-device	address	r/w	(ユニバーサル I/O ボード CZ-6BU1)
-UIO	$eafd03	  W	%PPPP_PPPP  (Default = $fc ※未確認)
+device	address	r/w	(Universal I / O board CZ - 6 BU 1)
+UIO	$eafd03	  W	%PPPP_PPPP  (Default = $fc ※unconfirmed)
  ID=0
-UIO	$eafd07	  W	%PPPP_PPPP  (Default = $fd ※未確認)
+UIO	$eafd07	  W	%PPPP_PPPP  (Default = $fd ※unconfirmed)
  ID=1
-UIO	$eafd0b	  W	%PPPP_PPPP  (Default = $fe ※未確認)
+UIO	$eafd0b	  W	%PPPP_PPPP  (Default = $fe ※unconfirmed)
  ID=2
-UIO	$eafd0f	  W	%PPPP_PPPP  (Default = $ff ※未確認)
+UIO	$eafd0f	  W	%PPPP_PPPP  (Default = $ff ※unconfirmed)
  ID=3
 
-　ID=4〜63 にも設定でき、その場合のベクタ番号設定アドレスは $eafd13〜$eafdff
-となる.
+ID = 4 to 63, and the vector number setting address in that case is $eafd 13 to $eafdff.
 
-・GP-IB ボード
+・GP-IB board
 
-device	address	r/w	(GP-IB ボード SH-6BG1)
+device	address	r/w	(GP-IB board SH-6BG1)
 GPIB	$eafe11	?/W	%PPPP_PPPP  (Default = $fb)
 
 ・Mercury-Unit V4
 
 device	address	r/w	(Mercury-Unit V4 OPNA)
 MK-MU1O	$ecc0b1	R/W	%PPPP_PPPP  (Default = $ff)
-			※Master 側のタイマのみ使用可能(Slave 側は不可)
+			※Only the timer on the master side can be used (not on the Slave side)
 
 ・POLYPHON
 
@@ -387,6 +376,6 @@ POLY	$eff8bf	R/W	%PPPP_PPPP
 
 device	address	r/w	(PSX16550 / PSX16750)
 PSX	$efffxf	R/W	%PPPP_PPPP  (Default = $f0)
- SCR			※'x' にはチャンネル番号が入る($0〜$f)
+ SCR			※'x' contains the channel number ($0 to $f)
 
 ==============================================================================
