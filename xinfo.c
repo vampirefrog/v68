@@ -271,7 +271,24 @@ int main(int argc, char **argv) {
 	if(optind < 0) exit(-optind);
 
 	if(opt_csv) {
-		printf("File\tSize\tMD5\tLoad mode\tLoad mode name\tBase addr\tEntry point\tText size\tData size\tBSS size\tReloc size\tSym table size\tSCD line num table size\tSCD sym table size\tSCD string table size\tBound module pos");
+		printf(
+			"File"
+			"\tSize"
+			"\tMD5"
+			"\tLoad mode"
+			"\tLoad mode name"
+			"\tBase addr"
+			"\tEntry point"
+			"\tText size"
+			"\tData size"
+			"\tBSS size"
+			"\tReloc size"
+			"\tSym table size"
+			"\tSCD line num table size"
+			"\tSCD sym table size"
+			"\tSCD string table size"
+			"\tBound module pos"
+		);
 		if(opt_hexdump)
 			printf("\tHeader\t.text\t.data\tReloc data");
 		printf("\n");
