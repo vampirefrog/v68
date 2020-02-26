@@ -11,9 +11,6 @@
 #include "v68iocscall.h"
 #include "musashi/m68kcpu.h"
 
-
-static void v68_reset_cb(void);
-
 struct v68 v68;
 
 int v68_init(int clock, int ram_size, int sample_rate) {
@@ -24,6 +21,7 @@ int v68_init(int clock, int ram_size, int sample_rate) {
 
 	v68.ram_size = ram_size;
 	v68.cpu_clock = clock;
+	v68.sound_touched = 0;
 	v68.sample_rate = sample_rate;
 	v68.samples_remainder = 0;
 
@@ -33,16 +31,18 @@ int v68_init(int clock, int ram_size, int sample_rate) {
 	m68k_init();
 	m68k_set_cpu_type(M68K_CPU_TYPE_68000);
 
+	v68_io_init();
+
+	return 0;
+}
+
+void v68_boot() {
+	verbose1("v68_boot\n");
 	v68_ipl_init();
 	v68_human_init();
 	v68_periph_init();
-
-	m68k_pulse_reset();
-
-	v68_io_init();
 	v68_iocs_init();
-
-	return 0;
+	m68k_pulse_reset();
 }
 
 void v68_cpu_reset_instr_cb(void) {
@@ -57,12 +57,35 @@ int v68_shutdown() {
 }
 
 extern int m68ki_initial_cycles;
-int v68_fill_buffer(int16_t *bufL, int16_t *bufR, int samples) {
-	printf("v68_fill_buffer samples=%d\n", samples);
+void v68_run() {
+	verbose1("v68_run cpu_clock=%d sound_touched=%d running=%d\n", v68.cpu_clock, v68.sound_touched, v68.running);
+	int remaining_tstates = v68.cpu_clock;
+
+	v68.running = 1;
+
+	while(!v68.sound_touched) {
+		while(remaining_tstates > 0 && v68.running) {
+			int next_int = v68_periph_next_int(remaining_tstates);
+			verbose2("v68_run  executing next_int=%d remaining_tstates=%d\n", next_int, remaining_tstates);
+			v68.cpu_ended_timeslice = 0;
+			v68.prev_sound_cycles = 0;
+			int cycles = m68k_execute(next_int, v68.log_dasm);
+			int executed_cycles = v68.cpu_ended_timeslice ? next_int - m68ki_initial_cycles : cycles;
+			verbose2("v68_run  ended_timeslice=%d executed_cycles=%d next_int=%d remaining_tstates = %d\n", v68.cpu_ended_timeslice, executed_cycles, next_int, remaining_tstates);
+			v68.cpu_ended_timeslice = 0;
+			if(v68.sound_touched) return;
+		}
+	}
+}
+
+int v68_fill_buffer(int samples, int16_t *bufL, int16_t *bufR, int16_t *tmpBufL, int16_t *tmpBufR) {
+	verbose1("v68_fill_buffer samples=%d\n", samples);
 	v68.prev_sound_cycles = 0;
 	v68.buf_remaining = samples;
 	v68.bufL = bufL;
 	v68.bufR = bufR;
+	v68.tmpBufL = tmpBufL;
+	v68.tmpBufR = tmpBufR;
 	memset(bufL, 0, samples * sizeof(*bufL));
 	memset(bufR, 0, samples * sizeof(*bufR));
 
@@ -117,8 +140,8 @@ unsigned int m68k_read_memory_8(unsigned int addr) {
 	}
 
 	if(addr >= v68.ram_size) {
-		verbose2("READ8 ERROR 0x%08x\n", addr);
-		return 0;
+		fprintf(stderr, "READ8 ERROR 0x%08x\n", addr);
+		exit(1);
 	}
 
 	uint8_t r = v68.ram[addr];
@@ -146,8 +169,8 @@ unsigned int  m68k_read_memory_16(unsigned int addr) {
 	}
 
 	if(addr >= v68.ram_size - 1) {
-		verbose2("READ16 ERROR 0x%08x\n", addr);
-		return 0;
+		fprintf(stderr, "READ16 ERROR 0x%08x\n", addr);
+		exit(1);
 	}
 
 	uint16_t r = (v68.ram[addr] << 8) | v68.ram[addr + 1];
@@ -175,11 +198,15 @@ unsigned int  m68k_read_memory_32(unsigned int addr) {
 	}
 
 	if(addr > v68.ram_size) {
-		verbose2("READ32 ERROR 0x%08x\n", addr);
-		return 0;
+		fprintf(stderr, "READ32 ERROR 0x%08x\n", addr);
+		exit(1);
 	}
 
-	uint32_t r = (v68.ram[addr] << 24) | (v68.ram[addr+1] << 16) | (v68.ram[addr+2] << 8) | v68.ram[addr+3];
+	uint32_t r =
+		(v68.ram[addr] << 24) |
+		(v68.ram[addr+1] << 16) |
+		(v68.ram[addr+2] << 8) |
+		v68.ram[addr+3];
 	verbose3("READ32 RAM 0x%08x = 0x%08x\n", addr, r);
 	return r;
 }
@@ -192,22 +219,22 @@ void m68k_write_memory_8(unsigned int addr, unsigned int data) {
 	}
 	verbose3("WRITE8 RAM 0x%08x = 0x%02x\n", addr, data);
 	if(addr > v68.ram_size) {
-		verbose2("Could not write RAM at 0x%08x = 0x%02x\n", addr, data);
-		return;
+		fprintf(stderr, "Could not write RAM at 0x%08x = 0x%02x\n", addr, data);
+		exit(1);
 	}
 	v68.ram[addr] = data;
 }
 
 void m68k_write_memory_16(unsigned int addr, unsigned int data) {
+	verbose3("WRITE16 0x%08x = 0x%04x\n", addr, data);
 	if(addr >= 0x00e80000 && addr < 0x00eb0000) {
 		verbose3("WRITE16 PERIPH 0x%08x = 0x%04x\n", addr, data);
 		v68_write_periph_16(addr, data);
 		return;
 	}
-	verbose3("WRITE16 RAM 0x%08x = 0x%04x\n", addr, data);
 	if(addr > v68.ram_size) {
-		verbose2("Could not write RAM at 0x%08x = 0x%04x\n", addr, data);
-		return;
+		fprintf(stderr, "Could not write RAM at 0x%08x = 0x%04x\n", addr, data);
+		exit(1);
 	}
 	v68.ram[addr++] = data >> 8;
 	v68.ram[addr] = data;
@@ -221,8 +248,8 @@ void m68k_write_memory_32(unsigned int addr, unsigned int data) {
 	}
 	verbose3("WRITE32 RAM 0x%08x = 0x%08x\n", addr, data);
 	if(addr > v68.ram_size) {
-		verbose2("Could not write RAM at 0x%08x = 0x%08x\n", addr, data);
-		return;
+		fprintf(stderr, "Could not write RAM at 0x%08x = 0x%08x\n", addr, data);
+		exit(1);
 	}
 
 	v68.ram[addr++] = data >> 24;

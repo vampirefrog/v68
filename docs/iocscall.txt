@@ -2490,25 +2490,25 @@ Ret	a1.l	次のアドレス
 
 ==============================================================================
 
-$8a	_DMAMOVE	DMA 転送
+$8a	_DMAMOVE	DMA transfer
 
-Arg	d1.b	モード
-		bit    7	方向(0:a1からa2 1:a2からa1)
-		bit 3〜2	MAC(0:a1固定 1:a1++ 2:a1-- 3:指定禁止)
-		bit 1〜0	DAC(0:a2固定 1:a2++ 2:a2-- 3:指定禁止)
-	d2.l	転送バイト数
-	a1.l	転送元アドレス
-	a2.l	転送先〃
+Arg	d1.b	mode
+		bit    7	direction(0:From a1 to a2 1:From a2 to a1)
+		bit 3〜2	MAC(0:A1 fixed 1:a1++ 2:a1-- 3:Designated prohibition)
+		bit 1〜0	DAC(0:A2 fixed 1:a2++ 2:a2-- 3:Designated prohibition)
+	d2.l	Bytes Transferred
+	a1.l	Source address
+	a2.l	Forwarding destination〃
 
-Ret	d0/d2/a1/a2 は内容が保証されない.
+Content is not guaranteed for Ret d 0 / d 2 / a 1 / a 2.
 
-	バイト単位で DMA 転送を行なう.
-	$ff00 バイト以上転送する場合はすぐに戻ってこない.
-	DMA が使用不可能であれば、使用可能になるまで待つ.
+	DMA transfer is performed in byte units. When transferring more than $ff00
+	bytes, it will not return immediately. When DMA is unusable, wait until it
+	becomes available.
 
-	IOCS _DMAMOVE、_DMAMOV_A、_DMAMOV_L は必ずバイトサイズで転送を行うので、
-	ワードサイズでアクセスしなければならないポート(PCG エリアなど)に対して
-	使用しないように注意すること.
+	Since IOCS _DMAMOVE, _DMAMOV_A, _DMAMOV_L are always transferred in byte
+	size, be careful not to use for ports (PCG area, etc.) accessed in word
+	size.
 
 ==============================================================================
 

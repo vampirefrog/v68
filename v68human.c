@@ -238,11 +238,11 @@ int v68_run_command(char *cmd) {
 		verbose2("Entry point: 0x%08x + 0x%08x = 0x%08x cmd_queue_pos=%d\n", entry_point, reloc_adj, pc, v68.cmd_queue_pos);
 		m68k_set_reg(M68K_REG_PC, pc);
 		m68k_set_reg(M68K_REG_A4, pc); // program start addr
+		// REG_USP = STACK_TOP + STACK_SIZE;
+		// REG_ISP = STACK_TOP + STACK_SIZE;
+		// REG_MSP = STACK_TOP + STACK_SIZE;
+//		m68k_set_reg(M68K_REG_SR, m68k_get_reg(0, M68K_REG_SR) & ~0x2000);
 		m68k_set_reg(M68K_REG_A7, STACK_TOP + STACK_SIZE);
-		REG_USP = STACK_TOP + STACK_SIZE;
-		REG_ISP = STACK_TOP + STACK_SIZE;
-		REG_MSP = STACK_TOP + STACK_SIZE;
-		FLAG_S = 0;
 
 		v68.running = 1;
 		v68.cur_prog_addr = m;
@@ -256,15 +256,17 @@ int v68_run_command(char *cmd) {
 }
 
 int v68_queue_command(char *cmdline) {
+	verbose1("v68_queue_command \"%s\"\n", cmdline);
 	if(v68.cmd_queue_pos > V68_CMD_QUEUE_LEN) return -1;
-
 	strncpy(v68.cmd_queue[v68.cmd_queue_pos], cmdline, sizeof(v68.cmd_queue[0]));
 	v68.cmd_queue_pos++;
+	verbose2("v68_queue_command cmd_queue_pos=%d\n", v68.cmd_queue_pos);
 
 	return 0;
 }
 
 void v68_queue_next_command() {
+	verbose1("v68_queue_next_command cmd_queue_pos=%d\n", v68.cmd_queue_pos);
 	while(v68.cmd_queue_pos > 0) {
 		if(v68_run_command(v68.cmd_queue[0])) {
 			fprintf(stderr, "Could not run command \"%s\"\n", v68.cmd_queue[0]);
@@ -274,8 +276,10 @@ void v68_queue_next_command() {
 		return;
 	}
 
+	verbose2("v68_queue_next_command last command cur_prog_addr=0x%08x\n", v68.cur_prog_addr);
 	/* Last command, restore PC*/
 	m68k_set_reg(M68K_REG_PC, m68k_read_memory_32(v68.cur_prog_addr + 0x04));
+	v68.running = 0;
 }
 
 int v68_env_append(char *env) {
@@ -331,7 +335,7 @@ uint32_t v68_mem_alloc(int size, uint32_t parent_addr) {
 		return -2;
 	}
 
-	if(!prev) prev = HUMAN_HEAD;
+	if(!prev) prev = HUMAN_HEAD - 0x10;
 
 	uint32_t next = v68.heap_top;
 	m68k_write_memory_32(prev + 0x0c, next);

@@ -1,0 +1,74 @@
+Source Code Generator for X680x0 (MinGW cross) version 3.16
+Copyright (C)1989-1992 K.Abe, 1994-1997 R.ShimiZu, 2010-05-25 Tachibana.
+usage: dis [option] Execution file name [Output file name]
+option:
+	-a[num]		num Comment out addresses for each line (every 5 lines if num is omitted)
+	-b num		Relative branch instruction size output (0: Auto 1: Always omitted 2: Always attached)
+	-c		Do not perform label check
+	-d		Specified at the time of device driver
+	-e[file]	Output of label file
+	-f		Do not check the indefinite byte of byte manipulation instruction ($00 or $ff?)
+	-g[file]	Read label file
+	-h		Pay attention to the address following $4e75(rts) in the data area
+	-i		Even if there is an undefined instruction at the branch destination, it is not regarded as a data area
+	-j		Do not regard instructions that address errors will occur as undefined instructions
+	-k		We assume that there is no label pointing in the instruction
+	-l		I will not search severely until I can not find the program area
+	-m 680x0[,...]	Specify MPU to be disassembled (68000-68060, 680x0)
+	-m 68851	68851 Enable instruction (valid only when -m 68020 is specified)
+	-m 6888x[,ID]	Specify valid FPCP and its ID (68881/68882 ID = 0 - 7, default 1)
+	-n num		Minimum length to judge as a character string 0 if not determined (Initial value = 3)
+	-o num		Number of digits in character string area (1 ≦ num ≦ 80 initial value = 60)
+	-p		The program area in the data area is not discriminated
+	-q[num]		Do not output message ([0]: normal 1: information about table is not output)
+	-r		Add a hexadecimal comment to a character string
+	-s[num]		Output of symbol table ([0]: not 1: [normal] 2: all)
+	-u[num]		Unused A, F line trap is not regarded as an undefined instruction (num = 1 SX-Window compatible)
+	-v		Output a simple disassemble list
+	-w num		Number of horizontal bytes in the data area (1 ≦ num ≦ 32 initial value = 8)
+	-x		Append the actual opcode with a hexadecimal comment
+	-y		Do not check whether all data areas are program areas
+	-z base,exec	We consider the executable file as a binary file from base and parse it from exec
+
+	-A		Change cmpi, movea etc to cmp, move etc.
+	-B		Breaking a line even after bra
+	-C[num]		Colon after the label (0: not attached 1: 1 for every [2]: normal 3: 2 for all)
+	-D		You can also accept programs in the data section
+	-E		Do not check rewriting of indefinite bytes of byte manipulation instruction
+	-F		Output dbra, fdbra as dbf, fdbf
+	-G		Analyze the program that puts the argument immediately after the subroutine call
+	-I		Displays the address of the label to be inserted in the command
+	-K char		Use char as a comment character
+	-L char		Use char as the first character of label name
+	-M		cmpi, move, addi.b, subi.b Add comments to #imm and pack, unpk
+	-N		If size is default, it does not
+	-P num		Enable software emulation instruction (bit specification, initial value = 3)
+		+1	Enable unimplemented floating point instructions
+		+2	Enable unimplemented integer instructions
+	-R num		Specification of check item of unused field (bit designation, initial value = 15)
+		+1	Check unused register fields in mulu.l, muls.l, ftst.x
+		+2	Check for suppressed register fields in extended addressing
+		+4	Check scaling against suppressed index register
+		+8	Check size specification (.l) for suppressed index register
+	-S[num]		Divide the output file every num KB (if num is omitted, 64 KB)
+	-T[file]	Read table description file
+	-U		Output mnemonic in capital letters
+	-V num		Display of cause of backtrack (0: Disable [1]: Program area 2: all areas)
+	-W num		The minimum number of bytes to output the same data in. Dcb. If 0, it is not compressed (initial value = 64)
+	-X		Output hexadecimal numbers in upper case
+	-Y		Search the include file from the current directory
+	-Z[num]		Zero suppression of hexadecimal number ([0]: normal 1: omitted optional '$' omitted)
+
+	--include-XXX-mac=file	Specifying the include file(XXX = doscall,iocscall,fefunc)
+	--exclude-XXX-mac	Do not read include files
+	--header=file	Specifying header files(Override environment variable dis_header)
+	--(no-)fpsp	Make the unimplemented floating point instruction [Enable] (invalid)
+	--(no-)isp	Make unimplemented integer instruction [Enable] (invalid)
+	--no-fpu	Invalidate the internal FPU instruction (specified after -m68040 to 68060)
+	--no-mmu	Invalidate the built-in MMU instruction (specified after -m68030 to 68060)
+	--sp		Write a7 register as 'sp' (--a7 by default)
+	--old-syntax	Output addressing as old notation (--new-syntax by default)
+	--(in)real	Output floating point in [real notation] (internal expression)
+	--overwrite	Overwrite file unconditionally
+	--version	Display version
+	--help		Display usage

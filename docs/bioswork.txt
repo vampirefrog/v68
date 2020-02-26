@@ -36,7 +36,7 @@ $944	 1.l	〃		Start address of plane
 $948	 1.l	Text display start address offset
 $94c	 1.l	Start address of soft keyboard drawing plane(X68000 only)
 $950	 1.w	〃		Indicates the X coordinate
-$952	 1.w	〃		    Ｙ
+$952	 1.w	〃		    Y
 $954	 1.w	Text clipping range (X minimum value)
 $956	 1.w	〃			(Y minimum value)
 $958	 1.w	〃			(X maximum value + 1)

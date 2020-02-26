@@ -1,5 +1,7 @@
 #include "v68.h"
 #include "v68periph.h"
+#include "v68doscall.h"
+#include "v68fecall.h"
 #include "v68iocscall.h"
 #include "musashi/m68kcpu.h"
 #include "tools.h"
@@ -22,7 +24,7 @@ void v68_adpcm_write_8(uint32_t addr, uint8_t value);
 uint8_t v68_adpcm_read_8(uint32_t addr);
 void v68_ppi_write_8(uint32_t addr, uint8_t value);
 uint8_t v68_ppi_read_8(uint32_t addr);
-void v68_emu_write_16(uint32_t addr, uint8_t data);
+void v68_emu_write_16(uint32_t addr, uint16_t data);
 
 void v68_periph_init() {
 	verbose1("v68_periph_init\n");
@@ -100,7 +102,7 @@ uint32_t v68_int_ack_handler(int int_level) {
 	return M68K_INT_ACK_SPURIOUS;
 }
 
-void v68_periph_render(int16_t *bufL, int16_t *bufR, int samples) {
+void v68_periph_render(int samples) {
 	verbose1("v68_periph_render samples=%d\n", samples);
 
 #ifndef __EMSCRIPTEN__
@@ -109,27 +111,33 @@ void v68_periph_render(int16_t *bufL, int16_t *bufR, int samples) {
 	}
 #endif
 
-	int16_t *buf[2] = { bufL, bufR };
+	int16_t *buf[2] = { v68.bufL, v68.bufR };
 	ym2151_update_one(&v68.opm, buf, samples);
 
-	int16_t tmpBufL[1024], tmpBufR[1024];
-	int16_t *tmpBuf[2] = { tmpBufL, tmpBufR };
-
+	int prev_oki_remainder = v68.oki_resample_remainder;
 	int x = (samples * v68.oki_freq + v68.oki_resample_remainder);
 	int oki_samples = x / v68.sample_rate;
 	v68.oki_resample_remainder = x - oki_samples * v68.sample_rate;
 
-	while(oki_samples > 0) {
-		int oki_render_samples = MIN(1024, oki_samples);
-		verbose2("v68_periph_render  oki_samples=%d oki_render_samples=%d\n", oki_samples, oki_render_samples);
-		okim6258_update(&v68.oki, tmpBuf, oki_render_samples);
-		for(int i = 0; i < samples; i++) {
-			int j = i * v68.oki_freq / v68.sample_rate;
-			*bufL++ += tmpBufL[j];
-			*bufR++ += tmpBufR[j];
-		}
-		oki_samples -= oki_render_samples;
+	buf[0] = v68.tmpBufL;
+	buf[1] = v68.tmpBufR;
+	verbose2("v68_periph_render  oki_samples=%d\n", oki_samples);
+	okim6258_update(&v68.oki, buf, oki_samples);
+
+	int j = 0;
+	for(int i = 0; i < samples; i++) {
+		int x = v68.oki_freq + prev_oki_remainder;
+		int s = x / v68.sample_rate;
+		prev_oki_remainder = x - s * v68.sample_rate;
+		if(s > 0 && j < oki_samples - 1)
+			j++;
+		v68.bufL[i] += v68.tmpBufL[j];
+		v68.bufR[i] += v68.tmpBufR[j];
 	}
+
+	v68.bufL += samples;
+	v68.bufR += samples;
+	v68.buf_remaining -= samples;
 }
 
 int v68_render_tstates(int tstates) {
@@ -142,10 +150,7 @@ int v68_render_tstates(int tstates) {
 	verbose2("v68_render_tstates tstates=%d samples_remainder=%d buf_remaining=%d samples=%ld\n", tstates, v68.samples_remainder, v68.buf_remaining, samples);
 
 	if(samples > 0) {
-		v68_periph_render(v68.bufL, v68.bufR, samples);
-		v68.bufL += samples;
-		v68.bufR += samples;
-		v68.buf_remaining -= samples;
+		v68_periph_render(samples);
 	}
 
 	return samples;
@@ -191,7 +196,8 @@ void v68_periph_advance(uint32_t cycles) {
 		}
 	}
 
-	v68_render_tstates(cycles - v68.prev_sound_cycles);
+	v68_render_tstates(v68.periph_cycles - v68.prev_sound_cycles);
+	v68.prev_sound_cycles = v68.periph_cycles;
 
 	verbose2("v68_periph_advance done periph_cycles=%d\n", v68.periph_cycles);
 
@@ -215,6 +221,15 @@ static void v68_periph_before_read(uint32_t addr) {
 }
 
 static void v68_periph_before_write(uint32_t addr) {
+
+	/* Check if sound is touched */
+	if(!v68.sound_touched) {
+		if(addr == 0xe92001 || addr == 0xe92003 || addr == 0xe90003) {
+			v68.sound_touched = 1;
+			m68k_end_timeslice();
+		}
+	}
+
 	/* Check for OKIM6258 or Y2151 writes */
 	// if(addr == 0xe92001 || addr == 0xe92003 || addr == 0xe90003) {
 		verbose1("v68_periph_before_write addr=0x%08x in_periph_timing=%d prev_sound_cycles=%d periph_cycles=%d\n", addr, v68.in_periph_timing, v68.prev_sound_cycles, v68.periph_cycles);
@@ -409,7 +424,7 @@ void v68_write_periph_16(unsigned int addr, unsigned int data) {
 		v68_ppi_write_8((addr & 0xff) + 1, (data     ) & 0xff);
 	} else if(addr < 0xe9e000) { /* Ｉ／Ｏ コントローラ ◆ I/O controller */
 	} else if(addr < 0xeb0000) { /* Emulator port */
-		v68_emu_write_16(addr & 0xff, data);
+		v68_emu_write_16(addr, data);
 	}
 
 	v68_periph_after_write();
@@ -594,15 +609,16 @@ uint8_t v68_ppi_read_8(uint32_t addr) {
 }
 
 /* Emulator specific ports */
-void v68_emu_write_16(uint32_t addr, uint8_t data) {
-	if(addr == 0x00) {
+void v68_emu_write_16(uint32_t addr, uint16_t data) {
+	verbose1("v68_emu_write_16 addr=0x%08x data=0x%04x\n", addr, data);
+	if(addr == 0xea0000) {
 		if((data & 0xff00) == 0xff00)
 			v68_dos_call(data);
 		else if((data & 0xff00) == 0xfe00)
 			v68_fe_call(data);
-	} else if(addr == 0x04) {
+	} else if(addr == 0xea0004) {
 		v68_iocs_call(data);
-	} else if(addr == 0x08) {
+	} else if(addr == 0xea0008) {
 		v68_queue_next_command();
 	}
 }

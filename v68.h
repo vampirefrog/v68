@@ -37,29 +37,25 @@
 #define logcall(fmt...) { if(v68.log_calls) printf(fmt); }
 
 struct v68 {
+	int log_dasm, verbosity;
+
+	/* VM */
 	uint8_t *ram;
 	size_t ram_size;
-
-	/* Memory allocation */
-	int heap_start, heap_top;
-
-#define V68_CMD_QUEUE_LEN 8
-	char cmd_queue[V68_CMD_QUEUE_LEN][1024];
-	int cmd_queue_pos;
-	int running;
 	int reset_pulsed;
 
 	/* MFP */
 	int int_vec;
 
+	/* CPU timing */
+	int cpu_clock, cpu_cycle_remainder, cpu_ended_timeslice;
+
 	/* Sound Timing */
-	int16_t *bufL, *bufR;
+	int sound_touched;
+	int16_t *bufL, *bufR, *tmpBufL, *tmpBufR;
 	int sample_rate;
 	int samples_remainder, buf_remaining;
 	int prev_sound_cycles, remaining_tstates;
-
-	/* CPU timing */
-	int cpu_clock, cpu_cycle_remainder, cpu_ended_timeslice;
 
 	/* Peripheral timing */
 	int periph_timers_altered, in_periph_timing, periph_cycles;
@@ -85,16 +81,25 @@ struct v68 {
 	/* VGM logging */
 	struct vgm_logger *logger;
 
-	uint32_t cur_prog_addr; // address of currently running program
+	/* OS */
+	/* Memory allocation */
+	int heap_start, heap_top;
 
-	int log_calls, log_dasm, verbosity;
+#define V68_CMD_QUEUE_LEN 8
+	int running;
+	char cmd_queue[V68_CMD_QUEUE_LEN][1024];
+	int cmd_queue_pos;
+	uint32_t cur_prog_addr; // address of currently running program
+	int log_calls;
 };
 
 extern struct v68 v68;
 
 int v68_init(int clock, int ram_size, int sample_rate);
-int v68_shutdown();
-int v68_fill_buffer(int16_t *bufL, int16_t *bufR, int samples);
+void v68_boot(void);
+void v68_run(void);
+int v68_fill_buffer(int samples, int16_t *bufL, int16_t *bufR, int16_t *tmpBufL, int16_t *tmpBufR);
+int v68_shutdown(void);
 
 /* Traps */
 int v68_trap(int which);

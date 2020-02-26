@@ -286,19 +286,13 @@ $ed001c	1.b	0		起動時のキー LED の状態(電原 OFF 時の状態が
 				bit 1	ローマ字
 				bit 0	かな
 				bit = 0 で消灯、1 で点灯
-$ed001d	1.b	16		起動時の画面モード(IOCS CRTMOD の d1)
-				ROM IOCS 内のエラー表示ルーチンは 16 のモード
-				しか対応していないので、できるだけ 16 以外の値
-				は設定しないこと.
-				Human68k は常に 16 のモードで起動する.
-$ed001e	1.l	0		アラームで起動した時の動作(IOCS _ALARMSET の a1)
-				       0:普通に立ち上がる(指定のメディアからブ
-					 ート). OFF するまでの時間が -1 以外な
-					 ら、指定時間後本体を OFF.
-				$01〜$3f:テレビをコントロールする.
-					 OFF するまでの時間が -1 なら 1 分後本
-					 体のみ OFF. それ以外なら指定時間後本
-					 体とテレビを OFF.
+$ed001d	1.b	16		Screen mode at startup(IOCS CRTMOD の d1)
+				As the error display routine in ROM IOCS only supports 16 modes, do not set values other than 16 as much as possible.
+				Human 68k always starts in 16 modes.
+$ed001e	1.l	0		Operation when activated by alarm(IOCS _ALARMSET の a1)
+				       0:Stand up as usual(Boot from specified media). If the time until turning OFF is other than -1, turn the main unit OFF after the specified time.
+				$01〜$3f:Control the TV.
+					 OIf the time to FF is -1, only the main body is turned off after 1 minute. Otherwise it turns off the main body and the television after the specified time.
 				$40〜	:$000040〜$ffffff までのアドレス指定.
 					 先頭バイトが $60 ならスーパーバイザの
 					 ままそのアドレスをコールし、そのサブ
@@ -327,126 +321,119 @@ $ed002c	1.b	0		電卓の文字フォント	0:LCD
 							1:通常のフォント
 $ed002d	1.b	0		SRAM 使用状態
 					0:未使用  1:SRAMDISK  2:プログラム
-$ed002e	1.w	$0000		テキストパレット 0 のシステム規定値
+$ed002e	1.w	$0000		System specification value of text palette 0
 $ed0030	1.w	$f83e			〃	 1 〃
 $ed0032	1.w	$ffc0			〃	 2 〃
 $ed0034	1.w	$fffe			〃	 3 〃
 $ed0036	1.w	$de6c			〃	 4〜 7 〃
 $ed0038	1.w	$4022			〃	 8〜15 〃
-$ed003a	1.b	3		キーのオートリピートが始まるまでの時間(0〜15)
+$ed003a	1.b	3		Time until key auto repeat starts(0〜15)
 								200+100N[ms]
-$ed003b	1.b	2		キーのリピート間隔(0〜15)	 30+5N^2[ms]
-$ed003c	1.l	$0008_0000	プリンタタイムアウト時間
-$ed0040	1.l	0		SRAM が初期化されてから前回までの積算稼働時間
-				本体 OFF 及びソフトウェアリセットごとに積算さ
-				れる(分単位).
-$ed0044	1.l	0		SRAM が初期化されてから本体が OFF された回数
-				本体 OFF ごとに加算される.
-$ed0048	1.l	$00ff_dc00	ROMDISK FAT 開始番地(030:$00ff_f400)
+$ed003b	1.b	2		Key repeat interval(0〜15)	 30+5N^2[ms]
+$ed003c	1.l	$0008_0000	Printer timeout time
+$ed0040	1.l	0		Integrated operation time from the initialization of SRAM to the last time It is integrated every time main unit OFF and software reset (in minutes).
+$ed0044	1.l	0		Number of times the main body is turned OFF after SRAM is initialized is added for each body OFF.
+$ed0048	1.l	$00ff_dc00	ROMDISK FAT start address(030:$00ff_f400)
 (ROM DISK's BPB)
-$ed004c	1.w	1024		1 セクタ当りのバイト数
-$ed004e	1.b	1		1 クラスタ当りのセクタ数
-$ed004f	1.b	1		FAT 領域の個数
-$ed0050	1.w	0		予約領域の個数
-$ed0052	1.w	32		ルートディレクトリのエントリ数
-$ed0054	1.w	9		全領域のセクタ数(030:3)
-$ed0056	1.b	$f9		メディアバイト
-$ed0057	1.b	1		FAT 領域 1 個当りのセクタ数
+$ed004c	1.w	1024		Number of bytes per sector
+$ed004e	1.b	1		Number of sectors per cluster
+$ed004f	1.b	1		Number of FAT regions
+$ed0050	1.w	0		Number of reserved areas
+$ed0052	1.w	32		Number of entries in the root directory
+$ed0054	1.w	9		Number of sectors in all areas (030: 3)
+$ed0056	1.b	$f9		Media byte
+$ed0057	1.b	1		Number of sectors per FAT area
 
-$ed0058	1.b	0		ROM デバッガの使用($00:OFF $ff:ON)
-$ed0059	1.b	0		$7c,$7e,$5c(\~|) の文字変換フラグ
-				bit 2	0:｜ 1:｜(破線)
+$ed0058	1.b	0		Using ROM debugger($00:OFF $ff:ON)
+$ed0059	1.b	0		$7c,$7e,$5c(\~|) Character conversion flag
+				bit 2	0:｜ 1:｜(Dashed line)
 				bit 1	0:￣ 1:〜
 				bit 0	0:￥ 1:＼
-$ed005a	1.b	0		SASI-HD 接続台数(0〜15)
-				指定台数以上は IOCS レベルでエラーになる.
-$ed005b	1.b	0		システム予約
+$ed005a	1.b	0		Number of SASI-HD connections(0〜15)
+				An error occurs at the IOCS level above the specified number.
+$ed005b	1.b	0		System reservation
 (RSDRV.SYS)
-$ed005c	1.w	0($4e07)	拡張 RS-232C 設定
-$ed005e	1.w	0($4e07)	〃  内容は $ed001a を参照のこと.
-$ed0060	1.w	0($4e07)	〃  ただし bit 3〜0 = 8 の場合は 19200bps
+$ed005c	1.w	0($4e07)	Extended RS-232C setting
+$ed005e	1.w	0($4e07)	〃  See $ ed001a for details.
+$ed0060	1.w	0($4e07)	〃  However, if bits 3 to 0 = 8, 19200 bps
 $ed0062	1.w	0($4e07)	〃
-$ed0064	11.b	0		システム予約
+$ed0064	11.b	0		System reservation
 (SCSI)
-$ed006f	1.b	0('V')		SCSI 適用フラグ(0:無効 $56='V':有効)
-$ed0070	1.b	0		SCSI 関係(bit 7〜4 は X68030 以降で有効)
-				bit 7	 DMA 一回あたりの転送語数
-						(0:256バイト
-						 1:$cc0 で可変、通常 512バイト)
-				bit 6	 ブート時のデバイスタイプの無視
-						(0:0,4,5,7,$84 のみブート
-						 1:デバイスタイプを無視する)
-				bit 5	 DMA バーストモード(現在は 0 固定)
-						(0:オートリクエスト最大速度
-						 1:初回オートリクエスト、以後
-						   は外部要求転送)
-				bit 4	 転送モード(0:DMA 転送 1:MPU 転送)
-				bit 3	 SCSI の種類
-						(0:内蔵 1:オプションボード)
-				bit 2〜0 本体の ID 番号
-$ed0071	1.b	0		SASI フラグ
-					SCSI に SASI ディスクを接続した時に
-					SASI の ID に対応するビットを 1 にする.
+$ed006f	1.b	0('V')		SCSI application flag(0:Disabled $56='V':Effectiveness)
+$ed0070	1.b	0		SCSI relationship(bit 7〜4 Valid for X68030 and later)
+				bit 7	 Number of words transferred per DMA
+						(0:256 bytes
+						 1:Variable with $cc0, usually 512 bytes)
+				bit 6	 Ignore device type at boot
+						(0:0,4,5,7,$84 Boot only
+						 1:Ignore device type)
+				bit 5	 DMA burst mode(Currently fixed at 0)
+						(0:Auto request maximum speed
+						 1:Initial auto request, afterwards external request transfer)
+				bit 4	 Transfer mode(0:DMA transfer 1:MPU transfer)
+				bit 3	 Types of SCSI
+						(0:Built in 1:Option board)
+				bit 2〜0 ID number of main unit
+$ed0071	1.b	0		SASI flag
+					When a SASI disk is connected to SCSI, set the bit corresponding to the SASI ID to 1.
 (SX-WINDOW)
-$ed0072	2.b	0('SX')		SX-WINDOW 環境フラグ('SX'で使用中)
-$ed0074	1.b	0(6)		マウスポインタの移動量(遅 $03〜$0a 速)
-$ed0075	1.b	0(6)		マウスのダブルクリック感覚(短 $00〜$0c 長)
-$ed0076	1.b	0(96)		テキストパレット色相:H($00〜$bf)
-$ed0077	1.b	0(2)			〃	彩度:S($00〜$1f)
-$ed0078	1.b	0(%11111_110)		〃	明度:V0,V1($88〜$ff)
-$ed0079	1.b	0(%00_10000_0)			明度:V1,V2,V3($82〜$ba)
-$ed007a	1.b	0(%0000_0000)			明度:V3($00〜$e0)
-$ed007b	1.b	0(0)		プリンタドライバ(PRTD)ID
+$ed0072	2.b	0('SX')		SX-WINDOW environment flag(Busy with 'SX')
+$ed0074	1.b	0(6)		Movement amount of mouse pointer(Late $03 to $0a speed)
+$ed0075	1.b	0(6)		Double mouse click feeling(短 $00〜$0c 長)
+$ed0076	1.b	0(96)		Text Palette Hue:H($00〜$bf)
+$ed0077	1.b	0(2)			〃	saturation:S($00〜$1f)
+$ed0078	1.b	0(%11111_110)		〃	brightness:V0,V1($88〜$ff)
+$ed0079	1.b	0(%00_10000_0)			brightness:V1,V2,V3($82〜$ba)
+$ed007a	1.b	0(%0000_0000)			brightness:V3($00〜$e0)
+$ed007b	1.b	0(0)		Printer driver(PRTD)ID
 				0:SHARP CZ 24 ピン	5:EPSON ESC/P24-J84･C
 				1:EPSON ESC/P24-J83･C	6:ADOBE PostScript
 				2:NEC PC-PR***		7:CANON LIPS3
 				3:SHARP CZ 48 ピン	8:EPSON ESC/Page
 				4:CANON BJ-***
-$ed007c	1.b	0(%0010_0011)	bit 7〜4:バージョン番号
+$ed007c	1.b	0(%0010_0011)	bit 7〜4:Version number
 					%0000	SXWIN.X Ver.1.0
 					%0001	SXWIN.X Ver.1.1
 					%0010	SXWIN.X Ver.3.0
-				bit 3〜0:ファイル保存モード
+				bit 3〜0:File save mode
 				(bit 1:DIRDTOP.SX 保存)
 				(bit 0:SYSDTOP.SX 保存)
-$ed007d	1.b	0(0)		背景ピクチャー(PICT)ID
-				0:システム 0	1:システム 1	2:ユーザ定義
+$ed007d	1.b	0(0)		Background picture (PICT) ID
+				0:System 0	1:System 1	2:User defined
 $ed007e	1.b	0(0)		SX-WINDOW 画面モード
-				bit 7	0:768x512,16 色   1:下位ビットで指定
-				bit 6	0:表示画面モード  1:実画面モード
+				bit 7	0:768x512,16 colors   1:Designated with lower bits
+				bit 6	0:Display screen mode  1:Real screen mode
 				bit 5〜0:IOCS _CRTMOD での値
-$ed007f	1.b	0		システム予約
-$ed0080	4.w	0(0,0,0,0)	ウィンドウマージン(左、上、右、下)
-$ed0088	8.b	0		システム予約
+$ed007f	1.b	0		System reservation
+$ed0080	4.w	0(0,0,0,0)	Window margin(Left, up, right, down)
+$ed0088	8.b	0		System reservation
 (X68030)
-$ed0090	1.b	0		標準キャッシュ状態(bit=0:OFF 1:ON)
-				bit 1	データキャッシュ
-				bit 0	命令キャッシュ
-$ed0091	1.b	0		起動時サウンド設定(0:OPM 演奏 OFF それ以外:ON)
-$ed0092	1.b	0		10MHz 相当のウェイト値(0 の場合は 10 と見なす)
+$ed0090	1.b	0		Standard cache state(bit=0:OFF 1:ON)
+				bit 1	Data cache
+				bit 0	Instruction cache
+$ed0091	1.b	0		Sound setting at startup(0:OPM performance OFF other than that:ON)
+$ed0092	1.b	0		Weight value equivalent to 10 MHz(0 の場合は 10 と見なす)
 $ed0093	1.b	0		16MHz 〃	      (0 の場合は 4 と見なす)
 
-$ed0094	4.b	0		システム予約
+$ed0094	4.b	0		System reservation
 (Mach-2)
-$ed0098	2.b	0($4368)	Mach-2 マジックナンバ
-$ed009a	1.b	0		同期転送の転送周期上限
-$ed009b	1.b	0		bit 3=1:パリティチェック
-				bit 2=1:限定速度
-				bit 1=1:バースト転送
+$ed0098	2.b	0($4368)	Mach-2 Magic number
+$ed009a	1.b	0		Transfer period upper limit of synchronous transfer
+$ed009b	1.b	0		bit 3=1:Parity check
+				bit 2=1:Limited speed
+				bit 1=1:Burst transfer
 				bit 0=1:RAM BIOS
-$ed009c	4.b	0		未使用
-$ed00a0	8.b	0		各 SCSI ID ごとのフラグ
-				bit 7=1:同期転送許可
-				bit 2〜0:この値が本体 ID と同じときドライブと
-					 して認識しない
-$ed00a8	1.l	0		512KB 単位でソフト転送を行うビット=1
-$ed00ac	1.l	0		512KB 単位で通常バスサイクルを行う(ショートバ
-				スサイクルを禁止する)ビット=1
-$ed00b0	80.b	0		システム予約
+$ed009c	4.b	0		Unused
+$ed00a0	8.b	0		Flags for each SCSI ID
+				bit 7=1:Allow synchronous transfer
+				bit 2〜0:When this value is the same as the main body ID, it does not recognize it as a drive
+$ed00a8	1.l	0		Soft transfer in units of 512 KB Bits = 1
+$ed00ac	1.l	0		Perform normal bus cycle in 512 KB increments (disable short bus cycle) Bit = 1
+$ed00b0	80.b	0		System reservation
 
-$ed0100	768.b	0		SRAM プログラムの先頭アドレス
-$ed0400	15KB	0		SRAMDISK の先頭アドレス
-$ed3fff				SRAM の終わり
+$ed0100	768.b	0		Start address of SRAM program
+$ed0400	15KB	0		Start address of SRAMDISK
+$ed3fff				End of SRAM
 
 備考	  SRAM 初期化時 $ed0000〜$ed005a には ROM 中の初期値が書き込まれ、
 	$ed005b〜$ed00101(X68030 では 〜$ed3fff)は 0 が書き込まれる.
@@ -455,26 +442,26 @@ $ed3fff				SRAM の終わり
 
 ・CGROM
 
-address	  font size	type	 count	code(JIS)
-$f00000	  全角 16x16	非漢字	  752	High:$21〜$78,Low:$21〜$7e
-$f05e00	   〃  16x16	第一水準 3008	     $30〜$4f
-$f1d600	   〃  16x16	第二水準 3478	     $50〜$74
-$f388c0			(未使用)
-$f3a000	 1/4角  8x8	ANK	  256	$00〜$ff
-$f3a800	  半角  8x16	〃	  256	〃
-$f3b800	 1/4角 12x12	〃	  256	〃
-$f3d000	  半角 12x24	〃	  256	〃
-$f40000	  全角 24x24	非漢字	  752	High:$21〜$78,Low:$21〜$7e
-$f4d380	   〃  24x24	第一水準 3008	     $30〜$4f
-$f82180	   〃  24x24	第二水準 3478	     $50〜$74
-$fbf3b0			(未使用)
+address  font        size      type               count  code(JIS)
+$f00000  Full-width  16x16     Non-Chinese chars  752    High:$21〜$78,Low:$21〜$7e
+$f05e00   〃         16x16     First level        3008   $30〜$4f
+$f1d600   〃         16x16     Second level       3478   $50〜$74
+$f388c0              (Unused)
+$f3a000  1/4 size    8x8       ANK                256    $00〜$ff
+$f3a800  Half size   8x16       〃                256     〃
+$f3b800  1/4 size    12x12      〃                256     〃
+$f3d000  Half size   12x24      〃                256     〃
+$f40000  Full-width  24x24     Non-Chinese chars  752    High:$21〜$78,Low:$21〜$7e
+$f4d380   〃         24x24     First level        3008   $30〜$4f
+$f82180   〃         24x24     Second level       3478   $50〜$74
+$fbf3b0  (Unused)
 
-$xxxxxx	 1/4角  6x12	ANK	  256	$00〜$ff
-	このフォントは機種によりアドレスが異なる. 各アドレスは以下の通り.
-$ffd018	 X68000 シリーズ
-$ffd344	 X68000 XVI
-$ffd45e	 X68000 Compact XVI
-$fbf400	 X68030 / X68030 Compact
+$xxxxxx  1/4 angle   6x12      ANK                256    $00〜$ff
+        The address differs according to model according to this font. Each address is as follows.
+$ffd018 X68000 series
+$ffd344 X68000 XVI
+$ffd45e X68000 Compact XVI
+$fbf400 X68030 / X68030 Compact
 
 ==============================================================================
 

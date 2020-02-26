@@ -124,10 +124,13 @@ $fffe   _TIME_PR    Timer counter value acquisition
 $ffff   _CHANGE_PR  Abandonment of execution rights
 
 
-note    Calls placed in $ ff 50 to $ ff 7f in Human 68k version 2 were moved to $ ff 80 to $ ffaf in verion 3 and later.
+note    Calls placed in $ff50 to $ff7f in Human 68k version 2 were moved to
+        $ff80 to $ffaf in verion 3 and later.
 
-	Processing address of calls of $fff5 to $fff7, $fffa ~ $fffe can not be changed (ignored).
-	$fff8, $ffff is executed after the original processing is normally completed. $fff9 is called each time one thread is deleted.
+        Processing address of calls of $fff5 to $fff7, $fffa~$fffe can not be
+        changed (ignored). $fff8, $ffff is executed after the original
+        processing is normally completed. $fff9 is called each time one thread
+        is deleted.
 
 ==============================================================================
 
@@ -1360,12 +1363,12 @@ Ret	Processing address of specified vector
 
 ==============================================================================
 
-$ff36	_DSKFRE		ディスクの残り容量を得る
+$ff36	_DSKFRE		Get the remaining capacity of the disk
 
-Arg	DRIVE.w		ドライブ番号
-	BUFFER.l	バッファのポインタ
+Arg	DRIVE.w		Drive number
+	BUFFER.l	Buffer pointer
 
-Ret	使用可能なバイト数(最大 2GB、負数ならError code)
+Ret	Number of available bytes(2GB maximum、If it is a negative number, Error code)
 
 	DRIVE で指定したドライブのディスクの残り容量を調べ、結果を BUFFER で指
 	定した 8 バイトのバッファに書き込む.

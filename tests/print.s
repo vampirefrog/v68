@@ -9,9 +9,6 @@
 
 	DOS _EXIT
 
-.bss
-.dc.l 0
-
 .data
 lHelloWorld:
 .dc.b 'Hello world!', $0d, $0a, $00

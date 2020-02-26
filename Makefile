@@ -13,7 +13,7 @@ musashi/m68kmake: musashi/m68kmake.o
 	gcc $^ -o $@
 
 v68: main.o tools.o v68.o v68ipl.o v68io.o v68periph.o v68human.o v68doscall.o v68iocscall.o v68fecall.o sjis.o sjis_unicode.o utf8.o ym2151.o dmac.o okim6258.o vgm.o $(MUSASHIOBJS) $(MUSASHIGENOBJS) fake_ipl.inc fake_human.inc
-	gcc $(filter %.o,$^) $(shell pkg-config --libs ao)  -lm -o $@
+	gcc -g -ggdb $(filter %.o,$^) $(shell pkg-config --libs ao)  -lm -o $@
 
 v68human.o: v68human.c fake_human.inc
 
@@ -50,7 +50,7 @@ test-mem: test-mem.o v68.o v68human.o v68opm.o v68io.o v68doscall.o v68fecall.o 
 	gcc $^ -lao -lm -o $@
 
 %.o: %.c
-	gcc -g -Wall $(shell pkg-config --cflags ao) -c $< -o $@
+	gcc -g -ggdb -Wall $(shell pkg-config --cflags ao) -c $< -o $@
 
 clean:
 	rm -f v68 xinfo xdump sjis2utf8 *.o musashi/*.o $(patsubst %.c,musashi/%.c,$(MUSASHIGENCFILES)) ay.js *.wasm *.map test

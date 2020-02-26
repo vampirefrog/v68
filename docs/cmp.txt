@@ -1,0 +1,17 @@
+CMP A,B         signed          unsigned
+-------         ------          --------
+B < A           BLT             BLO (or BCS)
+B <= A          BLE             BLS
+B = A           BEQ             BEQ
+B <> A          BNE             BNE
+B > A           BGT             BHI
+B >= A          BGE             BHS (or BCC)
+
+TST A            signed          unsigned
+-------          ------          --------
+A <  0           BLT (or BMI)    NOP
+A <= 0           BLE             BZ (or BEQ)
+A =  0           BZ (or BEQ)     BZ (or BEQ)
+A <> 0           BNZ (or BNE)    BNZ (or BNE)
+A >  0           BGT             BNZ (or BNE)
+A >= 0           BGE (or BPL)    BRA

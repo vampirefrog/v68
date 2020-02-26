@@ -154,7 +154,7 @@ void okim6258_update(struct okim6258 *chip, int16_t **outputs, int samples) {
 			}
 
 			nibble_shift ^= 4;
-			verbose2("okim6258_update samples=%d sample=%d\n", samples, sample);
+			// verbose2("okim6258_update samples=%d sample=%d\n", samples, sample);
 			*bufL++ = (chip->pan & 0x02) ? 0x00 : sample;
 			*bufR++ = (chip->pan & 0x01) ? 0x00 : sample;
 			samples--;

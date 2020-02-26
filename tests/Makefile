@@ -16,6 +16,7 @@ all: \
 	oki1.x \
 	oki2.x \
 	oki3.x \
+	oki4.x \
 	ontime.x \
 	opm.x \
 	pcm8.x \
@@ -46,6 +47,7 @@ ontime.x: ontime.o
 oki1.x: oki1.o
 oki2.x: oki2.o
 oki3.x: oki3.o
+oki4.x: oki4.o tools.o
 opm.x: opm.o
 pcm8.x: pcm8.o
 pcm8en.x: pcm8en.o

@@ -1,0 +1,2 @@
+.global LoadFile
+.global WriteOPM

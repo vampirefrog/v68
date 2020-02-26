@@ -669,11 +669,14 @@ int m68k_execute(int num_cycles, int dasm)
 
 				int d = m68k_disassemble(dasmbuf, REG_PC, CPU_TYPE);
 				printf("  D* %08X %08X %08X %08X %08X %08X %08X %08X\n",
-					REG_D[0], REG_D[1], REG_D[2], REG_D[3], REG_D[4], REG_D[5], REG_D[6], REG_D[7]);
+					REG_D[0], REG_D[1], REG_D[2], REG_D[3],
+					REG_D[4], REG_D[5], REG_D[6], REG_D[7]);
 				printf("  A* %08X %08X %08X %08X %08X %08X %08X %08X\n",
-					REG_A[0], REG_A[1], REG_A[2], REG_A[3], REG_A[4], REG_A[5], REG_A[6], REG_A[7]);
+					REG_A[0], REG_A[1], REG_A[2], REG_A[3],
+					REG_A[4], REG_A[5], REG_A[6], REG_A[7]);
 				printf("  PC=%08X  SR=%04X  cycles % 8d/%-8d\n",
-					REG_PC, m68k_get_reg(0, M68K_REG_SR), m68k_cycles_run(), m68k_cycles_remaining());
+					REG_PC, m68k_get_reg(0, M68K_REG_SR),
+					m68k_cycles_run(), m68k_cycles_remaining());
 				puts(dasmbuf);
 			}
 

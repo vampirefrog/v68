@@ -130,12 +130,6 @@
 	}
 #endif /* ULONG_MAX == 0xffffffff */
 
-
-int v68_dos_call(uint16 instr);
-int v68_fe_call(uint16 instr);
-int v68_trap(int which);
-
-
 /* ======================================================================== */
 /* ============================ GENERAL DEFINES =========================== */
 /* ======================================================================== */
@@ -1743,11 +1737,9 @@ INLINE void m68ki_exception_trap(uint vector)
 /* Trap#n stacks a 0 frame but behaves like group2 otherwise */
 INLINE void m68ki_exception_trapN(uint vector)
 {
-	if(v68_trap(vector - 32)) {
-		uint sr = m68ki_init_exception();
-		m68ki_stack_frame_0000(REG_PC, sr, vector);
-		m68ki_jump_vector(vector);
-	}
+	uint sr = m68ki_init_exception();
+	m68ki_stack_frame_0000(REG_PC, sr, vector);
+	m68ki_jump_vector(vector);
 
 	/* Use up some clock cycles and undo the instruction's cycles */
 	USE_CYCLES(CYC_EXCEPTION[vector] - CYC_INSTRUCTION[REG_IR]);
@@ -1828,19 +1820,9 @@ INLINE void m68ki_exception_1111(void)
 					 m68ki_disassemble_quick(ADDRESS_68K(REG_PPC))));
 #endif
 
-	int caught = 0;
-	uint16 instr = m68k_read_memory_16(REG_PPC);
-	if((instr & 0xff00) == 0xff00) {
-		caught = !v68_dos_call(instr);
-	} else if((instr & 0xff00) == 0xfe00) {
-		caught = !v68_fe_call(instr);
-	}
-
-	if(!caught) {
-		sr = m68ki_init_exception();
-		m68ki_stack_frame_0000(REG_PPC, sr, EXCEPTION_1111);
-		m68ki_jump_vector(EXCEPTION_1111);
-	}
+	sr = m68ki_init_exception();
+	m68ki_stack_frame_0000(REG_PPC, sr, EXCEPTION_1111);
+	m68ki_jump_vector(EXCEPTION_1111);
 
 	/* Use up some clock cycles and undo the instruction's cycles */
 	USE_CYCLES(CYC_EXCEPTION[EXCEPTION_1111] - CYC_INSTRUCTION[REG_IR]);
