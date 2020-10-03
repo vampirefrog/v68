@@ -18,3 +18,9 @@ sudo apt-get install git build-essential portaudio19-dev zlib1g-dev
 touch fake_ipl.inc fake_human.inc
 make
 ```
+
+Building the tests:
+
+```
+sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install wine32
+```
