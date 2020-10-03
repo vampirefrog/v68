@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
@@ -16,6 +18,9 @@
 #endif
 
 int main(int argc, char **argv) {
+	(void)argc;
+	(void)argv;
+
 	uint8_t         u8 = __LINE__; printf(" uint8_t       %"PRIu8"\n",     u8 );
 	int8_t          i8 = __LINE__; printf("  int8_t       %"PRId8"\n",     i8 );
 	uint16_t       u16 = __LINE__; printf("uint16_t       %"PRIu16"\n",    u16);
