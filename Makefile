@@ -46,13 +46,13 @@ LK=$(RUN68) ./x/LK.X
 
 fake_ipl.inc: fake_ipl.s xdump
 	include=tests $(HAS060) $(HASFLAGS) $(patsubst %.inc,%.s,$@)
-	$(LK) -b 0xff0000 $(patsubst %.inc,%.o,$@)
+	$(LK) -bff0000 $(patsubst %.inc,%.o,$@)
 	./xdump $(patsubst %.inc,%.x,$@) > $@
 	rm -f $(patsubst %.inc,%.x,$@) $(patsubst %.inc,%.o,$@)
 
 fake_human.inc: fake_human.s xdump
 	include=tests $(HAS060) $(HASFLAGS) $(patsubst %.inc,%.s,$@)
-	$(LK) -b 0x006800 $(patsubst %.inc,%.o,$@)
+	$(LK) -b006800 $(patsubst %.inc,%.o,$@)
 	./xdump $(patsubst %.inc,%.x,$@) > $@
 	rm -f $(patsubst %.inc,%.x,$@) $(patsubst %.inc,%.o,$@)
 
