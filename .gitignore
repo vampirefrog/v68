@@ -6,7 +6,6 @@ sjis2utf8
 sjisstat
 xinfo
 xdump
-x/
 puni7_2/
 musashi/m68kop*.c
 musashi/m68kmake
