@@ -1,6 +1,11 @@
+ifeq ($(OS),Windows_NT)
+RUN68=../run68/run68.exe
+else
 RUN68=wine ../run68/run68.exe
-HAS=$(RUN68) ../x/has060.x
-LINK=$(RUN68) ../x/xc/BIN/LK.X
+endif
+
+HAS=$(RUN68) ../x/HAS.X
+LINK=$(RUN68) ../x/LK.X
 ICONV=iconv -f Shift_JIS -t utf8
 TRANS=php ~/trans.php
 

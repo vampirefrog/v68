@@ -34,9 +34,16 @@ v68human.o: v68human.c fake_human.inc
 
 v68ipl.o: v68ipl.c fake_ipl.inc
 
-HAS060=wine ~/ownCloud/X68000/run68/run68.exe 'H:\\ownCloud\\X68000\\has060.x'
+ifeq ($(OS),Windows_NT)
+RUN68=../run68/run68.exe
+else
+RUN68=wine ../run68/run68.exe
+endif
+
+HAS060=$(RUN68) ./x/HAS.X
 HASFLAGS=-m68000
-LK=wine ~/ownCloud/X68000/run68/run68.exe x/xc/BIN/LK.X
+LK=$(RUN68) ./x/LK.X
+
 fake_ipl.inc: fake_ipl.s xdump
 	include=tests $(HAS060) $(HASFLAGS) $(patsubst %.inc,%.s,$@)
 	$(LK) -b 0xff0000 $(patsubst %.inc,%.o,$@)
