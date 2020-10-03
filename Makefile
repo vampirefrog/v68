@@ -35,9 +35,9 @@ v68human.o: v68human.c fake_human.inc
 v68ipl.o: v68ipl.c fake_ipl.inc
 
 ifeq ($(OS),Windows_NT)
-RUN68=../run68/run68.exe
+RUN68=run68/run68.exe
 else
-RUN68=wine ../run68/run68.exe
+RUN68=wine run68/run68.exe
 endif
 
 HAS060=$(RUN68) ./x/HAS.X
