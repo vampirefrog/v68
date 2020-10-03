@@ -1,5 +1,7 @@
 #include <string.h>
 
+#include "platform.h"
+
 #include "v68human.h"
 #include "v68io.h"
 #include "v68.h"
@@ -196,7 +198,7 @@ int v68_run_command(char *cmd) {
 							v68_io_close(fd);
 							return -1;
 						}
-						verbose3("  @%04x: %04x -> %08x  %08x -> %08x / %08lx\n", i, r, text_loc, prev - reloc_adj, prev, v68.ram_size);
+						verbose3("  @%04x: %04x -> %08x  %08x -> %08x / %08"PRIxSIZET"\n", i, r, text_loc, prev - reloc_adj, prev, v68.ram_size);
 						m68k_write_memory_32(text_loc, prev);
 					}
 				}
@@ -331,7 +333,7 @@ uint32_t v68_mem_alloc(int size, uint32_t parent_addr) {
 
 	// Check if there is room at the top of the heap
 	if(v68.heap_top + size + 16 > v68.ram_size) {
-		verbose1("Could not allocate %08x bytes ram_size=%08lx heap_top=%08x\n", size, v68.ram_size, v68.heap_top);
+		verbose1("Could not allocate %08x bytes ram_size=%08"PRIxSIZET" heap_top=%08x\n", size, v68.ram_size, v68.heap_top);
 		return -2;
 	}
 

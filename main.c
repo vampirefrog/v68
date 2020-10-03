@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <portaudio.h>
+#include "platform.h"
 
 #include "v68.h"
 #include "v68io.h"
@@ -16,7 +17,7 @@
 #define DEFAULT_CPU_CLOCK   8000000
 #define DEFAULT_RAM_SIZE    8 * 1024 * 1024
 #define DEFAULT_SAMPLE_RATE 44100
-#define DEFAULT_BUFFER_SIZE    4096
+#define DEFAULT_BUFFER_SIZE 4096
 
 int opt_cpu_clock   = DEFAULT_CPU_CLOCK;
 int opt_ram_size    = DEFAULT_RAM_SIZE;
@@ -195,7 +196,7 @@ int main(int argc, char **argv, char **envp) {
 #define ALLOCBUF(b, s) \
 	int16_t *b = malloc(s); \
 	if(!b) { \
-		fprintf(stderr, "Could not allocate %u bytes sound bufer\n", s); \
+		fprintf(stderr, "Could not allocate %"PRIuSIZET" bytes sound bufer\n", s); \
 		return 1; \
 	}
 		ALLOCBUF(bufL, opt_buffer_size * sizeof(*bufL));

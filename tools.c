@@ -11,6 +11,8 @@
 #ifndef __EMSCRIPTEN__
 #include <zlib.h>
 #endif /* __EMSCRIPTEN */
+
+#include "platform.h"
 #include "tools.h"
 
 uint8_t *load_file(const char *filename, size_t *size_out) {
@@ -31,7 +33,7 @@ uint8_t *load_file(const char *filename, size_t *size_out) {
 	if(!data) {
 		fprintf(
 			stderr,
-			"Could not allocate %lu bytes for %s: %s (%d)\n",
+			"Could not allocate %"PRIuSIZET" bytes for %s: %s (%d)\n",
 			size, filename, strerror(errno), errno
 		);
 		fclose(f);

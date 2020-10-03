@@ -667,7 +667,7 @@ int m68k_execute(int num_cycles, int dasm)
 			if(dasm) {
 				char dasmbuf[256];
 
-				int d = m68k_disassemble(dasmbuf, REG_PC, CPU_TYPE);
+				m68k_disassemble(dasmbuf, REG_PC, CPU_TYPE);
 				printf("  D* %08X %08X %08X %08X %08X %08X %08X %08X\n",
 					REG_D[0], REG_D[1], REG_D[2], REG_D[3],
 					REG_D[4], REG_D[5], REG_D[6], REG_D[7]);

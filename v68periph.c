@@ -1,3 +1,4 @@
+#include "platform.h"
 #include "v68.h"
 #include "v68periph.h"
 #include "v68doscall.h"
@@ -147,7 +148,7 @@ int v68_render_tstates(int tstates) {
 	if(samples > v68.buf_remaining)
 		samples = v68.buf_remaining;
 	v68.samples_remainder = x - samples * v68.cpu_clock;
-	verbose2("v68_render_tstates tstates=%d samples_remainder=%d buf_remaining=%d samples=%ld\n", tstates, v68.samples_remainder, v68.buf_remaining, samples);
+	verbose2("v68_render_tstates tstates=%d samples_remainder=%d buf_remaining=%d samples=%"PRId64"\n", tstates, v68.samples_remainder, v68.buf_remaining, samples);
 
 	if(samples > 0) {
 		v68_periph_render(samples);
