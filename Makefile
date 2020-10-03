@@ -41,7 +41,7 @@ RUN68=wine run68/run68.exe
 endif
 
 HAS060=$(RUN68) ./x/HAS.X
-HASFLAGS=-m68000
+HASFLAGS=-m68000 -w3
 LK=$(RUN68) ./x/LK.X
 
 fake_ipl.inc: fake_ipl.s xdump
