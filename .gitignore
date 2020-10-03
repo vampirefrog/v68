@@ -1,6 +1,6 @@
 *.sublime-workspace
 *.o
-*.x
+*.exe
 v68
 sjis2utf8
 sjisstat

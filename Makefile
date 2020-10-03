@@ -12,8 +12,23 @@ $(patsubst %.c,musashi/%.c,$(MUSASHIGENCFILES)): musashi/m68kmake musashi/m68k_i
 musashi/m68kmake: musashi/m68kmake.o
 	gcc $^ -o $@
 
+CFLAGS=-ggdb -Wall -DHAVE_MEMCPY
+ifneq (,$(findstring MINGW,$(shell uname -s)))
+CFLAGS+=-I../portaudio/include -static-libgcc
+LDFLAGS=-lz -liconv -lws2_32 -static-libgcc
+else
+CFLAGS+=$(shell pkg-config portaudio-2.0 --cflags)
+LDFLAGS=-lz -lm
+endif
+
+ifneq (,$(findstring MINGW,$(shell uname -s)))
+LDFLAGS+=../portaudio/lib/.libs/libportaudio.a -lwinmm
+else
+LDFLAGS+=$(shell pkg-config portaudio-2.0 --libs)
+endif
+
 v68: main.o tools.o v68.o v68ipl.o v68io.o v68periph.o v68human.o v68doscall.o v68iocscall.o v68fecall.o sjis.o sjis_unicode.o utf8.o ym2151.o dmac.o okim6258.o vgm.o $(MUSASHIOBJS) $(MUSASHIGENOBJS) fake_ipl.inc fake_human.inc
-	gcc -g -ggdb $(filter %.o,$^) $(shell pkg-config --libs ao)  -lm -o $@
+	gcc $(filter %.o,$^) $(LDFLAGS) -o $@
 
 v68human.o: v68human.c fake_human.inc
 
@@ -24,13 +39,13 @@ HASFLAGS=-m68000
 LK=wine ~/ownCloud/X68000/run68/run68.exe x/xc/BIN/LK.X
 fake_ipl.inc: fake_ipl.s xdump
 	include=tests $(HAS060) $(HASFLAGS) $(patsubst %.inc,%.s,$@)
-	$(LK) /bff0000 $(patsubst %.inc,%.o,$@)
+	$(LK) -b 0xff0000 $(patsubst %.inc,%.o,$@)
 	./xdump $(patsubst %.inc,%.x,$@) > $@
 	rm -f $(patsubst %.inc,%.x,$@) $(patsubst %.inc,%.o,$@)
 
 fake_human.inc: fake_human.s xdump
 	include=tests $(HAS060) $(HASFLAGS) $(patsubst %.inc,%.s,$@)
-	$(LK) /b006800 $(patsubst %.inc,%.o,$@)
+	$(LK) -b 0x006800 $(patsubst %.inc,%.o,$@)
 	./xdump $(patsubst %.inc,%.x,$@) > $@
 	rm -f $(patsubst %.inc,%.x,$@) $(patsubst %.inc,%.o,$@)
 
@@ -50,10 +65,10 @@ test-mem: test-mem.o v68.o v68human.o v68opm.o v68io.o v68doscall.o v68fecall.o 
 	gcc $^ -lao -lm -o $@
 
 %.o: %.c
-	gcc -g -ggdb -Wall $(shell pkg-config --cflags ao) -c $< -o $@
+	gcc $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f v68 xinfo xdump sjis2utf8 *.o musashi/*.o $(patsubst %.c,musashi/%.c,$(MUSASHIGENCFILES)) ay.js *.wasm *.map test
+	rm -f v68 v68.exe xinfo xinfo.exe xdump xdump.exe sjis2utf8 sjis2utf8.exe *.o musashi/*.o $(patsubst %.c,musashi/%.c,$(MUSASHIGENCFILES)) ay.js *.wasm *.map test
 
 main.o: main.c v68.h okim6258.h mamedef.h ym2151.h v68io.h cmdline.h \
  tools.h

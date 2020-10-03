@@ -1,7 +1,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#if __linux__
 #include <sys/sysinfo.h>
+#endif
 #include "v68.h"
 #include "v68iocscall.h"
 #include "musashi/m68k.h"
@@ -497,10 +499,12 @@ int v68_iocs_call(uint16_t instr) {
 			}
 			break;
 		case IOCS_CALL_ONTIME: {
+#if __linux__
 				struct sysinfo si;
 				sysinfo(&si);
 				m68k_set_reg(M68K_REG_D0, (si.uptime % (24 * 60 * 60)) * 100);
 				m68k_set_reg(M68K_REG_D1, si.uptime / (24 * 60 * 60));
+#endif
 			}
 			break;
 		case IOCS_CALL_B_MEMSTR: {

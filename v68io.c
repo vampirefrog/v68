@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#if __linux__
 #include <mntent.h>
+#endif
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -33,14 +35,23 @@ int v68_io_init() {
 	memset(drives, 0, sizeof(drives));
 	// Init Z: as unix /
 	curdrive = 'Z' - 'A';
+#if __linux__
 	strncpy(drives[curdrive].vpath, "/", PATH_MAX);
+#else
+	strncpy(drives[curdrive].vpath, "C:", PATH_MAX);
+#endif
 	char buf[PATH_MAX];
 	buf[0] = 0;
 	getcwd(buf, PATH_MAX);
 	int l = strlen(buf);
 	if(l > 0) {
+#if __linux__
 		for(int i = 1; i < l; i++)
 			drives[curdrive].cwd[i-1] = buf[i] == '/' ? '\\' : buf[i];
+#else
+		for(int i = 2; i < l; i++)
+			drives[curdrive].cwd[i-2] = buf[i] == '/' ? '\\' : buf[i];
+#endif
 	}
 
 	dosfiles[0].fd = 0;
@@ -69,15 +80,16 @@ uint8_t v68_io_unused_drive() {
 }
 
 int v68_io_autodetect_drives() {
-	static char *ignore_fstypes[] = {
-		"sysfs", "proc", "devtmpfs", "devpts", "tmpfs", "securityfs", "swap", 0
-	};
-
 	char *home = getenv("HOME");
 	if(home) {
 		strncpy(drives['H' - 'A'].vpath, home, PATH_MAX);
 		drives['H' - 'A'].cwd[0] = 0;
 	}
+
+#if __linux__
+	static char *ignore_fstypes[] = {
+		"sysfs", "proc", "devtmpfs", "devpts", "tmpfs", "securityfs", "swap", 0
+	};
 
 	FILE *f = fopen("/etc/fstab", "r");
 	struct mntent *m;
@@ -94,6 +106,9 @@ int v68_io_autodetect_drives() {
 		}
 	}
 	fclose(f);
+#else
+	v68_io_add_drive(v68_io_unused_drive(), "C:/");
+#endif
 
 	return 0;
 }
@@ -103,6 +118,7 @@ int v68_io_open(char *filename, int mode) {
 	v68_io_xlate_dos_path(filename, xlated, sizeof(xlated));
 	char resolved[PATH_MAX];
 	v68_io_resolve_path(xlated, resolved, sizeof(resolved));
+	printf("v68_io_open filename=%s xlated=%s resolved=%s mode=%d\n", filename, xlated, resolved, mode);
 
 	switch(mode & 0x03) {
 		case 0x00:
@@ -260,7 +276,7 @@ int v68_io_add_drive(uint8_t drive, char *path) {
 
 	strncpy(drives[drive].vpath, path, PATH_MAX);
 	drives[drive].cwd[0] = 0;
-
+printf("added drive %d = %s\n", drive, path);
 	return 0;
 }
 
@@ -311,10 +327,16 @@ char *v68_io_xlate_dos_path(char *filename, char *out, int len) {
 			snprintf(out, len, "%s/%s", drives[curdrive].vpath, filename + 1);
 	} else {
 		// Start with current dir
+		printf("drives[%d].vpath=%s\n", curdrive, drives[curdrive].vpath);
 		if(drives[curdrive].vpath[0] == '/' && drives[curdrive].vpath[1] == 0)
 			snprintf(out, len, "/%s/%s", drives[curdrive].cwd, filename);
-		else
+		else {
+#if __linux__
 			snprintf(out, len, "%s/%s/%s", drives[curdrive].vpath, drives[curdrive].cwd, filename);
+#else
+			snprintf(out, len, "%s\\%s\\%s", drives[curdrive].vpath, drives[curdrive].cwd, filename);
+#endif
+		}
 	}
 
 	for(char *c = out; *c; c++) {
@@ -376,11 +398,20 @@ static int find_ci(char *from, char *to, int to_len) {
 	to[0] = 0;
 
 	char buf[PATH_MAX];
+
 	buf[0] = '/';
 	buf[1] = 0;
 
-	char *saveptr;
-	for(char *c = strtok_r(from, "/\\", &saveptr); c && *c; c = strtok_r(0, "/\\", &saveptr)) {
+#if __linux__
+#define STRTOK_R(str, delim, savep) strtok_r(str, delim, savep)
+#define READDIR_R(dirp, entry, result) readdir_r(dirp, entry, result)
+char *saveptr;
+#else
+#define STRTOK_R(str, delim, savep) strtok(str, delim)
+#define READDIR_R(dirp, entry, result) (*(result) = readdir(dirp))
+#endif
+
+	for(char *c = STRTOK_R(from, "/\\", &saveptr); c && *c; c = STRTOK_R(0, "/\\", &saveptr)) {
 		DIR *d = opendir(buf);
 		if(!d) {
 			to[0] = 0;
@@ -388,7 +419,7 @@ static int find_ci(char *from, char *to, int to_len) {
 		}
 		struct dirent de, *result;
 		int found = 0;
-		for(readdir_r(d, &de, &result); result; readdir_r(d, &de, &result)) {
+		for(READDIR_R(d, &de, &result); result; READDIR_R(d, &de, &result)) {
 			if(!strcasecmp(c, de.d_name)) {
 				found = 1;
 				snprintf(buf, to_len, "%s/%s", to, de.d_name);
@@ -410,9 +441,12 @@ char *v68_io_resolve_path(char *filename, char *out, int len) {
 	char buf[PATH_MAX];
 
 	if(urldecode(filename, buf, sizeof(buf)) < 0) return 0;
-
 	// only deal with absolute paths
+#if __linux__
 	if(buf[0] != '/') return 0;
+#else
+	if(buf[1] != ':') return 0;
+#endif
 
 	struct stat st;
 	if(stat(buf, &st) == 0) {
@@ -420,7 +454,11 @@ char *v68_io_resolve_path(char *filename, char *out, int len) {
 		return out;
 	}
 
+#if __linux__
 	if(find_ci(buf, out, len)) return 0;
+#else
+	strncpy(out, buf, len);
+#endif
 
 	return out;
 }
@@ -429,6 +467,6 @@ void v68_dump_drives() {
 	for(int i = 0; i < MAX_DRIVES; i++) {
 		if(!drives[i].vpath[0]) continue;
 
-		verbose2("%c:\\%s = %s\n", 'A' + i, drives[i].cwd, drives[i].vpath);
+		verbose1("%c:\\%s = %s\n", 'A' + i, drives[i].cwd, drives[i].vpath);
 	}
 }

@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <limits.h>
-#include <ao/ao.h>
+#include <portaudio.h>
 
 #include "v68.h"
 #include "v68io.h"
@@ -160,25 +160,29 @@ int main(int argc, char **argv, char **envp) {
 
 	v68_run();
 
+	PaStream *stream;
+	PaError err;
+
 	if(v68.sound_touched) {
 		printf("init sound\n");
-		// AO
-		ao_initialize();
 
-		int default_driver = ao_default_driver_id();
+		err = Pa_Initialize();
+		if( err != paNoError ) goto error;
 
-		ao_sample_format format;
-		memset(&format, 0, sizeof(format));
-		format.bits = 16;
-		format.channels = 2;
-		format.rate = opt_sample_rate;
-		format.byte_format = AO_FMT_LITTLE;
+		err = Pa_OpenDefaultStream(
+			&stream,
+			0,              /* no input channels */
+			2,              /* stereo output */
+			paInt16,        /* 16 bit floating point output */
+			opt_sample_rate,
+			opt_buffer_size,    /* frames per buffer */
+			NULL,
+			NULL
+		);
+		if( err != paNoError ) goto error;
 
-		ao_device *device = ao_open_live(default_driver, &format, NULL /* no options */);
-		if (device == NULL) {
-			fprintf(stderr, "Error opening device.\n");
-			return 1;
-		}
+		err = Pa_StartStream( stream );
+		if( err != paNoError ) goto error;
 
 		signal(SIGINT, sighandler);
 
@@ -191,7 +195,7 @@ int main(int argc, char **argv, char **envp) {
 #define ALLOCBUF(b, s) \
 	int16_t *b = malloc(s); \
 	if(!b) { \
-		fprintf(stderr, "Could not allocate %lu bytes sound bufer\n", s); \
+		fprintf(stderr, "Could not allocate %u bytes sound bufer\n", s); \
 		return 1; \
 	}
 		ALLOCBUF(bufL, opt_buffer_size * sizeof(*bufL));
@@ -207,13 +211,16 @@ int main(int argc, char **argv, char **envp) {
 				buf[i * 2] = bufL[i];
 				buf[i * 2 + 1] = bufR[i];
 			}
-			ao_play(device, (char *)buf, opt_buffer_size * format.channels * format.bits / 8);
+			err = Pa_WriteStream( stream, buf, opt_buffer_size);
+			if( err ) goto error;
 		}
 
 		/* -- Close and shutdown -- */
-		ao_close(device);
-
-		ao_shutdown();
+		err = Pa_StopStream( stream );
+		if( err != paNoError ) goto error;
+		err = Pa_CloseStream( stream );
+		if( err != paNoError ) goto error;
+		Pa_Terminate();
 
 		if(v68.logger)
 			vgm_logger_end(v68.logger);
@@ -221,5 +228,12 @@ int main(int argc, char **argv, char **envp) {
 
 	v68_shutdown();
 
-	return 0;
+	return err;
+
+error:
+	Pa_Terminate();
+	fprintf( stderr, "An error occured while using the portaudio stream\n" );
+	fprintf( stderr, "Error number: %d\n", err );
+	fprintf( stderr, "Error message: %s\n", Pa_GetErrorText( err ) );
+	return err;
 }

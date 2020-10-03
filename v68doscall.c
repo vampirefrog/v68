@@ -487,27 +487,33 @@ int v68_dos_call(uint16_t instr) {
 			}
 			break;
 		case DOS_CALL_GETDATE: {
+#if __linux__
 				time_t t = time(NULL);
 				struct tm result;
 				localtime_r(&t, &result);
 				uint32_t d = ((result.tm_wday & 0x07) << 16) | (((result.tm_year - 80) & 0x7f) << 9) | ((result.tm_mon & 0x0f) << 5) | (result.tm_mday & 0x1f);
 				m68k_set_reg(M68K_REG_D0, d);
+#endif
 			}
 			break;
 		case DOS_CALL_GETTIME: {
+#if __linux__
 				time_t t = time(NULL);
 				struct tm result;
 				localtime_r(&t, &result);
 				uint16_t d = ((result.tm_hour & 0x1f) << 11) | ((result.tm_min & 0x3f) << 5) | ((result.tm_sec >> 1) & 0x1f);
 				m68k_set_reg(M68K_REG_D0, d);
+#endif
 			}
 			break;
 		case DOS_CALL_GETTIM2: {
+#if __linux__
 				time_t t = time(NULL);
 				struct tm result;
 				localtime_r(&t, &result);
 				uint16_t d = ((result.tm_hour & 0x1f) << 16) | ((result.tm_min & 0x3f) << 8) | (result.tm_sec & 0x3f);
 				m68k_set_reg(M68K_REG_D0, d);
+#endif
 			}
 			break;
 		case DOS_CALL_CREATE: {
