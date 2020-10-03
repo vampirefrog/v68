@@ -1,3 +1,5 @@
+// gcc -Wall -Wextra -Wpedantic -std=c11 tests/printf-test.c -o tests/printf-test
+
 #define _GNU_SOURCE
 
 #include <stdio.h>
