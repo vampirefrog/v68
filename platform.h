@@ -15,7 +15,7 @@
 #  endif
 #else
 #  define PRIuSIZET "zu"
-#  define PRIuSIZET "zx"
+#  define PRIxSIZET "zx"
 #  define PRIdSSIZET "zd"
 #endif
 
