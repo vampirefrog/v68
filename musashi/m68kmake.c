@@ -1258,23 +1258,23 @@ int main(int argc, char **argv)
 
 
 	/* Open the files we need */
-	sprintf(filename, "%s%s", output_path, FILENAME_PROTOTYPE);
+	snprintf(filename, sizeof(filename), "%s%s", output_path, FILENAME_PROTOTYPE);
 	if((g_prototype_file = fopen(filename, "wt")) == NULL)
 		perror_exit("Unable to create prototype file (%s)\n", filename);
 
-	sprintf(filename, "%s%s", output_path, FILENAME_TABLE);
+	snprintf(filename, sizeof(filename), "%s%s", output_path, FILENAME_TABLE);
 	if((g_table_file = fopen(filename, "wt")) == NULL)
 		perror_exit("Unable to create table file (%s)\n", filename);
 
-	sprintf(filename, "%s%s", output_path, FILENAME_OPS_AC);
+	snprintf(filename, sizeof(filename), "%s%s", output_path, FILENAME_OPS_AC);
 	if((g_ops_ac_file = fopen(filename, "wt")) == NULL)
 		perror_exit("Unable to create ops ac file (%s)\n", filename);
 
-	sprintf(filename, "%s%s", output_path, FILENAME_OPS_DM);
+	snprintf(filename, sizeof(filename), "%s%s", output_path, FILENAME_OPS_DM);
 	if((g_ops_dm_file = fopen(filename, "wt")) == NULL)
 		perror_exit("Unable to create ops dm file (%s)\n", filename);
 
-	sprintf(filename, "%s%s", output_path, FILENAME_OPS_NZ);
+	snprintf(filename, sizeof(filename), "%s%s", output_path, FILENAME_OPS_NZ);
 	if((g_ops_nz_file = fopen(filename, "wt")) == NULL)
 		perror_exit("Unable to create ops nz file (%s)\n", filename);
 
