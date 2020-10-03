@@ -27,7 +27,7 @@ else
 LDFLAGS+=$(shell pkg-config portaudio-2.0 --libs)
 endif
 
-v68: main.o tools.o v68.o v68ipl.o v68io.o v68periph.o v68human.o v68doscall.o v68iocscall.o v68fecall.o sjis.o sjis_unicode.o utf8.o ym2151.o dmac.o okim6258.o vgm.o $(MUSASHIOBJS) $(MUSASHIGENOBJS) fake_ipl.inc fake_human.inc
+v68: main.o tools.o v68.o v68io.o v68human.o v68doscall.o v68iocscall.o v68fecall.o sjis.o sjis_unicode.o utf8.o ym2151.o dmac.o okim6258.o vgm.o v68periph.o v68ipl.o $(MUSASHIOBJS) $(MUSASHIGENOBJS)
 	gcc $(filter %.o,$^) $(LDFLAGS) -o $@
 
 v68human.o: v68human.c fake_human.inc
