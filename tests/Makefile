@@ -4,7 +4,7 @@ else
 RUN68=wine ../run68/run68.exe
 endif
 
-HAS=$(RUN68) ../x/HAS.X
+HAS=$(RUN68) ../x/HAS.X -w3
 LINK=$(RUN68) ../x/LK.X
 ICONV=iconv -f Shift_JIS -t utf8
 TRANS=php ~/trans.php
@@ -15,7 +15,6 @@ all: \
 	filewrite.x \
 	fwritetsr.x \
 	ioctrl.x \
-	mxdrv17.x \
 	mxp.x \
 	nameck.x \
 	oki1.x \
@@ -24,9 +23,6 @@ all: \
 	oki4.x \
 	ontime.x \
 	opm.x \
-	pcm8.x \
-	pcm8_1.x \
-	pcm8en.x \
 	print.x \
 	process.x \
 	proginfo.x \
