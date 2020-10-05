@@ -11,6 +11,10 @@
 #include <dirent.h>
 #include <errno.h>
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 #include "v68io.h"
 
 #define MAX_DRIVES ('Z' - 'A' + 1)
@@ -118,7 +122,6 @@ int v68_io_open(char *filename, int mode) {
 	v68_io_xlate_dos_path(filename, xlated, sizeof(xlated));
 	char resolved[PATH_MAX];
 	v68_io_resolve_path(xlated, resolved, sizeof(resolved));
-	printf("v68_io_open filename=%s xlated=%s resolved=%s mode=%d\n", filename, xlated, resolved, mode);
 
 	switch(mode & 0x03) {
 		case 0x00:
@@ -131,6 +134,9 @@ int v68_io_open(char *filename, int mode) {
 			mode = O_RDWR;
 			break;
 	}
+#ifdef WIN32
+	mode |= _O_BINARY;
+#endif
 	int fd = open(resolved, mode, 0644);
 	if(fd < 0) {
 		// fprintf(stderr, "Could not open %s: %s (%d)\n", filename, strerror(errno), errno);
@@ -214,7 +220,6 @@ int v68_io_write(int fd, void *buf, size_t count) {
 int v68_io_seek(int fd, off_t offset, int whence) {
 	CHECKFD(fd);
 
-
 	switch(whence) {
 		case 1: whence = SEEK_CUR; break;
 		case 2: whence = SEEK_END; break;
@@ -276,7 +281,7 @@ int v68_io_add_drive(uint8_t drive, char *path) {
 
 	strncpy(drives[drive].vpath, path, PATH_MAX);
 	drives[drive].cwd[0] = 0;
-printf("added drive %d = %s\n", drive, path);
+
 	return 0;
 }
 
@@ -327,7 +332,6 @@ char *v68_io_xlate_dos_path(char *filename, char *out, int len) {
 			snprintf(out, len, "%s/%s", drives[curdrive].vpath, filename + 1);
 	} else {
 		// Start with current dir
-		printf("drives[%d].vpath=%s\n", curdrive, drives[curdrive].vpath);
 		if(drives[curdrive].vpath[0] == '/' && drives[curdrive].vpath[1] == 0)
 			snprintf(out, len, "/%s/%s", drives[curdrive].cwd, filename);
 		else {
