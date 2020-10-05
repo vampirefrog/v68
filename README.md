@@ -19,8 +19,16 @@ touch fake_ipl.inc fake_human.inc
 make
 ```
 
+Install wine
+------------
+
+```
+sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install wine32
+```
+
 Building the tests:
 
 ```
+
 sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install wine32
 ```
