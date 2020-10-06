@@ -199,23 +199,26 @@ void xinfo(char *filename) {
 
 		if(reloc_size > 0) {
 			printf("Relocation:\n");
+			printf("Table ofs  Val  -> Text loc (Text val)\n");
 			uint32_t text_loc = 0x40;
 			for(int i = 0; i < reloc_size; i+=2) {
-				uint32_t r = READ_SHORT(0x40 + text_size + data_size + i);
+				int read_pos = 0x40 + text_size + data_size + i;
+				uint32_t r = READ_SHORT(read_pos);
+				printf("r=0x%04x @%d\n", r, read_pos);
 				if(r == 1) {
 					i += 2;
 					r = READ_LONG(0x40 + text_size + data_size + i);
 					i += 2; // 4 total, with `for' increment
 				}
 				text_loc += r & 0xfffffffe;
-				if(text_loc >= 0x40 + text_size) {
-					fprintf(stderr, "%s: Relocation out of bounds.\n", filename);
+				if(text_loc >= 0x40 + text_size + data_size) {
+					printf("  @%04x:   %04x -> %08x Relocation out of bounds text_size=0x%08x\n", i, r, text_loc, text_size);
 					break;
 				} else {
 					if(r & 1) {
-						printf(" @%04x: %04x -> %08x (%04x)\n", i, r, text_loc, READ_SHORT(text_loc));
+						printf("  @%04x:   %04x -> %08x (%04x)\n", i, r, text_loc, READ_SHORT(text_loc));
 					} else {
-						printf(" @%04x: %04x -> %08x (%08x)\n", i, r, text_loc, READ_LONG(text_loc));
+						printf("  @%04x:   %04x -> %08x (%08x)\n", i, r, text_loc, READ_LONG(text_loc));
 					}
 				}
 			}
