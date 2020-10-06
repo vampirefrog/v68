@@ -406,16 +406,7 @@ static int find_ci(char *from, char *to, int to_len) {
 	buf[0] = '/';
 	buf[1] = 0;
 
-#if __linux__
-#define STRTOK_R(str, delim, savep) strtok_r(str, delim, savep)
-#define READDIR_R(dirp, entry, result) readdir_r(dirp, entry, result)
-char *saveptr;
-#else
-#define STRTOK_R(str, delim, savep) strtok(str, delim)
-#define READDIR_R(dirp, entry, result) (*(result) = readdir(dirp))
-#endif
-
-	for(char *c = STRTOK_R(from, "/\\", &saveptr); c && *c; c = STRTOK_R(0, "/\\", &saveptr)) {
+	for(char *c = strtok(from, "/\\"); c && *c; c = strtok(0, "/\\")) {
 		DIR *d = opendir(buf);
 		if(!d) {
 			to[0] = 0;
@@ -423,7 +414,7 @@ char *saveptr;
 		}
 		struct dirent de, *result;
 		int found = 0;
-		for(READDIR_R(d, &de, &result); result; READDIR_R(d, &de, &result)) {
+		for(result = readdir(d); result; result = readdir(d)) {
 			if(!strcasecmp(c, de.d_name)) {
 				found = 1;
 				snprintf(buf, to_len, "%s/%s", to, de.d_name);
