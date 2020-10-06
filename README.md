@@ -12,7 +12,7 @@ Building on debian 10
 
 First, have some required packages ready:
 
-```
+```sh
 sudo apt-get install git build-essential portaudio19-dev zlib1g-dev
 # if we don't touch these, you'll need wine to build them with run68.exe
 touch fake_ipl.inc fake_human.inc
@@ -22,13 +22,13 @@ make
 Install wine
 ------------
 
-```
+```sh
 sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install wine32
 ```
 
 Building the tests:
 
-```
-
+```sh
 sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install wine32
+cd tests && make
 ```
