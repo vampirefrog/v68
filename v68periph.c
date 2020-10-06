@@ -160,7 +160,7 @@ int v68_render_tstates(int tstates) {
 void v68_periph_advance(uint32_t cycles) {
 	v68.in_periph_timing = 1;
 
-	verbose1("v68_periph_advance cycles=%d\n", cycles);
+	verbose1("v68_periph_advance cycles=%d v68.periph_cycles=%d v68.prev_sound_cycles=%d\n", cycles, v68.periph_cycles, v68.prev_sound_cycles);
 	verbose2("v68_periph_advance  opm_timera_counter=%d opm_timera_cycles=%d\n", v68.opm_timera_counter, v68.opm_timera_cycles);
 	verbose2("v68_periph_advance  opm_timerb_counter=%d opm_timerb_cycles=%d\n", v68.opm_timerb_counter, v68.opm_timerb_cycles);
 	verbose2("v68_periph_advance  oki_sample_counter=%d oki_sample_cycles=%d\n", v68.oki_sample_counter, v68.oki_sample_cycles);
@@ -197,7 +197,8 @@ void v68_periph_advance(uint32_t cycles) {
 		}
 	}
 
-	v68_render_tstates(v68.periph_cycles - v68.prev_sound_cycles);
+	verbose2("v68_periph_advance before v68_render_tstates v68.periph_cycles=%d v68.prev_sound_cycles=%d\n", v68.periph_cycles, v68.prev_sound_cycles);
+	v68_render_tstates(cycles + v68.periph_cycles - v68.prev_sound_cycles);
 	v68.prev_sound_cycles = v68.periph_cycles;
 
 	verbose2("v68_periph_advance done periph_cycles=%d\n", v68.periph_cycles);
@@ -212,7 +213,7 @@ static void v68_periph_before_read(uint32_t addr) {
 	if(v68.in_periph_timing) {
 		verbose2("v68_periph_before_read periph_cycles=%d prev_sound_cycles=%d periph_cycles-prev_sound_cycles=%d\n", v68.periph_cycles, v68.prev_sound_cycles, v68.periph_cycles - v68.prev_sound_cycles);
 		v68_render_tstates(v68.periph_cycles - v68.prev_sound_cycles);
-		v68.prev_sound_cycles = v68.periph_cycles;
+		// v68.prev_sound_cycles = v68.periph_cycles;
 	} else {
 		verbose2("v68_periph_before_read cycles_run=%d prev_sound_cycles=%d cycles_run-prev_sound_cycles=%d\n", m68k_cycles_run(), v68.prev_sound_cycles, m68k_cycles_run() - v68.prev_sound_cycles);
 		v68.periph_cycles = v68.prev_sound_cycles;
@@ -226,6 +227,7 @@ static void v68_periph_before_write(uint32_t addr) {
 	/* Check if sound is touched */
 	if(!v68.sound_touched) {
 		if(addr == 0xe92001 || addr == 0xe92003 || addr == 0xe90003) {
+			verbose1("sound touched\n");
 			v68.sound_touched = 1;
 			m68k_end_timeslice();
 		}
@@ -432,7 +434,7 @@ void v68_write_periph_16(unsigned int addr, unsigned int data) {
 }
 
 void v68_write_periph_8(unsigned int addr, unsigned int data) {
-	verbose2("v68_write_periph_8 addr=0x%08x data=0x%02x cycles=%d remaining=%d\n", addr, data, m68k_cycles_run(), m68k_cycles_remaining());
+	verbose1("v68_write_periph_8 addr=0x%08x data=0x%02x cycles=%d remaining=%d\n", addr, data, m68k_cycles_run(), m68k_cycles_remaining());
 
 	v68_periph_before_write(addr);
 

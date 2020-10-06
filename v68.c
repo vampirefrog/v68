@@ -58,23 +58,21 @@ int v68_shutdown() {
 
 extern int m68ki_initial_cycles;
 void v68_run() {
-	verbose1("v68_run cpu_clock=%d sound_touched=%d running=%d\n", v68.cpu_clock, v68.sound_touched, v68.running);
+	verbose1("v68_run cpu_clock=%d sound_touched=%d running=%d log_calls=%d\n", v68.cpu_clock, v68.sound_touched, v68.running, v68.log_calls);
 	int remaining_tstates = v68.cpu_clock;
 
 	v68.running = 1;
 
-	while(!v68.sound_touched) {
-		while(remaining_tstates > 0 && v68.running) {
-			int next_int = v68_periph_next_int(remaining_tstates);
-			verbose2("v68_run  executing next_int=%d remaining_tstates=%d\n", next_int, remaining_tstates);
-			v68.cpu_ended_timeslice = 0;
-			v68.prev_sound_cycles = 0;
-			int cycles = m68k_execute(next_int, v68.log_dasm);
-			int executed_cycles = v68.cpu_ended_timeslice ? next_int - m68ki_initial_cycles : cycles;
-			verbose2("v68_run  ended_timeslice=%d executed_cycles=%d next_int=%d remaining_tstates = %d\n", v68.cpu_ended_timeslice, executed_cycles, next_int, remaining_tstates);
-			v68.cpu_ended_timeslice = 0;
-			if(v68.sound_touched) return;
-		}
+	while(v68.running) {
+		int next_int = v68_periph_next_int(remaining_tstates);
+		verbose2("v68_run  executing next_int=%d remaining_tstates=%d log_calls=%d\n", next_int, remaining_tstates, v68.log_calls);
+		v68.cpu_ended_timeslice = 0;
+		v68.prev_sound_cycles = 0;
+		int cycles = m68k_execute(next_int, v68.log_dasm);
+		int executed_cycles = v68.cpu_ended_timeslice ? next_int - m68ki_initial_cycles : cycles;
+		verbose2("v68_run  ended_timeslice=%d executed_cycles=%d next_int=%d remaining_tstates=%d log_calls=%d\n", v68.cpu_ended_timeslice, executed_cycles, next_int, remaining_tstates, v68.log_calls);
+		v68.cpu_ended_timeslice = 0;
+		if(v68.sound_touched) return;
 	}
 }
 
