@@ -10,7 +10,6 @@
 
 void v68_human_init() {
 	verbose1("v68_human_init\n");
-	v68.log_calls = 0;
 
 	v68.cmd_queue_pos = 0;
 	v68.running = 0;
@@ -71,7 +70,12 @@ int v68_run_command(char *cmd) {
 		// .X files
 		uint8_t xhead[0x40];
 
-		v68_io_read(fd, xhead, sizeof(xhead));
+		int rd = v68_io_read(fd, xhead, sizeof(xhead));
+		if(rd != sizeof(xhead)) {
+			fprintf(stderr, "%s: Could not read %d bytes for header\n", cmd, sizeof(xhead));
+			v68_io_close(fd);
+			return -1;
+		}
 
 		if(xhead[0] != 'H' && xhead[1] != 'U') {
 			fprintf(stderr, "%s: X file signature invalid, not \"HU\"\n", cmd);
@@ -131,14 +135,14 @@ int v68_run_command(char *cmd) {
 		}
 		uint32_t bound_pos = READ_LONG(0x3c);
 		if(bound_pos && bound_pos >= o) {
-			fprintf(stderr, "Bound module list position exceeds end of file.\n");
+			fprintf(stderr, "%s: Bound module list position exceeds end of file.\n", cmd);
 			v68_io_close(fd);
 			return -1;
 		}
 
 		uint32_t remaining = v68_mem_remaining();
 		if(remaining < text_size + data_size + bss_size + 1024) {
-			fprintf(stderr, "Not enough memory\n");
+			fprintf(stderr, "%s: Not enough memory to load executable\n", cmd);
 			v68_io_close(fd);
 			return -1;
 		}
@@ -147,7 +151,7 @@ int v68_run_command(char *cmd) {
 
 		uint32_t m = v68_mem_alloc(remaining, 0);
 		if(m > 0x8000000) {
-			verbose2("Failed to allocate %d remaining bytes\n", remaining);
+			fprintf(stderr, "%s: Failed to allocate %d remaining bytes\n", cmd, remaining);
 			v68_io_close(fd);
 			return -1;
 		}
@@ -155,26 +159,48 @@ int v68_run_command(char *cmd) {
 		v68_mem_dump();
 
 		// Read text and data
-		v68_io_read(fd, &v68.ram[m + 240], text_size + data_size);
+		rd = v68_io_read(fd, &v68.ram[m + 240], text_size);
+		if(rd != text_size) {
+			fprintf(stderr, "%s: Could not read %d bytes of .text\n", cmd, text_size);
+			v68_io_close(fd);
+			return -1;
+		}
+		rd = v68_io_read(fd, &v68.ram[m + 240 + text_size], data_size);
+		if(rd != data_size) {
+			fprintf(stderr, "%s: Could not read %d bytes of .data\n", cmd, data_size);
+			v68_io_close(fd);
+			return -1;
+		}
 
-		// /* Relocate */
+		/* Relocate */
 		int reloc_adj = (m + 240) - base_addr;
 		if(reloc_size > 0 && reloc_adj != 0) {
-			verbose2("Relocating %dB\n", reloc_size);
 			uint32_t text_loc = m + 240;
 			for(int i = 0; i < reloc_size; i+=2) {
 				uint8_t buf[4];
-				v68_io_read(fd, buf, 2);
+				int rd = v68_io_read(fd, buf, 2);
+				if(rd != 2) {
+					fprintf(stderr, "%s: EOF while reading relocation table\n", cmd);
+					v68_mem_free(m, 0);
+					v68_io_close(fd);
+					return -1;
+				}
 				uint32_t r = (buf[0] << 8) | buf[1];
 				if(r == 1) {
 					i += 2;
-					v68_io_read(fd, buf, 4);
+					int rd = v68_io_read(fd, buf, 4);
+					if(rd != 4) {
+						fprintf(stderr, "%s: EOF while reading relocation table\n", cmd);
+						v68_mem_free(m, 0);
+						v68_io_close(fd);
+						return -1;
+					}
 					r = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
 					i += 2; // 4 total, with `for' increment
 				}
 				text_loc += r & 0xfffffffe;
 				if(text_loc >= (m + 240) + text_size + data_size) {
-					fprintf(stderr, "Relocation out of bounds %08x + %04x = %08x >= (%08x + 240) + %08x\n", text_loc - (r & 0xfffffffe), r, text_loc, m, text_size);
+					fprintf(stderr, "%s: Relocation out of bounds %08x + %04x = %08x >= (%08x + 240) + %08x\n", cmd, text_loc - (r & 0xfffffffe), r, text_loc, m, text_size);
 					break;
 				} else {
 					if(r & 1) {
@@ -182,7 +208,7 @@ int v68_run_command(char *cmd) {
 						int prev = (v68.ram[text_loc] << 8) | v68.ram[text_loc + 1];
 						prev += reloc_adj;
 						if(prev > 0xffff || prev < 0) {
-							fprintf(stderr, "Relocation word offset cannot fit adjustment.\n");
+							fprintf(stderr, "%s: Relocation word offset 0x%04x cannot fit adjustment.\n", cmd, prev);
 							v68_mem_free(m, 0);
 							v68_io_close(fd);
 							return -1;
@@ -193,7 +219,7 @@ int v68_run_command(char *cmd) {
 						int prev = (v68.ram[text_loc] << 24) | (v68.ram[text_loc + 1] << 16) | (v68.ram[text_loc + 2] << 8) | v68.ram[text_loc + 3];
 						prev += reloc_adj;
 						if(prev > 0x00ffffff || prev < 0) {
-							fprintf(stderr, "Relocation word offset cannot fit adjustment.\n");
+							fprintf(stderr, "%s: Relocation long offset 0x%08x cannot fit adjustment.\n", cmd, prev);
 							v68_mem_free(m, 0);
 							v68_io_close(fd);
 							return -1;
