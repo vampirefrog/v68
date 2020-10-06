@@ -72,7 +72,7 @@ int v68_run_command(char *cmd) {
 
 		int rd = v68_io_read(fd, xhead, sizeof(xhead));
 		if(rd != sizeof(xhead)) {
-			fprintf(stderr, "%s: Could not read %d bytes for header\n", cmd, sizeof(xhead));
+			fprintf(stderr, "%s: Could not read %"PRIuSIZET" bytes for header\n", cmd, sizeof(xhead));
 			v68_io_close(fd);
 			return -1;
 		}
