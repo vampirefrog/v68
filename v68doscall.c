@@ -620,7 +620,9 @@ int v68_dos_call(uint16_t instr) {
 			break;
 		case DOS_CALL_INTVCG: {
 				uint16_t intno = m68k_read_memory_16(m68k_get_reg(0, M68K_REG_A7));
-				m68k_set_reg(M68K_REG_D0, m68k_read_memory_32(intno * 4));
+				uint32_t ret = m68k_read_memory_32(intno * 4);
+				m68k_set_reg(M68K_REG_D0, ret);
+				logcall("intno=%04x ret=%08x\n", intno, ret);
 			}
 			break;
 		case DOS_CALL_PRNSNS: {
