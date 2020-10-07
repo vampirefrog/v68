@@ -108,7 +108,7 @@ SetupIOCSCalls:
 
 FakeTrap15Handler:
 	movem.l a1,-(sp)
-	and.w   #$00ff, d0
+	and.l   #$000000ff, d0
 	add.w   d0, d0
 	add.w   d0, d0
 	lea.l   (IOCSCallVecTable), a1
