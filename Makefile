@@ -4,6 +4,9 @@ MUSASHIGENCFILES=m68kops.c m68kopac.c m68kopdm.c m68kopnz.c
 MUSASHIOBJS=$(patsubst %.c,musashi/%.o,$(MUSASHIFILES))
 MUSASHIGENOBJS=$(patsubst %.c,musashi/%.o,$(MUSASHIGENCFILES))
 
+CC=gcc
+
+
 all: v68 xinfo sjis2utf8
 
 $(patsubst %.c,musashi/%.c,$(MUSASHIGENCFILES)): musashi/m68kmake musashi/m68k_in.c
@@ -28,7 +31,7 @@ LDFLAGS+=$(shell pkg-config portaudio-2.0 --libs)
 endif
 
 v68: main.o tools.o v68.o v68io.o v68human.o v68doscall.o v68iocscall.o v68fecall.o sjis.o sjis_unicode.o utf8.o ym2151.o dmac.o okim6258.o vgm.o v68periph.o v68ipl.o $(MUSASHIOBJS) $(MUSASHIGENOBJS)
-	gcc $(filter %.o,$^) $(LDFLAGS) -o $@
+	$(CC) $(filter %.o,$^) $(LDFLAGS) -o $@
 
 v68human.o: v68human.c fake_human.inc
 
@@ -57,22 +60,22 @@ fake_human.inc: fake_human.s xdump
 	rm -f $(patsubst %.inc,%.x,$@) $(patsubst %.inc,%.o,$@)
 
 xinfo: xinfo.o md5.o cmdline.o
-	gcc $^ -o $@
+	$(CC) $^ -o $@
 
 xdump: xdump.o tools.o
-	gcc $^ -o $@
+	$(CC) $^ -o $@
 
 sjis2utf8: sjis2utf8.o sjis.o sjis_unicode.o utf8.o
-	gcc $^ -o $@
+	$(CC) $^ -o $@
 
 sjisstat: sjisstat.o sjis.o sjis_unicode.o utf8.o
-	gcc $^ -o $@
+	$(CC) $^ -o $@
 
 test-mem: test-mem.o v68.o v68human.o v68opm.o v68io.o v68doscall.o v68fecall.o v68iocscall.o okim6258.o ym2151.o vgm.o sjis.o sjis_unicode.o $(MUSASHIOBJS) $(MUSASHIGENOBJS)
-	gcc $^ -lao -lm -o $@
+	$(CC) $^ -lao -lm -o $@
 
 %.o: %.c
-	gcc $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -f v68 v68.exe xinfo xinfo.exe xdump xdump.exe sjis2utf8 sjis2utf8.exe *.o musashi/*.o $(patsubst %.c,musashi/%.c,$(MUSASHIGENCFILES)) ay.js *.wasm *.map test
