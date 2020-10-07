@@ -107,14 +107,16 @@ SetupIOCSCalls:
 	rts
 
 FakeTrap15Handler:
-	movem.l a1,-(sp)
-	and.l   #$000000ff, d0
-	add.w   d0, d0
-	add.w   d0, d0
+	movem.l a1/d1,-(sp)
+	move.l  d0, d1
+	and.l   #$000000ff, d1
+	add.w   d1, d1
+	add.w   d1, d1
 	lea.l   (IOCSCallVecTable), a1
-	add.l   d0, a1
+	add.l   d1, a1
+	move.l  (a1), a1
 	jsr     (a1)
-	movem.l (sp)+,a1
+	movem.l (sp)+,a1/d1
 	rte
 
 FakeIOCSCallHandler:

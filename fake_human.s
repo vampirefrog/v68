@@ -52,7 +52,7 @@ LineFExceptionHandler:
 	bcs     LineFDone
 
 	move.w  d0, d1
-	and.w   #$00ff, d1
+	and.l   #$000000ff, d1
 	add.w   d1, d1
 	add.w   d1, d1
 	lea.l   (DOSCallVecTable), a2
