@@ -4,14 +4,14 @@
 #if __linux__
 #include <sys/sysinfo.h>
 #endif
+#include "v68.h"
+#include "v68iocscall.h"
+#include "sjis.h"
 #include "musashi/m68k.h"
 #include "musashi/m68kcpu.h"
 #ifdef WIN32
 #include <windows.h>
 #endif
-#include "v68.h"
-#include "v68iocscall.h"
-#include "sjis.h"
 
 #define IOCS_CALL_B_KEYINP  0x00
 #define IOCS_CALL_B_KEYSNS  0x01
