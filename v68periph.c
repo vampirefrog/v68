@@ -62,7 +62,7 @@ void v68_periph_end() {
 }
 
 uint32_t v68_periph_next_int(uint32_t cycles) {
-	verbose1("v68_periph_next_int cycles=%d\n", cycles);
+	verbose1("v68_periph_next_int cycles=%d running=%d\n", cycles, v68.running);
 	uint32_t next_int = cycles;
 
 	if((v68.opm_flags & 0x05) && (v68.opm_timera_counter < v68.opm_timera_cycles) && (v68.opm_timera_cycles - v68.opm_timera_counter) < next_int) {
