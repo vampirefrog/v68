@@ -1351,11 +1351,11 @@ Arg	INTNO.w		Vector number
 
 Ret	Processing address of specified vector
 
-	ベクタ番号 INTNO で指定したベクタの処理アドレスを調べる.
+	Check the processing address of the vector specified by the vector number INTNO.
 
-	INTNO = $0000〜$00ff	割り込み
-	INTNO = $0100〜$01ff	IOCS コール
-	INTNO = $ff00〜$ffff	 DOS コール
+	INTNO = $0000〜$00ff interrupt
+	INTNO = $0100〜$01ff IOCS call
+	INTNO = $ff00〜$ffff	 DOS call
 
 	move	INTNO,-(sp)
 	DOS	_INTVCG
