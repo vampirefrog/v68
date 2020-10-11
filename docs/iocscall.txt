@@ -2416,14 +2416,14 @@ Ret	d0.w	データ
 
 ==============================================================================
 
-$84	_B_LPEEK	指定アドレスから 1 ロングワード読み込み
+$84	_B_LPEEK	Purchase 1 long word from temporary receipt
 
-Arg	a1.l	読み込みアドレス
+Arg	a1.l	Read address
 
-Ret	d0.l	データ
-	a1.l	次のアドレス
+Ret	d0.l	data
+	a1.l	Next address
 
-	指定アドレスから 1 ロングワードデータを読み込む.
+	Read 1 longword data from the specified address.
 
 ==============================================================================
 

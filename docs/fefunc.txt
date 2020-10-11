@@ -4,27 +4,27 @@
 
 ・FE コール一覧
 
-$fe00   __LMUL          signed int 乗算                   d0 *= d1
-$fe01   __LDIV          signed int 除算                   d0 /= d1
-$fe02   __LMOD          signed int 除算の剰余              d0 %= d1
-$fe04   __UMUL          unsigned int 乗算                 d0 *= d1
-$fe05   __UDIV          unsigned int 除算                 d0 /= d1
-$fe06   __UMOD          unsigned int 除算の剰余            d0 %= d1
-$fe08   __IMUL          unsigned int 乗算                 d0d1 = d0*d1
-$fe09   __IDIV          unsigned int 除算                 d0...d1 = d0/d1
-$fe0c   __RANDOMIZE     signed short 乱数初期化            seed = d0(-32768〜32767)
-$fe0d   __SRAND         unsigned short 乱数初期化          seed = d0(0〜65535)
-$fe0e   __RAND          signed int 乱数                   d0 = rand()
+$fe00   __LMUL          signed int multiplication         d0 *= d1
+$fe01   __LDIV          signed int division               d0 /= d1
+$fe02   __LMOD          signed int modulo                 d0 %= d1
+$fe04   __UMUL          unsigned int multiply             d0 *= d1
+$fe05   __UDIV          unsigned int division             d0 /= d1
+$fe06   __UMOD          unsigned int modulo               d0 %= d1
+$fe08   __IMUL          unsigned int multiply             d0d1 = d0*d1
+$fe09   __IDIV          unsigned int division             d0...d1 = d0/d1
+$fe0c   __RANDOMIZE     signed short random number init   seed = d0(-32768〜32767)
+$fe0d   __SRAND         unsigned short random init        seed = d0(0〜65535)
+$fe0e   __RAND          signed int random number          d0 = rand()
 
-$fe10   __STOL          10進文字列 → signed int            d0 = (a0)〜
-$fe11   __LTOS          signed int → 10進文字列            (a0)〜 = d0
-$fe12   __STOH          16進文字列 → unsigned int          d0 = (a0)〜
-$fe13   __HTOS          unsigned int → 16進文字列          (a0)〜 = d0
-$fe14   __STOO          8進文字列 → unsigned int           d0 = (a0)〜
-$fe15   __OTOS          unsigned int → 8進文字列           (a0)〜 = d0
-$fe16   __STOB          2進文字列 → unsigned int           d0 = (a0)〜
-$fe17   __BTOS          unsigned int → 2進文字列           (a0)〜 = d0
-$fe18   __IUSING        signed int → 10進文字列            (a0)〜 = d0,d1桁
+$fe10   __STOL          Decimal string → signed int       d0 = (a0)〜
+$fe11   __LTOS          signed int → Decimal string       (a0)〜 = d0
+$fe12   __STOH          Hex string → unsigned int         d0 = (a0)〜
+$fe13   __HTOS          unsigned int → Hex string         (a0)〜 = d0
+$fe14   __STOO          Octal string → unsigned int       d0 = (a0)〜
+$fe15   __OTOS          unsigned int → Octal string       (a0)〜 = d0
+$fe16   __STOB          Binary string → unsigned int      d0 = (a0)〜
+$fe17   __BTOS          unsigned int → Binary string      (a0)〜 = d0
+$fe18   __IUSING        signed int → Decimal string       (a0)〜 = d0,d1pad
 $fe1a   __LTOD          signed int → double               d0d1 = d0
 $fe1b   __DTOL          double → signed int               d0 = d0d1
 $fe1c   __LTOF          signed int → float                d0 = d0
@@ -32,17 +32,17 @@ $fe1d   __FTOL          float → signed int                d0 = d0
 $fe1e   __FTOD          float → double                    d0d1 = d0
 $fe1f   __DTOF          double → float                    d0 = d0d1
 
-$fe20   __VAL           文字列 → double                    d0d1 = (a0)〜
-$fe21   __USING         double → 10進文字列                (a0)〜 = d0d1,d2.d3,d4
-$fe22   __STOD          10進文字列 → double                d0d1,d2,d3 = (a0)〜
-$fe23   __DTOS          double → 10進文字列                (a0)〜 = d0d1
-$fe24   __ECVT          double → 文字列                   (a0),d0,d1 = d0d1,d2全体桁
-$fe25   __FCVT          double → 文字列                   (a0),d0,d1 = d0d1,d2小数点桁
-$fe26   __GCVT          double → 文字列                   (a0)〜 = d0d1,d2全体桁
+$fe20   __VAL           String → double                   d0d1 = (a0)〜
+$fe21   __USING         double → Decimal string           (a0)〜 = d0d1,d2.d3,d4
+$fe22   __STOD          Decimal string → double           d0d1,d2,d3 = (a0)〜
+$fe23   __DTOS          double → Decimal string           (a0)〜 = d0d1
+$fe24   __ECVT          double → string                   (a0),d0,d1 = d0d1,d2全体桁
+$fe25   __FCVT          double → string                   (a0),d0,d1 = d0d1,d2小数点桁
+$fe26   __GCVT          double → String                   (a0)〜 = d0d1,d2全体桁
 $fe28   __DTST          double 0 比較                     Z,N = d0d1
 $fe29   __DCMP          double 比較                       Z,C = d0d1-d2d3
 $fe2a   __DNEG          double 符号反転                    d0d1 = neg(d0d1)
-$fe2b   __DADD          double 加算                       d0d1 += d2d3
+$fe2b   __DADD          double Addition                   d0d1 += d2d3
 $fe2c   __DSUB          double 減算                       d0d1 -= d2d3
 $fe2d   __DMUL          double 乗算                       d0d1 *= d2d3
 $fe2e   __DDIV          double 除算                       d0d1 /= d2d3
@@ -109,31 +109,31 @@ $fe6a   __FLOG          float 自然対数                      d0 = ln(d0)
 $fe6b   __FEXP          float 指数関数                      d0 = exp(d0)
 $fe6c   __FSQR          float 平方根                       d0 = sqr(d0)
 $fe6d   __FPI           float 円周率                       d0 = pi()
-$fe6e   __FNPI          float 円周率乗算             d0 = pi(d0)
-$fe6f   __FPOWER        float 羃乗                        d0 = pow(d0,d1)
-$fe70   __FRND          float 乱数                        d0 = rnd()
-$fe71   __FSINH         float 正弦                        d0 = sinh(d0)
-$fe72   __FCOSH         float 双曲余弦                      d0 = cosh(d0)
-$fe73   __FTANH         float 双曲正接                      d0 = tanh(d0)
-$fe74   __FATANH        float 双曲逆正接             d0 = atanh(d0)
-$fe75   __FASIN         float 逆正弦                       d0 = asin(d0)
-$fe76   __FACOS         float 逆余弦                       d0 = acos(d0)
-$fe77   __FLOG10        float 常用対数                      d0 = log10(d0)
-$fe78   __FLOG2         float 対数(底2)                    d0 = log2(d0)
-$fe79   __FFREXP        float 仮数指数分割            d0,d1 = d0
-$fe7a   __FLDEXP        float 仮数指数結合            d0 = d0,d1
-$fe7b   __FADDONE       float 1 加算                      d0 += 1.0#
-$fe7c   __FSUBONE       float 1 減算                      d0 -= 1.0#
-$fe7d   __FDIVTWO       float 2 除算                      d0 /= 2.0#
+$fe6e   __FNPI          float 円周率乗算                  d0 = pi(d0)
+$fe6f   __FPOWER        float 羃乗                       d0 = pow(d0,d1)
+$fe70   __FRND          float Random number             d0 = rnd()
+$fe71   __FSINH         float Hyperbolic sine           d0 = sinh(d0)
+$fe72   __FCOSH         float Hyperbolic cosine         d0 = cosh(d0)
+$fe73   __FTANH         float Hyperbolic tangent        d0 = tanh(d0)
+$fe74   __FATANH        float Hyperbolic reverse tangent d0 = atanh(d0)
+$fe75   __FASIN         float Inverse sine              d0 = asin(d0)
+$fe76   __FACOS         float Reverse cosine            d0 = acos(d0)
+$fe77   __FLOG10        float Common logarithm          d0 = log10(d0)
+$fe78   __FLOG2         float Logarithm (base 2)        d0 = log2(d0)
+$fe79   __FFREXP        float Mantissa index split      d0,d1 = d0
+$fe7a   __FLDEXP        float Mantissa exponential combination d0 = d0,d1
+$fe7b   __FADDONE       float 1 Addition                d0 += 1.0#
+$fe7c   __FSUBONE       float 1 Subtraction             d0 -= 1.0#
+$fe7d   __FDIVTWO       float 2 division                d0 /= 2.0#
 $fe7e   __FIEECNV       float SHARP → IEEE              d0 = d0
 $fe7f   __IEEFCNV       float IEEE → SHARP              d0 = d0
 
-$fee0   __CLMUL         signed int 乗算                   (sp) *= (4,sp)
-$fee1   __CLDIV         signed int 除算                   (sp) /= (4,sp)
-$fee2   __CLMOD         signed int 除算の剰余                (sp) %= (4,sp)
-$fee3   __CUMUL         unsigned int 乗算         (sp) *= (4,sp)
-$fee4   __CUDIV         unsigned int 除算         (sp) /= (4,sp)
-$fee5   __CUMOD         unsigned int 除算の剰余              (sp) %= (4,sp)
+$fee0   __CLMUL         signed int Multiply             (sp) *= (4,sp)
+$fee1   __CLDIV         signed int division             (sp) /= (4,sp)
+$fee2   __CLMOD         signed int Division remainder   (sp) %= (4,sp)
+$fee3   __CUMUL         unsigned int Multiply           (sp) *= (4,sp)
+$fee4   __CUDIV         unsigned int division           (sp) /= (4,sp)
+$fee5   __CUMOD         unsigned int Division remainder (sp) %= (4,sp)
 $fee6   __CLTOD         signed int → double             (sp)(4,sp) = (sp)
 $fee7   __CDTOL         double → signed int             (sp) = (sp)(4,sp)
 $fee8   __CLTOF         signed int → float              (sp) = (sp)
@@ -159,8 +159,8 @@ $fefb   __CFINC         float 1 addition                (sp) += 1.0#
 $fefc   __CDDEC         double 1 subtraction            (sp)(4,sp) -= 1.0#
 $fefd   __CFDEC         float 1 subtraction             (sp) -= 1.0#
 
-$fefe   __FEVARG        数値演算ドライバ種別検査    d0,d1={HS86,IEEE},{SOFT,FPCP}
-$feff   __FEVECS        処理アドレス変更                d0 = intvcs(d0,a0)
+$fefe   __FEVARG        Numerical calculation driver type inspection  d0,d1={HS86,IEEE},{SOFT,FPCP}
+$feff   __FEVECS        Change processing address                     d0 = intvcs(d0,a0)
 
 ==============================================================================
 
@@ -372,22 +372,22 @@ Ret     d0.l    乱数(0〜3,2767)
 
 ==============================================================================
 
-$fe10   __STOL          10進文字列 → signed int     d0 = (a0)〜
+$fe10   __STOL          Decimal string → signed int     d0 = (a0)〜
 
-Arg     a0.l    文字列のアドレス
+Arg     a0.l    String address
 
-Ret     d0.l    変換されたロングワード符号付き整数
-        a0.l    数値の末尾桁の次のアドレス
+Ret     d0.l    Converted longword signed integer
+        a0.l    Address next to the last digit of the number
 
-CCR     C : エラーの時セット
-        N : (C = 1)数値の記述法がおかしい場合セット
-        V : (C = 1)オーバーフローが発生した場合セット
+CCR     C : Set at the time of error
+        N : (C = 1)Set when the numerical description method is incorrect
+        V : (C = 1)Set when overflow occurs
 
-        文字列をロングワード符号付き整数に変換する.
+        Convert a string to a longword signed integer.
 
 ==============================================================================
 
-$fe11   __LTOS          signed int → 10進文字列     (a0)〜 = d0
+$fe11   __LTOS          signed int → Decimal string    (a0)〜 = d0
 
 Arg     d0.l    Longword signed int
         a0.l    Buffer address
@@ -480,19 +480,20 @@ Ret     (a0)〜   変換された文字列
 
 ==============================================================================
 
-$fe18   __IUSING        signed int → 10進文字列     (a0)〜 = d0,d1桁
+$fe18   __IUSING        signed int → Decimal string    (a0)〜 = d0,d1 digits
 
-Arg     d0.l    ロングワード符号付き整数
-        d1.l    桁数
-        a0.l    バッファのアドレス
+Arg     d0.l    Longword signed integer
+        d1.l    Number of digits
+        a0.l    Buffer address
 
-Ret     (a0)〜   変換された文字列
-        a0.l    文字列の末尾のアドレス
+Ret     (a0)〜  Converted string
+        a0.l    Address at the end of the string
 
-        ロングワード符号付き整数を文字列に変換する. 変換後の文字列が指定した桁
-        数に満たない場合は、ゼロ・サプレスを行った後で右詰めにして返す.
-        指定桁数より文字列が長くなる場合は、桁数を無視して必要なだけの長さの文
-        字列を返す.
+        Converts a longword signed integer to a string. If the converted
+        character string is less than the specified number of digits, it is
+        space-filled and then right-justified and returned.
+        If the string is longer than the specified number of digits, ignore
+        the number of digits and return a string of the required length.
 
 ==============================================================================
 
@@ -1202,28 +1203,27 @@ CCR     C : エラーの時セット
 
 ==============================================================================
 
-$fe51   __FUSING        float → 10進文字列          (a0)〜 = d0,d2.d3,d4
+$fe51   __FUSING        float → Decimal string          (a0)〜 = d0,d2.d3,d4
 
-Arg     d0.l    単精度浮動小数点数
-        d2.l    整数部の桁数
-        d3.l    小数部の桁数
-        d4.l    属性
-                bit 6   正数の場合スペースを、負数の場合"-"を最後尾に付加する
-                bit 5   正数の場合"+"を、負数の場合"-"を最後尾に付加する
-                bit 4   正数の場合"+"を先頭に付加する
-                bit 3   指数形式で表現する
-                bit 2   整数部分を３桁ごとに","で区切る
-                bit 1   先頭に"\"を付加する
-                bit 0   整数部の指定桁数に満たない部分(左側)を"*"で埋める
-                        (通常はスペース)
-        a0.l    バッファのアドレス
+Arg     d0.l    Single precision floating point number
+        d2.l    Number of digits in the integer part
+        d3.l    Number of decimal places
+        d4.l    attribute
+                bit 6   Add a space at the end for positive numbers and "-" for negative numbers.
+                bit 5   Add "+" for positive numbers and "-" for negative numbers at the end
+                bit 4   If it is a positive number, add "+" at the beginning.
+                bit 3   Express in exponential format
+                bit 2   Separate the integer part with "," every 3 digits
+                bit 1   Prepend "\"
+                bit 0   Fill the part (left side) that is less than the specified number of digits in the integer part with "*"
+                        (Usually space)
+        a0.l    Buffer address
 
-Ret     (a0)〜   変換された文字列
-        a0.l の値は変更されない.
+Ret     (a0)〜   Converted string
+        The value of a0.l does not change.
 
-        単精度浮動小数点数を属性 d4 で指定した形で文字列に変換する.
-        d3.l が負数の場合は 0 として扱われる. ただし、実際には最下位バイトだけ
-        が符号なしバイト値として参照される. 更に小数点 '.' が挿入されない.
+        Converts a single precision floating point number to a string in the form specified by the attribute d4.
+        If d3.l is negative, it is treated as 0. However, in reality, only the least significant byte is referenced as an unsigned byte value. Furthermore, the decimal point'.' Is not inserted.
 
 ==============================================================================
 
@@ -1259,7 +1259,7 @@ Ret     (a0)〜   変換された文字列
 
 ==============================================================================
 
-$fe54   __FECVT         float → 文字列                     (a0),d0,d1 = d0,d2全体桁
+$fe54   __FECVT         float → String                    (a0),d0,d1 = d0,d2全体桁
 
 Arg     d0.l    単精度浮動小数点数
         d2.b    全体の桁数
