@@ -40,33 +40,50 @@ SetupDOSCalls:
 
 	rts
 
-; Catch $Fxxx instructions
+; Catch $Fxxx illegal instructions
 LineFExceptionHandler:
-	movem.l d0-d1/a1-a2,-(sp)
-	lea.l   ($0012,sp),a2  ; Get stack addr of pushed PC
-	movea.l (a2),a1        ; Get PC from stack
-	clr.l   d0
-	move.w  (a1)+,d0       ; Get instruction from (PC)
-	move.l  a1, (a2)
-	cmpi.w  #$ff00,d0      ; Only process instructions >= $ff00
+	movem.l d5-d6/a5-a6,-(sp)
+	lea.l   ($0012,sp),a6  ; Get stack addr of pushed PC
+	movea.l (a6),a5        ; Get PC from stack
+	move.w  (a5)+,d5       ; Get instruction from (PC)
+	move.l  a5, (a6)+
+	cmpi.w  #$fe00, d5     ; Only process instructions >= $fe00
 	bcs     LineFDone
+	cmpi.w  #$ff00, d5
+	bcs     LineFE
+	move.l  #0, d6
+	move.b  d5, d6
+	lea.l	(DOSCallVecTable),a5
+	add.l   d6, d6
+	add.l   d6, d6
+	add.l	d6, a5
+	movea.l	(a5),a5
+	jsr	    (a5)
 
-	move.w  d0, d1
-	and.l   #$000000ff, d1
-	add.w   d1, d1
-	add.w   d1, d1
-	lea.l   (DOSCallVecTable), a2
-	add.l   d1, a2
-	move.l  (a2), a2
-	jsr     (a2)
+	* move.w	sr,d6
+	* move.b	d6,($000d,sp)
 
 LineFDone:
-	movem.l (sp)+,d0-d1/a1-a2
+	movem.l	(sp)+,d5-d6/a5-a6
+
+	* tst.w	(sp)
+	* bmi.s	@f
+	rte
+
+@@:
+	ori.w	#$8000,sr
+	rte
+
+LineFE:
+	move.l #FakeDOSCallPort, a5
+	and.l   #$0000ffff, d5
+	move.w d5, (a5)
+	movem.l	(sp)+,d5-d6/a5-a6
 	rte
 
 FakeDOSCallHandler:
 	lea.l (26,sp),sp
-	move.l #FakeDOSCallPort, a1
-	move.w d0, (a1)
+	move.l #FakeDOSCallPort, a6
+	move.w d5, (a6)
 	lea.l (-26,sp),sp
 	rts
