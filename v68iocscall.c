@@ -511,7 +511,6 @@ int v68_iocs_call(uint16_t instr) {
 #ifdef WIN32
 				DWORD u = GetTickCount();
 				u /= 1000;
-				printf("GetTickCount=%lu\n", u);
 				m68k_set_reg(M68K_REG_D0, (u % (24 * 60 * 60)) * 100);
 				m68k_set_reg(M68K_REG_D1, u / (24 * 60 * 60));
 #endif

@@ -426,7 +426,7 @@ int v68_fe_call(uint16_t instr) {
 	uint8_t call = instr & 0xff;
 
 	if(v68.log_calls)
-		printf("V68 FE CALL %04x %s\n", instr, fe_call_names[call]);
+		verbose1("V68 FE CALL %04x %s\n", instr, fe_call_names[call]);
 
 	switch(call) {
 		case FE_CALL_LTOS: {
@@ -495,11 +495,15 @@ int v68_fe_call(uint16_t instr) {
 			}
 			break;
 		case FE_CALL_IDIV: {
-				uint32_t d0 = m68k_get_reg(0, M68K_REG_D0);
-				uint32_t d1 = m68k_get_reg(0, M68K_REG_D1);
+				uint32_t d1;
+				uint32_t d0;
+				d0 = m68k_get_reg(0, M68K_REG_D0);
+				d1 = m68k_get_reg(0, M68K_REG_D1);
 				if(d1 == 0) {
+					logcall("IDIV BY ZERO %d / %d\n", d0, d1);
 					FLAG_C = 1;
 				} else {
+					logcall("IDIV %d / %d = %d r%d\n", d0, d1, d0 / d1, d0 % d1);
 					m68k_set_reg(M68K_REG_D0, d0 / d1);
 					m68k_set_reg(M68K_REG_D1, d0 % d1);
 				}
@@ -516,7 +520,7 @@ int v68_fe_call(uint16_t instr) {
 			}
 			break;
 		default:
-			printf("V68 FE CALL %04x %s\n", instr, fe_call_names[call]);
+			verbose1("V68 Unhandled FE call %04x %s\n", instr, fe_call_names[call]);
 			break;
 	}
 

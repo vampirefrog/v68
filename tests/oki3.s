@@ -323,10 +323,10 @@ cer00001: .dc.b 'Configuration error', $0d, $0a, $00
 cer00010: .dc.b 'Operation timing error', $0d, $0a, $00
 cer00011: .dc.b '(not used)', $0d, $0a, $00
 cer001rr: .dc.b 'Address error', $0d, $0a, $00
-cer010rr: .dc.b 'bus error', $0d, $0a, $00
+cer010rr: .dc.b 'Bus error', $0d, $0a, $00
 cer011rr: .dc.b 'Count error', $0d, $0a, $00
 cer10000: .dc.b 'External forced stop', $0d, $0a, $00
-cer10001: .dc.b 'software forced stop', $0d, $0a, $00
+cer10001: .dc.b 'Software forced stop', $0d, $0a, $00
 
 
 .bss

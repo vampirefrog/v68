@@ -101,7 +101,6 @@ prtdec0:
 .bss
 fileno:
 	.dc.l 0
-	.bss
 buff:
 	.ds.b 5
 bufend:
