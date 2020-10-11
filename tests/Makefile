@@ -6,7 +6,7 @@ endif
 
 HAS=$(RUN68) ../x/HAS.X -w3
 LINK=$(RUN68) ../x/LK.X
-ICONV=iconv -f Shift_JIS -t utf8
+ICONV=../sjis2utf8
 TRANS=php ~/trans.php
 
 all: \
@@ -14,7 +14,9 @@ all: \
 	datetime.x \
 	filewrite.x \
 	fwritetsr.x \
+	idiv.x \
 	ioctrl.x \
+	iusing.x \
 	mxp.x \
 	nameck.x \
 	oki1.x \
@@ -30,6 +32,7 @@ all: \
 	super1.x \
 	super2.x \
 	super3.x \
+	umod.x \
 	ver.x
 
 %.x:
@@ -40,7 +43,9 @@ ansi.x: ansi.o
 datetime.x: datetime.o
 filewrite.x: filewrite.o
 fwritetsr.x: fwritetsr.o
+idiv.x: idiv.o
 ioctrl.x: ioctrl.o
+iusing.x: iusing.o
 mxdrv17.x: mxdrv17.o
 mxp.x: mxp.o
 nameck.x: nameck.o
@@ -60,6 +65,7 @@ sjis.x: sjis.o
 super1.x: super1.o
 super2.x: super2.o
 super3.x: super3.o
+umod.x: umod.o
 ver.x: ver.o
 
 %.o: %.s
