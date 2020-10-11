@@ -38,7 +38,7 @@ FakeIOCSCallPort          equ $ea0004
 
 IPLStart:
 	.dc.l DefaultStackAddr ; Default stack top
-EntryPointPtr
+EntryPointPtr:
 	.dc.l EntryPoint       ; PC at boot
 BootBusErrVec:
 	.dc.l	DefaultExceptionHandler
