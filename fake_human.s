@@ -60,14 +60,14 @@ LineFExceptionHandler:
 	movea.l	(a5),a5
 	jsr	    (a5)
 
-	* move.w	sr,d6
-	* move.b	d6,($000d,sp)
+	move.w	sr,d6
+	move.b	d6,($000d,sp)
 
 LineFDone:
 	movem.l	(sp)+,d5-d6/a5-a6
 
-	* tst.w	(sp)
-	* bmi.s	@f
+	tst.w	(sp)
+	bmi.s	@f
 	rte
 
 @@:
