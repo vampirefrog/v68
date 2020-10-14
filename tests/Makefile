@@ -11,13 +11,13 @@ TRANS=php ~/trans.php
 
 all: \
 	ansi.x \
+	b_memstr.x \
 	datetime.x \
 	filewrite.x \
 	fwritetsr.x \
 	idiv.x \
 	ioctrl.x \
 	iusing.x \
-	mxp.x \
 	nameck.x \
 	oki1.x \
 	oki2.x \
@@ -40,6 +40,7 @@ all: \
 	stty sane
 
 ansi.x: ansi.o
+b_memstr.x: b_memstr.o
 datetime.x: datetime.o
 filewrite.x: filewrite.o
 fwritetsr.x: fwritetsr.o
@@ -47,7 +48,6 @@ idiv.x: idiv.o
 ioctrl.x: ioctrl.o
 iusing.x: iusing.o
 mxdrv17.x: mxdrv17.o
-mxp.x: mxp.o
 nameck.x: nameck.o
 ontime.x: ontime.o
 oki1.x: oki1.o
