@@ -15,7 +15,7 @@
 	move.l d1, d0
 	bsr prtdec
 
-	move.w #'h', -(sp)
+	move.w #'d', -(sp)
 	DOS _PUTCHAR
 	addq.l #2, sp
 
