@@ -478,7 +478,7 @@ int v68_iocs_call(uint16_t instr) {
 	uint32_t call_addr = m68k_read_memory_32(0x400 + call * 4);
 
 	if(v68.log_calls)
-		printf("v68_iocs_call call=0x%02x %s call_addr=0x%08x\n", instr, iocs_call_names[call], call_addr);
+		verbose1("v68_iocs_call call=0x%02x %s call_addr=0x%08x\n", instr, iocs_call_names[call], call_addr);
 
 	if(call_addr < 0xff0000) {/* Only implement calls that aren't overridden */
 		uint16_t sr = m68k_get_reg(0, M68K_REG_SR);
@@ -520,14 +520,15 @@ int v68_iocs_call(uint16_t instr) {
 				uint32_t num_bytes = m68k_get_reg(0, M68K_REG_D1);
 				uint32_t src = m68k_get_reg(0, M68K_REG_A1);
 				uint32_t dst = m68k_get_reg(0, M68K_REG_A2);
+				logcall("src=%08x dst=%08x num_bytes=%d %02x %02x %02x %02x \"%c%c%c%c\"\n", src, dst, num_bytes, v68.ram[src], v68.ram[src + 1], v68.ram[src + 2], v68.ram[src + 3], v68.ram[src], v68.ram[src + 1], v68.ram[src + 2], v68.ram[src + 3]);
 				if(src + num_bytes >= v68.ram_size || dst + num_bytes >= v68.ram_size) {
 					// Out of bounds, fool
 					m68k_set_reg(M68K_REG_A1, 0);
 					m68k_set_reg(M68K_REG_A2, 0);
 				} else {
 					memcpy(&v68.ram[dst], &v68.ram[src], num_bytes);
-					m68k_set_reg(M68K_REG_A1, src + num_bytes);
-					m68k_set_reg(M68K_REG_A2, 0);
+					m68k_set_reg(M68K_REG_A1, src + num_bytes + 1);
+					m68k_set_reg(M68K_REG_A2, dst + num_bytes + 1);
 				}
 			}
 			break;
@@ -568,6 +569,34 @@ int v68_iocs_call(uint16_t instr) {
 			break;
 		case IOCS_CALL_ADPCMMOD: {
 				verbose1("_ADPCMMOD\n");
+			}
+			break;
+		case IOCS_CALL_B_INTVCS: {
+				verbose1("_B_INTVCS\n");
+				uint16_t vecNum = m68k_get_reg(0, M68K_REG_D1);
+				uint32_t addr = m68k_get_reg(0, M68K_REG_A1);
+				uint32_t prevVec;
+				if(vecNum < 0x100) {
+				 	prevVec = m68k_read_memory_32(vecNum * 4);
+					m68k_write_memory_32(vecNum * 4, addr);
+					m68k_set_reg(M68K_REG_D0, prevVec);
+					verbose1("_B_INTVCS vecNum=%02x addr=%08x prevVec=%08x\n", vecNum, addr, prevVec);
+				} else if(vecNum < 0x200) {
+				 	prevVec = m68k_read_memory_32(0x400 + (vecNum & 0xff) * 4);
+					m68k_write_memory_32(0x400 + (vecNum & 0xff) * 4, addr);
+					m68k_set_reg(M68K_REG_D0, prevVec);
+					verbose1("_B_INTVCS IOCS vecNum=%02x addr=%08x prevVec=%08x\n", vecNum, addr, prevVec);
+				} else {
+					verbose1("_B_INTVCS bad vector vecNum=%04x addr=%08x\n", vecNum, addr);
+				}
+			}
+			break;
+		case IOCS_CALL_B_LPEEK: {
+				uint32_t a1 = m68k_get_reg(0, M68K_REG_A1);
+				uint32_t peek = m68k_read_memory_32(a1);
+				verbose1("_B_LPEEK a1=%08x returning=%08x\n", a1, peek);
+				m68k_set_reg(M68K_REG_D0, peek);
+				m68k_set_reg(M68K_REG_A1, m68k_get_reg(0, M68K_REG_A1) + 4);
 			}
 			break;
 
