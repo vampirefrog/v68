@@ -29,7 +29,6 @@ void v68_emu_write_16(uint32_t addr, uint16_t data);
 
 void v68_periph_init() {
 	verbose1("v68_periph_init\n");
-	v68.periph_timers_altered = 0;
 
 	// for mapping $ff0000 at $000000 at startup
 	v68.reset_pulsed = 0;
@@ -61,26 +60,6 @@ void v68_periph_end() {
 	okim6258_stop(&v68.oki);
 }
 
-uint32_t v68_periph_next_int(uint32_t cycles) {
-	verbose1("v68_periph_next_int cycles=%d running=%d\n", cycles, v68.running);
-	uint32_t next_int = cycles;
-
-	if((v68.opm_flags & 0x05) && (v68.opm_timera_counter < v68.opm_timera_cycles) && (v68.opm_timera_cycles - v68.opm_timera_counter) < next_int) {
-		next_int = v68.opm_timera_cycles - v68.opm_timera_counter;
-	}
-
-	if((v68.opm_flags & 0x0a) && (v68.opm_timerb_counter < v68.opm_timerb_cycles) && (v68.opm_timerb_cycles - v68.opm_timerb_counter) < next_int) {
-		next_int = v68.opm_timerb_cycles - v68.opm_timerb_counter;
-	}
-
-	if((v68.dmac.channels[3].csr & 0x08) && v68.dmac.channels[3].mtc * v68.oki_sample_cycles < next_int) {
-		next_int = v68.dmac.channels[3].mtc * v68.oki_sample_cycles;
-	}
-
-	verbose2("v68_periph_next_int returning %d\n", next_int);
-	return next_int;
-}
-
 uint32_t v68_int_ack_handler(int int_level) {
 	verbose1("v68_int_ack_handler int_level=%d int_vec=0x%02x\n", int_level, v68.int_vec);
 	if(int_level == 6) { /* MFP */
@@ -103,64 +82,43 @@ uint32_t v68_int_ack_handler(int int_level) {
 	return M68K_INT_ACK_SPURIOUS;
 }
 
-void v68_periph_render(int samples) {
-	verbose1("v68_periph_render samples=%d\n", samples);
+void v68_periph_render_sample(int16_t *l, int16_t *r) {
+	verbose1("v68_periph_render_sample\n");
 
 #ifndef __EMSCRIPTEN__
 	if(v68.logger) {
-		vgm_logger_wait(v68.logger, samples);
+		vgm_logger_wait(v68.logger, 1);
 	}
 #endif
 
-	int16_t *buf[2] = { v68.bufL, v68.bufR };
-	ym2151_update_one(&v68.opm, buf, samples);
+	int16_t *buf[2] = { l, r };
+	ym2151_update_one(&v68.opm, buf, 1);
 
 	int prev_oki_remainder = v68.oki_resample_remainder;
-	int x = (samples * v68.oki_freq + v68.oki_resample_remainder);
+	int x = v68.oki_freq + v68.oki_resample_remainder;
 	int oki_samples = x / v68.sample_rate;
 	v68.oki_resample_remainder = x - oki_samples * v68.sample_rate;
 
-	buf[0] = v68.tmpBufL;
-	buf[1] = v68.tmpBufR;
-	verbose2("v68_periph_render  oki_samples=%d\n", oki_samples);
-	okim6258_update(&v68.oki, buf, oki_samples);
+	verbose2("v68_periph_render_samples  oki_samples=%d\n", oki_samples);
+	if(oki_samples) {
+		int16_t tl, tr;
+		buf[0] = &tl;
+		buf[1] = &tr;
+		okim6258_update(&v68.oki, buf, oki_samples);
 
-	int j = 0;
-	for(int i = 0; i < samples; i++) {
+		int j = 0;
 		int x = v68.oki_freq + prev_oki_remainder;
 		int s = x / v68.sample_rate;
 		prev_oki_remainder = x - s * v68.sample_rate;
 		if(s > 0 && j < oki_samples - 1)
 			j++;
-		v68.bufL[i] += v68.tmpBufL[j];
-		v68.bufR[i] += v68.tmpBufR[j];
+		*l += tl;
+		*r += tr;
 	}
-
-	v68.bufL += samples;
-	v68.bufR += samples;
-	v68.buf_remaining -= samples;
-}
-
-int v68_render_tstates(int tstates) {
-	verbose1("v68_render_tstates tstates=%d\n", tstates);
-	int64_t x = (int64_t)tstates * (int64_t)v68.sample_rate + v68.samples_remainder;
-	int64_t samples = x / (int64_t)v68.cpu_clock;
-	if(samples > v68.buf_remaining)
-		samples = v68.buf_remaining;
-	v68.samples_remainder = x - samples * v68.cpu_clock;
-	verbose2("v68_render_tstates tstates=%d samples_remainder=%d buf_remaining=%d samples=%"PRId64"\n", tstates, v68.samples_remainder, v68.buf_remaining, samples);
-
-	if(samples > 0) {
-		v68_periph_render(samples);
-	}
-
-	return samples;
 }
 
 void v68_periph_advance(uint32_t cycles) {
-	v68.in_periph_timing = 1;
-
-	verbose1("v68_periph_advance cycles=%d v68.periph_cycles=%d v68.prev_sound_cycles=%d\n", cycles, v68.periph_cycles, v68.prev_sound_cycles);
+	verbose1("v68_periph_advance cycles=%d\n", cycles);
 	verbose2("v68_periph_advance  opm_timera_counter=%d opm_timera_cycles=%d\n", v68.opm_timera_counter, v68.opm_timera_cycles);
 	verbose2("v68_periph_advance  opm_timerb_counter=%d opm_timerb_cycles=%d\n", v68.opm_timerb_counter, v68.opm_timerb_cycles);
 	verbose2("v68_periph_advance  oki_sample_counter=%d oki_sample_cycles=%d\n", v68.oki_sample_counter, v68.oki_sample_cycles);
@@ -192,65 +150,24 @@ void v68_periph_advance(uint32_t cycles) {
 			verbose2("v68_periph_advance  DMA Tick oki_sample_counter=%d oki_sample_cycles=%d\n", v68.oki_sample_counter, v68.oki_sample_cycles);
 			v68.oki_sample_counter -= v68.oki_sample_cycles;
 			// Trigger transfer
-			v68.periph_cycles += v68.oki_sample_cycles;
 			dmac_tick(3);
 		}
 	}
 
-	verbose2("v68_periph_advance before v68_render_tstates v68.periph_cycles=%d v68.prev_sound_cycles=%d\n", v68.periph_cycles, v68.prev_sound_cycles);
-	v68_render_tstates(cycles + v68.periph_cycles - v68.prev_sound_cycles);
-	v68.prev_sound_cycles = v68.periph_cycles;
-
-	verbose2("v68_periph_advance done periph_cycles=%d\n", v68.periph_cycles);
-
-	v68.in_periph_timing = 0;
-}
-
-static void v68_periph_before_read(uint32_t addr) {
-	(void)addr;
-	verbose1("v68_periph_before_read addr=0x%08x prev_sound_cycles=%d in_periph_timing=%d\n", addr, v68.prev_sound_cycles, v68.in_periph_timing);
-
-	if(v68.in_periph_timing) {
-		verbose2("v68_periph_before_read periph_cycles=%d prev_sound_cycles=%d periph_cycles-prev_sound_cycles=%d\n", v68.periph_cycles, v68.prev_sound_cycles, v68.periph_cycles - v68.prev_sound_cycles);
-		v68_render_tstates(v68.periph_cycles - v68.prev_sound_cycles);
-		// v68.prev_sound_cycles = v68.periph_cycles;
-	} else {
-		verbose2("v68_periph_before_read cycles_run=%d prev_sound_cycles=%d cycles_run-prev_sound_cycles=%d\n", m68k_cycles_run(), v68.prev_sound_cycles, m68k_cycles_run() - v68.prev_sound_cycles);
-		v68.periph_cycles = v68.prev_sound_cycles;
-		v68_periph_advance(m68k_cycles_run() - v68.prev_sound_cycles);
-		v68.prev_sound_cycles = m68k_cycles_run();
-	}
+	verbose2("v68_periph_advance done\n");
 }
 
 static void v68_periph_before_write(uint32_t addr) {
-
 	/* Check if sound is touched */
 	if(!v68.sound_touched) {
 		if(addr == 0xe92001 || addr == 0xe92003 || addr == 0xe90003) {
 			verbose1("sound touched\n");
 			v68.sound_touched = 1;
-			m68k_end_timeslice();
 		}
-	}
-
-	/* Check for OKIM6258 or Y2151 writes */
-	// if(addr == 0xe92001 || addr == 0xe92003 || addr == 0xe90003) {
-		verbose1("v68_periph_before_write addr=0x%08x in_periph_timing=%d prev_sound_cycles=%d periph_cycles=%d\n", addr, v68.in_periph_timing, v68.prev_sound_cycles, v68.periph_cycles);
-		v68_periph_before_read(addr);
-	// }
-}
-
-static void v68_periph_after_write(void) {
-	if(v68.periph_timers_altered) {
-		verbose1("timers altered at %d cycles, %d remaining\n", m68k_cycles_run(), m68k_cycles_remaining());
-		v68.periph_timers_altered = 0;
-		v68.cpu_ended_timeslice = 1;
-		m68k_end_timeslice();
 	}
 }
 
 unsigned int v68_read_periph_32(unsigned int addr) {
-	v68_periph_before_read(addr);
 	if(addr < 0xe82000) { /* ＣＲＴコントローラ ◆ CRT controller */
 	} else if(addr < 0xe84000) { /* ビデオコントローラ ◆ Video controller */
 	} else if(addr < 0xe86000) { /* ＤＭＡＣ ◆ DMA controller */
@@ -293,7 +210,6 @@ unsigned int v68_read_periph_32(unsigned int addr) {
 }
 
 unsigned int v68_read_periph_16(unsigned int addr) {
-	v68_periph_before_read(addr);
 	if(addr < 0xe82000) { /* ＣＲＴコントローラ ◆ CRT controller */
 	} else if(addr < 0xe84000) { /* ビデオコントローラ ◆ Video controller */
 	} else if(addr < 0xe86000) { /* ＤＭＡＣ ◆ DMA controller */
@@ -328,7 +244,6 @@ unsigned int v68_read_periph_16(unsigned int addr) {
 }
 
 unsigned int v68_read_periph_8(unsigned int addr) {
-	v68_periph_before_read(addr);
 	if(addr < 0xe82000) {        /* ＣＲＴコントローラ ◆ CRT controller */
 	} else if(addr < 0xe84000) { /* ビデオコントローラ ◆ Video controller */
 	} else if(addr < 0xe86000) { /* ＤＭＡＣ ◆ DMA controller */
@@ -393,8 +308,6 @@ void v68_write_periph_32(unsigned int addr, unsigned int data) {
 		v68_ppi_write_8((addr & 0xff) + 3, (data      ) & 0xff);
 	} else if(addr < 0xe9e000) { /* Ｉ／Ｏ コントローラ ◆ I/O controller */
 	}
-
-	v68_periph_after_write();
 }
 
 void v68_write_periph_16(unsigned int addr, unsigned int data) {
@@ -429,8 +342,6 @@ void v68_write_periph_16(unsigned int addr, unsigned int data) {
 	} else if(addr < 0xeb0000) { /* Emulator port */
 		v68_emu_write_16(addr, data);
 	}
-
-	v68_periph_after_write();
 }
 
 void v68_write_periph_8(unsigned int addr, unsigned int data) {
@@ -459,8 +370,6 @@ void v68_write_periph_8(unsigned int addr, unsigned int data) {
 		v68_ppi_write_8(addr & 0xff, data);
 	} else if(addr < 0xe9e000) { /* Ｉ／Ｏ コントローラ ◆ I/O controller */
 	}
-
-	v68_periph_after_write();
 }
 
 
@@ -500,7 +409,6 @@ void v68_opm_write_8(uint32_t addr, uint8_t data) {
 						if(v68.opm_clka != clka) {
 							v68.opm_clka = clka;
 							v68.opm_timera_cycles = v68_opm_calc_timera();
-							v68.periph_timers_altered = 1;
 						}
 						break;
 					case 0x11:
@@ -509,7 +417,6 @@ void v68_opm_write_8(uint32_t addr, uint8_t data) {
 						if(v68.opm_clka != clka) {
 							v68.opm_clka = clka;
 							v68.opm_timera_cycles = v68_opm_calc_timera();
-							v68.periph_timers_altered = 1;
 						}
 						break;
 					case 0x12:
@@ -517,13 +424,9 @@ void v68_opm_write_8(uint32_t addr, uint8_t data) {
 						if(v68.opm_clkb != clkb) {
 							v68.opm_clkb = clkb;
 							v68.opm_timerb_cycles = v68_opm_calc_timerb();
-							v68.periph_timers_altered = 1;
 						}
 						break;
 					case 0x14: {
-							if((data & 0x3f) != (v68.opm_flags & 0x3f)) {
-								v68.periph_timers_altered = 1;
-							}
 							v68.opm_flags = data & 0x0f;
 							/* Check for reset */
 							if(data & 0x10) {
@@ -535,9 +438,6 @@ void v68_opm_write_8(uint32_t addr, uint8_t data) {
 						}
 						break;
 					case 0x1b: {
-							if((data & 0x80) != (v68.opm_ct & 0x80)) {
-								v68.periph_timers_altered = 1;
-							}
 							v68.opm_ct = data & 0xc0;
 						}
 						break;
@@ -581,7 +481,6 @@ void v68_adpcm_write_8(uint32_t addr, uint8_t value) {
 				vgm_logger_write_okim6258(v68.logger, 0x00, value);
 #endif
 			if(value & 0x02) {
-				v68.periph_timers_altered = 1;
 				v68.oki_freq = 15625;
 				v68.oki_sample_cycles = v68.cpu_clock * 2 / v68.oki_freq;
 			}

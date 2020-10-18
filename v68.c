@@ -23,7 +23,6 @@ int v68_init(int clock, int ram_size, int sample_rate) {
 	v68.cpu_clock = clock;
 	v68.sound_touched = 0;
 	v68.sample_rate = sample_rate;
-	v68.samples_remainder = 0;
 
 	v68.ram = calloc(v68.ram_size, 1);
 	if(!v68.ram) return errno;
@@ -63,57 +62,35 @@ void v68_run() {
 
 	v68.running = 1;
 
-	while(v68.running) {
-		int next_int = v68_periph_next_int(remaining_tstates);
-		verbose2("v68_run  executing next_int=%d remaining_tstates=%d log_calls=%d\n", next_int, remaining_tstates, v68.log_calls);
-		v68.cpu_ended_timeslice = 0;
-		v68.prev_sound_cycles = 0;
-		int cycles = m68k_execute(next_int, v68.log_dasm);
-		int executed_cycles = v68.cpu_ended_timeslice ? next_int - m68ki_initial_cycles : cycles;
-		verbose2("v68_run  ended_timeslice=%d executed_cycles=%d next_int=%d remaining_tstates=%d log_calls=%d\n", v68.cpu_ended_timeslice, executed_cycles, next_int, remaining_tstates, v68.log_calls);
-		v68.cpu_ended_timeslice = 0;
-		if(v68.sound_touched) return;
+	int extra_samples = 100;
+
+	for(int i = 0; (v68.running || !v68.sound_touched) && i < extra_samples; i += (v68.running || !v68.sound_touched ? 0 : 1)) {
+		// run for one sample at a time
+		int64_t x = v68.cpu_clock + v68.cpu_cycle_remainder;
+		int cpu_tstates = x / v68.sample_rate;
+
+		verbose2("v68_run  executing cpu_tstates=%d remaining_tstates=%d log_calls=%d\n", cpu_tstates, remaining_tstates, v68.log_calls);
+		int executed_cycles = m68k_execute(cpu_tstates, v68.log_dasm);
+		v68.cpu_cycle_remainder = x - executed_cycles * v68.sample_rate;
 	}
 }
 
-int v68_fill_buffer(int samples, int16_t *bufL, int16_t *bufR, int16_t *tmpBufL, int16_t *tmpBufR) {
+int v68_fill_buffer(int samples, int16_t *bufL, int16_t *bufR) {
 	verbose1("v68_fill_buffer samples=%d\n", samples);
-	v68.prev_sound_cycles = 0;
-	v68.buf_remaining = samples;
-	v68.bufL = bufL;
-	v68.bufR = bufR;
-	v68.tmpBufL = tmpBufL;
-	v68.tmpBufR = tmpBufR;
 	memset(bufL, 0, samples * sizeof(*bufL));
 	memset(bufR, 0, samples * sizeof(*bufR));
 
-	int64_t x = (int64_t)samples * v68.cpu_clock + v68.cpu_cycle_remainder;
-	int cpu_tstates = x / v68.sample_rate;
-	v68.cpu_cycle_remainder = x - cpu_tstates * v68.sample_rate;
+	for(int i = 0; i < samples; i++) {
+		// render one sample at a time
+		int64_t x = v68.cpu_clock + v68.cpu_cycle_remainder;
+		int cpu_tstates = x / v68.sample_rate;
 
-	verbose2("v68_fill_buffer  cpu_tstates=%d CPU_STOPPED=%d PC=%08x v68.sample_rate=%d\n", cpu_tstates, CPU_STOPPED, REG_PC, v68.sample_rate);
+		int executed_cycles = m68k_execute(cpu_tstates, v68.log_dasm);
+		v68.cpu_cycle_remainder = x - executed_cycles * v68.sample_rate;
 
-	int remaining_tstates = cpu_tstates;
-	while(remaining_tstates > 0) {
-		verbose2("v68_fill_buffer  remaining_tstates=%d opm_flags=0x%02x\n", remaining_tstates, v68.opm_flags);
-		int next_int = v68_periph_next_int(remaining_tstates);
-
-		verbose2("v68_fill_buffer  executing next_int=%d remaining_tstates=%d\n", next_int, remaining_tstates);
-		v68.cpu_ended_timeslice = 0;
-		v68.prev_sound_cycles = 0;
-		int cycles = m68k_execute(next_int, v68.log_dasm);
-		int executed_cycles = v68.cpu_ended_timeslice ? next_int - m68ki_initial_cycles : cycles;
-		verbose2("v68_fill_buffer  ended_timeslice=%d executed_cycles=%d next_int=%d remaining_tstates = %d\n", v68.cpu_ended_timeslice, executed_cycles, next_int, remaining_tstates);
-		v68.cpu_ended_timeslice = 0;
-
-		verbose2("v68_fill_buffer  advancing executed_cycles=%d - prev_sound_cycles=%d = %d\n", executed_cycles, v68.prev_sound_cycles, executed_cycles - v68.prev_sound_cycles);
-		v68.periph_cycles = v68.prev_sound_cycles;
-		v68_periph_advance(executed_cycles - v68.prev_sound_cycles);
-		verbose2("v68_fill_buffer  remaining_tstates=%d  executed_cycles=%d  remaining_tstates-executed_cycles=%d\n", remaining_tstates, executed_cycles, remaining_tstates-executed_cycles);
-		remaining_tstates -= executed_cycles;
+		v68_periph_advance(executed_cycles);
+		v68_periph_render_sample(bufL++, bufR++);
 	}
-
-	verbose2("v68_fill_buffer  filled buffer buf_remaining=%d\n", v68.buf_remaining);
 
 	return 0;
 }

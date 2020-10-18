@@ -182,12 +182,13 @@ int main(int argc, char **argv, char **envp) {
 	}
 
 	v68_run();
+	verbose1("v68_run finished, sound_touched=%d\n", v68.sound_touched);
 
 	PaStream *stream;
 	PaError err;
 
 	if(v68.sound_touched) {
-		printf("init sound\n");
+		verbose1("init sound\n");
 
 		err = Pa_Initialize();
 		if( err != paNoError ) goto error;
@@ -223,13 +224,11 @@ int main(int argc, char **argv, char **envp) {
 	}
 		ALLOCBUF(bufL, opt_buffer_size * sizeof(*bufL));
 		ALLOCBUF(bufR, opt_buffer_size * sizeof(*bufR));
-		ALLOCBUF(tmpBufL, opt_buffer_size * sizeof(*tmpBufL));
-		ALLOCBUF(tmpBufR, opt_buffer_size * sizeof(*tmpBufR));
 		ALLOCBUF(buf, opt_buffer_size * 2 * sizeof(*buf));
 
 		/* -- Play some stuff -- */
 		while(running) {
-			v68_fill_buffer(opt_buffer_size, bufL, bufR, tmpBufL, tmpBufR);
+			v68_fill_buffer(opt_buffer_size, bufL, bufR);
 			for(int i = 0; i < opt_buffer_size; i++) {
 				buf[i * 2] = bufL[i];
 				buf[i * 2 + 1] = bufR[i];

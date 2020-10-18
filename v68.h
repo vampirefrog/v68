@@ -48,17 +48,11 @@ struct v68 {
 	int int_vec;
 
 	/* CPU timing */
-	int cpu_clock, cpu_cycle_remainder, cpu_ended_timeslice;
+	int cpu_clock, cpu_cycle_remainder;
 
 	/* Sound Timing */
 	int sound_touched;
-	int16_t *bufL, *bufR, *tmpBufL, *tmpBufR;
 	int sample_rate;
-	int samples_remainder, buf_remaining;
-	int prev_sound_cycles, remaining_tstates;
-
-	/* Peripheral timing */
-	int periph_timers_altered, in_periph_timing, periph_cycles;
 
 	/* OPM */
 	struct ym2151 opm;
@@ -98,7 +92,7 @@ extern struct v68 v68;
 int v68_init(int clock, int ram_size, int sample_rate);
 void v68_boot(void);
 void v68_run(void);
-int v68_fill_buffer(int samples, int16_t *bufL, int16_t *bufR, int16_t *tmpBufL, int16_t *tmpBufR);
+int v68_fill_buffer(int samples, int16_t *bufL, int16_t *bufR);
 int v68_shutdown(void);
 
 /* Traps */
