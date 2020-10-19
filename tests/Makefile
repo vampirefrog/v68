@@ -25,6 +25,7 @@ all: \
 	oki4.x \
 	ontime.x \
 	opm.x \
+	pcm8_1.x \
 	print.x \
 	process.x \
 	proginfo.x \
@@ -55,8 +56,6 @@ oki2.x: oki2.o
 oki3.x: oki3.o
 oki4.x: oki4.o tools.o
 opm.x: opm.o
-pcm8.x: pcm8.o
-pcm8en.x: pcm8en.o
 pcm8_1.x: pcm8_1.o piano-c4.adp piano-e4.adp piano-g4.adp
 print.x: print.o
 process.x: process.o
