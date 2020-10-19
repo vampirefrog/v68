@@ -478,7 +478,7 @@ int v68_iocs_call(uint16_t instr) {
 	uint32_t call_addr = m68k_read_memory_32(0x400 + call * 4);
 
 	if(v68.log_calls)
-		verbose1("v68_iocs_call call=0x%02x %s call_addr=0x%08x\n", instr, iocs_call_names[call], call_addr);
+		printf("v68_iocs_call call=0x%02x %s call_addr=0x%08x\n", instr, iocs_call_names[call], call_addr);
 
 	if(call_addr < 0xff0000) {/* Only implement calls that aren't overridden */
 		uint16_t sr = m68k_get_reg(0, M68K_REG_SR);
@@ -599,7 +599,14 @@ int v68_iocs_call(uint16_t instr) {
 				m68k_set_reg(M68K_REG_A1, m68k_get_reg(0, M68K_REG_A1) + 4);
 			}
 			break;
-
+		case IOCS_CALL_B_BPEEK: {
+				uint32_t a1 = m68k_get_reg(0, M68K_REG_A1);
+				uint8_t peek = m68k_read_memory_8(a1);
+				verbose1("_B_BPEEK a1=%08x returning=%02x\n", a1, peek);
+				m68k_set_reg(M68K_REG_D0, (m68k_get_reg(0, M68K_REG_D0) & 0xffffff00) | (peek & 0xff));
+				m68k_set_reg(M68K_REG_A1, m68k_get_reg(0, M68K_REG_A1) + 4);
+			}
+			break;
 		default:
 			logcall("Unimplemented V68 IOCS CALL %04x %s\n", instr, iocs_call_names[call]);
 	}
