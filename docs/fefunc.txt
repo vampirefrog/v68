@@ -414,15 +414,15 @@ CCR     C : エラーの時セット
 
 ==============================================================================
 
-$fe13   __HTOS          unsigned int → 16進文字列   (a0)〜 = d0
+$fe13   __HTOS          unsigned int → Hexadecimal string   (a0)〜 = d0
 
-Arg     d0.l    ロングワード符号なし整数
-        a0.l    バッファのアドレス
+Arg     d0.l    Longword unsigned integer
+        a0.l    Buffer address
 
-Ret     (a0)〜   変換された文字列
-        a0.l    文字列の末尾のアドレス
+Ret     (a0)〜   Converted string
+        a0.l    Address at the end of the string
 
-        ロングワード符号なし整数を16進数表現の文字列に変換する.
+        Converts a longword unsigned integer to a string in hexadecimal representation.
 
 ==============================================================================
 

@@ -2394,14 +2394,14 @@ Ret	d0.l	ユーザモードに切り換えた場合は常に 0 を返す.
 
 ==============================================================================
 
-$82	_B_BPEEK	指定アドレスから 1 バイト読み込み
+$82	_B_BPEEK	Read 1 byte from the specified address
 
-Arg	a1.l	読み込みアドレス
+Arg	a1.l	Read address
 
-Ret	d0.b	データ
-	a1.l	次のアドレス
+Ret	d0.b	data
+	a1.l	Next address
 
-	指定アドレスから 1 バイトデータを読み込む.
+	Read 1-byte data from the specified address.
 
 ==============================================================================
 
@@ -2416,7 +2416,7 @@ Ret	d0.w	データ
 
 ==============================================================================
 
-$84	_B_LPEEK	Purchase 1 long word from temporary receipt
+$84	_B_LPEEK	Acquire 1 long word from temporary receipt
 
 Arg	a1.l	Read address
 
