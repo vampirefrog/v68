@@ -134,7 +134,9 @@ SetupTraps:
 	lea.l (DefaultTrapHandler), a1
 	move.l a1, (Trap1VecAddr)
 	lea.l (DefaultTrapHandler), a1
-	move.l a1, (Trap2VecAddr)
+	move.l a1, d1
+	or.l #$22000000, d1
+	move.l d1, (Trap2VecAddr)
 	lea.l (DefaultTrapHandler), a1
 	move.l a1, (Trap3VecAddr)
 	lea.l (DefaultTrapHandler), a1
