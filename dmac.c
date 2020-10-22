@@ -41,60 +41,63 @@ void dmac_tick(int chan) {
 	if (!dma_in_progress(chan))  // DMA in progress in channel x
 		return;
 
+	uint32_t mar = v68.dmac.channels[chan].mar & 0x00ffffff;
+	uint32_t dar = v68.dmac.channels[chan].dar & 0x00ffffff;
+
 	if (v68.dmac.channels[chan].ocr & 0x80)  // direction: 1 = device -> memory
 	{
 		switch(v68.dmac.channels[chan].ocr & 0x30)  // operation size
 		{
 		case 0x00:  // 8 bit
-			data = m68k_read_memory_8(v68.dmac.channels[chan].dar);  // read from device address
-			m68k_write_memory_8(v68.dmac.channels[chan].mar, data);  // write to memory address
+			data = m68k_read_memory_8(dar);  // read from device address
+			m68k_write_memory_8(mar, data);  // write to memory address
 			datasize = 1;
 			break;
 		case 0x10:  // 16 bit
-			data = m68k_read_memory_16(v68.dmac.channels[chan].dar);  // read from device address
-			m68k_write_memory_16(v68.dmac.channels[chan].mar, data);  // write to memory address
+			data = m68k_read_memory_16(dar);  // read from device address
+			m68k_write_memory_16(mar, data);  // write to memory address
 			datasize = 2;
 			break;
 		case 0x20:  // 32 bit
-			data = m68k_read_memory_16(v68.dmac.channels[chan].dar) << 16;  // read from device address
-			data |= m68k_read_memory_16(v68.dmac.channels[chan].dar+2);
-			m68k_write_memory_16(v68.dmac.channels[chan].mar, (data & 0xffff0000) >> 16);  // write to memory address
-			m68k_write_memory_16(v68.dmac.channels[chan].mar+2, data & 0x0000ffff);
+			data = m68k_read_memory_16(dar) << 16;  // read from device address
+			data |= m68k_read_memory_16(dar+2);
+			m68k_write_memory_16(mar, (data & 0xffff0000) >> 16);  // write to memory address
+			m68k_write_memory_16(mar+2, data & 0x0000ffff);
 			datasize = 4;
 			break;
 		case 0x30:  // 8 bit packed (?)
-			data = m68k_read_memory_8(v68.dmac.channels[chan].dar);  // read from device address
-			m68k_write_memory_8(v68.dmac.channels[chan].mar, data);  // write to memory address
+			data = m68k_read_memory_8(dar);  // read from device address
+			m68k_write_memory_8(mar, data);  // write to memory address
 			datasize = 1;
 			break;
 		}
-		verbose2("dmac_tick device->memory dar=0x%08x mar=0x%08x data=0x%02x\n", v68.dmac.channels[chan].dar, v68.dmac.channels[chan].mar, data);
+		verbose2("dmac_tick device->memory dar=0x%08x mar=0x%08x data=0x%02x\n", dar, mar, data);
 	}
 	else  // memory -> device
 	{
 		switch(v68.dmac.channels[chan].ocr & 0x30)  // operation size
 		{
 		case 0x00:  // 8 bit
-			data = m68k_read_memory_8(v68.dmac.channels[chan].mar);  // read from memory address
-			m68k_write_memory_8(v68.dmac.channels[chan].dar, data);  // write to device address
+			data = m68k_read_memory_8(mar);  // read from memory address
+			m68k_write_memory_8(dar, data);  // write to device address
 			datasize = 1;
 			break;
 		case 0x10:  // 16 bit
-			data = m68k_read_memory_16(v68.dmac.channels[chan].mar);  // read from memory address
-			m68k_write_memory_16(v68.dmac.channels[chan].dar, data);  // write to device address
+			data = m68k_read_memory_16(mar);  // read from memory address
+			m68k_write_memory_16(dar, data);  // write to device address
 			datasize = 2;
 			break;
 		case 0x20:  // 32 bit
-			data = m68k_read_memory_16(v68.dmac.channels[chan].mar) << 16;  // read from memory address
-			data |= m68k_read_memory_16(v68.dmac.channels[chan].mar+2);  // read from memory address
-			m68k_write_memory_16(v68.dmac.channels[chan].dar, (data & 0xffff0000) >> 16);  // write to device address
-			m68k_write_memory_16(v68.dmac.channels[chan].dar+2, data & 0x0000ffff);  // write to device address
+			data = m68k_read_memory_16(mar) << 16;  // read from memory address
+			data |= m68k_read_memory_16(2);  // read from memory address
+			m68k_write_memory_16(dar, (data & 0xffff0000) >> 16);  // write to device address
+			m68k_write_memory_16(dar+2, data & 0x0000ffff);  // write to device address
 			datasize = 4;
 			break;
 		case 0x30:  // 8 bit packed (?)
-			data = m68k_read_memory_8(v68.dmac.channels[chan].mar);  // read from memory address
-			m68k_write_memory_8(v68.dmac.channels[chan].dar, data);  // write to device address
-			verbose2("dmac_tick 0x%08x -> 0x%08x = 0x%02x\n", v68.dmac.channels[chan].mar, v68.dmac.channels[chan].dar, data);
+			data = m68k_read_memory_8(mar);  // read from memory address
+			m68k_write_memory_8(dar, data);  // write to device address
+			verbose2("dmac_tick 0x%08x -> 0x%08x = 0x%02x\n", mar, dar, data);
 			datasize = 1;
 			break;
 		}
@@ -136,6 +139,7 @@ void dmac_tick(int chan) {
 		// Burst transfer
 		if ((v68.dmac.channels[chan].dcr & 0xc0) == 0x00)
 		{
+			verbose2("dmac_tick burst transfer\n");
 			// m_cpu->set_input_line(INPUT_LINE_HALT, CLEAR_LINE);
 		}
 
@@ -161,13 +165,17 @@ static void dmac_transfer_start(int chan) {
 	// Burst transfers will halt the CPU until the transfer is complete
 	if ((v68.dmac.channels[chan].dcr & 0xc0) == 0x00)  // Burst transfer
 	{
+		verbose2("dmac_transfer_start  complete\n");
 		// m_cpu->set_input_line(INPUT_LINE_HALT, ASSERT_LINE);
 		// m_timer[channel]->adjust(attotime::zero, channel, m_burst_clock[channel]);
 	} else if (!(v68.dmac.channels[chan].ocr & 2)) {
+		verbose2("dmac_transfer_start  & 2\n");
 		// m_timer[channel]->adjust(attotime::from_usec(500), channel, m_our_clock[channel]);
 	} else if ((v68.dmac.channels[chan].ocr & 3) == 3) {
+		verbose2("dmac_transfer_start  & 3 == 3\n");
 		// m_timer[channel]->adjust(attotime::from_usec(500), channel, attotime::never);
 	} else if ((v68.dmac.channels[chan].ocr & 3) == 2) {
+		verbose2("dmac_transfer_start  & 3 == 2\n");
 		// m_timer[channel]->adjust(attotime::never, channel, attotime::never);
 	}
 
