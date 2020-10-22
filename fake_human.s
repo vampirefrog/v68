@@ -87,3 +87,11 @@ FakeDOSCallHandler:
 	move.w d5, (a6)
 	lea.l (-26,sp),sp
 	rts
+
+Strings:
+.dc.l $ffffffff
+.dc.w $8024
+.dc.l $0
+.dc.l $0
+.dc.b 'NUL     '
+.dc.l $00000000
