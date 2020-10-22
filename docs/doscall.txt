@@ -706,18 +706,17 @@ $ff1f	_ALLCLOSE	全ファイルのクローズ
 
 $ff20	_SUPER		Switch between supervisor and user mode
 
-Arg STACK.l		切り替えモード(0 若しくは SSP に設定するアドレス)
+Arg STACK.l		Switching mode (0 or address set to SSP)
 
 Ret	STACK = 0
-		前の SSP の値(負数ならError code)
+		Previous SSP value (Error code if negative)
 
-	切り替えモード STACK の値に従って、スーパーバイザ/ユーザーモードを切り
-	替える.
+	Switch mode Switches between supervisor / user mode according to the value of STACK.
 
 	STACK = 0
-		USP の値を SSP に設定し、スーパーバイザモードに切り替える.
-	STACK = その他
-		STACK を SSP に設定し、ユーザーモードに切り替える.
+		Set the USP value to SSP and switch to supervisor mode.
+	STACK = Other
+		Set STACK to SSP and switch to user mode.
 
 	pea	(STACK)
 	DOS	_SUPER
@@ -2050,11 +2049,11 @@ Ret	終了コード
 
 ==============================================================================
 
-$ff4e	_FILES		ファイルを検索し、情報を得る(最初のファイル)
+$ff4e	_FILES		Search for files and get information (first file)
 
-Arg	BUFFER.l	バッファのポインタ
-	FILE.l		ファイル名のポインタ
-	ATR.w		ファイル属性(%XLAD_VSHR)
+Arg	BUFFER.l	Buffer pointer
+	FILE.l		Filename pointer
+	ATR.w		File attributes (%XLAD_VSHR)
 
 Ret	Error code
 
@@ -2079,22 +2078,22 @@ Ret	Error code
 	絶対ドライブ名で返る).
 
 offset	size
-0	1.b	検索する属性				┐
-1	1.b	〃	ドライブ番号			│
-2	1.l	検索中のディレクトリのセクタ番号	│Human68k 内部で
-6	1.w	ディレクトリの残りセクタ数		│使用する.
-		(ルートの場合のみ有効)			│破壊すると
-8	1.w	ディレクトリ上のセクタ先頭からの	│_NFILES 出来ない.
-		オフセット(-1 の時該当ファイルなし)	│
-10	8.b	検索するファイル名			│
-18	3.b	〃	拡張子				┘
-21	1.b	属性
-22	1.w	最終変更時刻
-24	1.w	最終変更月日
-26	1.l	ファイルサイズ
-30	23.b	ファイル名(主ファイル名＋'.'＋拡張子＋0)
+0	1.b	Attributes to search                                    ┐
+1	1.b	"	Drive number                                        │
+2	1.l	Sector number of the directory being searched           │ Used inside Human68k.
+6	1.w	Number of sectors remaining in the directory            │
+		(Valid only for root)                                   │If you destroy it,
+8	1.w	Offset from the beginning of the sector on              │ you cannot _NFILES.
+		the directory (When -1, there is no corresponding file)	│
+10	8.b	File name to search                                     │
+18	3.b	"	extension                                           ┘
+21	1.b	attribute
+22	1.w	Last change time
+24	1.w	Last change date
+26	1.l	file size
+30	23.b	file name(Main file name + '.' + Extension +0)
 
-	バッファアドレスの最上位ビットを 1 にした場合、以下の情報が加わる.
+	When the most significant bit of the buffer address is set to 1, the following information is added.
 
 offset	size
 53	 2.b	ドライブ名＋':'
