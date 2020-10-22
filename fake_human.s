@@ -88,7 +88,7 @@ FakeDOSCallHandler:
 	lea.l (-26,sp),sp
 	rts
 
-Strings:
+SpecialFiles:
 .dc.l $ffffffff
 .dc.w $8024
 .dc.l $0
