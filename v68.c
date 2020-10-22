@@ -76,20 +76,22 @@ void v68_run() {
 }
 
 int v68_fill_buffer(int samples, int16_t *bufL, int16_t *bufR) {
-	verbose1("v68_fill_buffer samples=%d\n", samples);
+	verbose1("v68_fill_buffer samples=%d running=%d\n", samples, v68.running);
 	memset(bufL, 0, samples * sizeof(*bufL));
 	memset(bufR, 0, samples * sizeof(*bufR));
 
-	for(int i = 0; i < samples; i++) {
-		// render one sample at a time
-		int64_t x = v68.cpu_clock + v68.cpu_cycle_remainder;
-		int cpu_tstates = x / v68.sample_rate;
+	if(v68.running) {
+		for(int i = 0; i < samples; i++) {
+			// render one sample at a time
+			int64_t x = v68.cpu_clock + v68.cpu_cycle_remainder;
+			int cpu_tstates = x / v68.sample_rate;
 
-		int executed_cycles = m68k_execute(cpu_tstates, v68.log_dasm);
-		v68.cpu_cycle_remainder = x - executed_cycles * v68.sample_rate;
+			int executed_cycles = m68k_execute(cpu_tstates, v68.log_dasm);
+			v68.cpu_cycle_remainder = x - executed_cycles * v68.sample_rate;
 
-		v68_periph_advance(executed_cycles);
-		v68_periph_render_sample(bufL++, bufR++);
+			v68_periph_advance(executed_cycles);
+			v68_periph_render_sample(bufL++, bufR++);
+		}
 	}
 
 	return 0;
