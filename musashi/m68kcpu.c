@@ -669,20 +669,32 @@ int m68k_execute(int num_cycles, int dasm)
 
 				if(REG_PC < 0xff0000 && REG_PC > 0x33c00) {
 					m68k_disassemble(dasmbuf, REG_PC, CPU_TYPE);
+					int sr = m68k_get_reg(0, M68K_REG_SR);
 					printf(
-						"D  %08X %08X %08X %08X  %08X %08X %08X %08X SR=%04X\n",
+						"D  %08X %08X %08X %08X  %08X %08X %08X %08X SR=%04X %c%c%c%c%c\n",
 						REG_D[0], REG_D[1], REG_D[2], REG_D[3],
 						REG_D[4], REG_D[5], REG_D[6], REG_D[7],
-						m68k_get_reg(0, M68K_REG_SR)
+						sr,
+						sr &  1 ? 'C' : '-',
+						sr &  2 ? 'V' : '-',
+						sr &  4 ? 'Z' : '-',
+						sr &  8 ? 'N' : '-',
+						sr & 16 ? 'X' : '-'
 					);
 					printf(
-						"A  %08X %08X %08X %08X  %08X %08X %08X %08X cycles %d/%d\n",
+						"A  %08X %08X %08X %08X  %08X %08X %08X %08X %s%s%s%c%c-%s%s\n",
 						REG_A[0], REG_A[1], REG_A[2], REG_A[3],
 						REG_A[4], REG_A[5], REG_A[6], REG_A[7],
-						m68k_cycles_run(), m68k_cycles_remaining()
+						sr & 0x100 ? "I0" : "--",
+						sr & 0x200 ? "I1" : "--",
+						sr & 0x400 ? "I2" : "--",
+						sr & 0x1000 ? 'M' : '-',
+						sr & 0x2000 ? 'S' : '-',
+						sr & 0x4000 ? "T0" : "--",
+						sr & 0x8000 ? "T1" : "--"
 					);
 					printf(
-						"S  %08X %08X %08X %08X  %08X %08X %08X %08X\n",
+						"S  %08X %08X %08X %08X  %08X %08X %08X %08X cycles %d/%d\n",
 						m68k_read_memory_32(REG_A[7]),
 						m68k_read_memory_32(REG_A[7] + 4),
 						m68k_read_memory_32(REG_A[7] + 8),
@@ -690,7 +702,9 @@ int m68k_execute(int num_cycles, int dasm)
 						m68k_read_memory_32(REG_A[7] + 16),
 						m68k_read_memory_32(REG_A[7] + 20),
 						m68k_read_memory_32(REG_A[7] + 24),
-						m68k_read_memory_32(REG_A[7] + 28)
+						m68k_read_memory_32(REG_A[7] + 28),
+						m68k_cycles_run(),
+						m68k_cycles_remaining()
 					);
 					printf("PC=%08X  ", REG_PC);
 					puts(dasmbuf);
