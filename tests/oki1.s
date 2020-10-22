@@ -3,7 +3,7 @@
 
 .cpu 68000
 
-STACK_SIZE: .equ 32*1024
+STACK_SIZE: .equ 64*1024
 
 .text
 	lea		(16,a0),a0
@@ -15,11 +15,16 @@ STACK_SIZE: .equ 32*1024
 	addq.l		#8,sp
 	tst.l d0
 	bpl @f
+
 	pea.l (setBlockErrStr,pc)
 	DOS _PRINT
 	addq.l #4, sp
 	DOS _EXIT
 @@:
+
+	; setup stackarino
+	move.l a1, a7
+	add.l  STACK_SIZE, a7
 
 	pea.l (helloStr,pc)
 	DOS _PRINT
