@@ -6,7 +6,7 @@ endif
 
 HAS=$(RUN68) ../x/HAS.X -w3
 LINK=$(RUN68) ../x/LK.X
-ICONV=../sjis2utf8
+ICONV=../x68ksjis/sjis2utf8
 TRANS=php ~/trans.php
 
 all: \
