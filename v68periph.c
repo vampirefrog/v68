@@ -49,6 +49,7 @@ void v68_periph_init() {
 	v68.oki_freq = 15625;
 	v68.oki_sample_counter = 0;
 	v68.oki_sample_cycles = v68.cpu_clock * 2 / 15625; /* it's actually clock / (sample rate / 2), 1 byte contains 2 samples */
+	v68.oki_prev_sample[0] = v68.oki_prev_sample[1] = 0;
 
 	dmac_init();
 	dmac_write_16(0xd4, 0xe92003 >> 16, 0xffff);
@@ -105,6 +106,8 @@ void v68_periph_render_sample(int16_t *l, int16_t *r) {
 		buf[0] = &tl;
 		buf[1] = &tr;
 		okim6258_update(&v68.oki, buf, oki_samples);
+		v68.oki_prev_sample[0] = tl;
+		v68.oki_prev_sample[1] = tr;
 
 		int j = 0;
 		int x = v68.oki_freq + prev_oki_remainder;
@@ -114,6 +117,9 @@ void v68_periph_render_sample(int16_t *l, int16_t *r) {
 			j++;
 		*l += tl;
 		*r += tr;
+	} else {
+		*l += v68.oki_prev_sample[0];
+		*r += v68.oki_prev_sample[1];
 	}
 }
 

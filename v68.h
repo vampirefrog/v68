@@ -65,6 +65,7 @@ struct v68 {
 	struct okim6258 oki;
 	int oki_sample_counter, oki_sample_cycles;
 	int oki_resample_remainder, oki_freq;
+	int16_t oki_prev_sample[2];
 
 	/* 8255 PPI */
 	uint8_t ppi_regs[4];
