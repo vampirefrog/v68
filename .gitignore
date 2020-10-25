@@ -12,3 +12,4 @@ musashi/m68kop*.c
 musashi/m68kmake
 tests/*.x
 tests/*.log
+*.log
