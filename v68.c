@@ -56,22 +56,28 @@ int v68_shutdown() {
 }
 
 extern int m68ki_initial_cycles;
+
+static void v68_run_sample() {
+	int64_t x = v68.cpu_clock + v68.cpu_cycle_remainder;
+	int cpu_tstates = x / v68.sample_rate;
+
+	verbose2("v68_run  executing cpu_tstates=%d log_calls=%d running=%d sound_touched=%d\n", cpu_tstates, v68.log_calls, v68.running, v68.sound_touched);
+	int executed_cycles = m68k_execute(cpu_tstates, v68.log_dasm);
+	v68.cpu_cycle_remainder = x - executed_cycles * v68.sample_rate;
+}
+
 void v68_run() {
 	verbose1("v68_run cpu_clock=%d sound_touched=%d running=%d log_calls=%d\n", v68.cpu_clock, v68.sound_touched, v68.running, v68.log_calls);
-	int remaining_tstates = v68.cpu_clock;
 
 	v68.running = 1;
 
+	while(v68.running && !v68.sound_touched) {
+		v68_run_sample();
+	}
+
 	int extra_samples = 100;
-
-	for(int i = 0; (v68.running || !v68.sound_touched) && i < extra_samples; i += (v68.running || !v68.sound_touched ? 0 : 1)) {
-		// run for one sample at a time
-		int64_t x = v68.cpu_clock + v68.cpu_cycle_remainder;
-		int cpu_tstates = x / v68.sample_rate;
-
-		verbose2("v68_run  executing cpu_tstates=%d remaining_tstates=%d log_calls=%d\n", cpu_tstates, remaining_tstates, v68.log_calls);
-		int executed_cycles = m68k_execute(cpu_tstates, v68.log_dasm);
-		v68.cpu_cycle_remainder = x - executed_cycles * v68.sample_rate;
+	for(int i = 0; i < extra_samples; i++) {
+		v68_run_sample();
 	}
 }
 
@@ -85,11 +91,10 @@ int v68_fill_buffer(int samples, int16_t *bufL, int16_t *bufR) {
 		int64_t x = v68.cpu_clock + v68.cpu_cycle_remainder;
 		int cpu_tstates = x / v68.sample_rate;
 
-		if(v68.running) {
-			int executed_cycles = m68k_execute(cpu_tstates, v68.log_dasm);
-			v68.cpu_cycle_remainder = x - executed_cycles * v68.sample_rate;
-		}
-		v68_periph_advance(cpu_tstates);
+		int executed_cycles = m68k_execute(cpu_tstates, v68.log_dasm);
+		v68.cpu_cycle_remainder = x - executed_cycles * v68.sample_rate;
+
+		v68_periph_advance(executed_cycles);
 		v68_periph_render_sample(bufL++, bufR++);
 	}
 
