@@ -36,7 +36,7 @@ void dmac_tick(int chan) {
 	int data;
 	int datasize = 1;
 
-	verbose1("dmac_tick chan=%d in_progress=%d\n", chan, dma_in_progress(chan));
+	verbose1("dmac_tick chan=%d in_progress=%d mtc=%d\n", chan, dma_in_progress(chan), v68.dmac.channels[chan].mtc);
 
 	if (!dma_in_progress(chan))  // DMA in progress in channel x
 		return;
