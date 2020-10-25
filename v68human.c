@@ -304,9 +304,10 @@ void v68_queue_next_command() {
 		return;
 	}
 
-	verbose2("v68_queue_next_command last command cur_prog_addr=0x%08x\n", v68.cur_prog_addr);
+	uint32_t pc = m68k_read_memory_32(v68.cur_prog_addr + 0x04);
+	verbose2("v68_queue_next_command last command cur_prog_addr=%08x pc=%08x\n", v68.cur_prog_addr, pc);
 	/* Last command, restore PC*/
-	m68k_set_reg(M68K_REG_PC, m68k_read_memory_32(v68.cur_prog_addr + 0x04));
+	m68k_set_reg(M68K_REG_PC, pc);
 	v68.running = 0;
 }
 
