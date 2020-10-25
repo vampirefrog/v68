@@ -110,7 +110,7 @@ FakeTrap15Handler:
 	movem.l	a0,-(a7)
 	and.l	#$000000ff,d0
 	suba.l	a0,a0
-	movea.w	d0,a0
+	move.l	d0,a0
 	adda.l	a0,a0
 	adda.l	a0,a0
 	adda.l	#IOCSCallVecTable,a0
