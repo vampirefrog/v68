@@ -307,7 +307,7 @@ void v68_write_periph_32(unsigned int addr, unsigned int data) {
 	} else if(addr < 0xe96000) { /* ＦＤＣ ◆ Floppy drive controller */
 	} else if(addr < 0xe98000) { /* ＨＤＣ ◆ Hard disk controller */
 	} else if(addr < 0xe9a000) { /* ＳＣＣ ◆ Serial communications */
-	} else if(addr < 0xe9C000) { /* ｉ８２５５ ◆ Programmable peripheral interface */
+	} else if(addr < 0xe9c000) { /* ｉ８２５５ ◆ Programmable peripheral interface */
 		v68_ppi_write_8((addr & 0xff) + 0, (data >> 24) & 0xff);
 		v68_ppi_write_8((addr & 0xff) + 1, (data >> 16) & 0xff);
 		v68_ppi_write_8((addr & 0xff) + 2, (data >>  8) & 0xff);
@@ -468,11 +468,11 @@ uint8_t v68_opm_read_8(uint32_t addr) {
 
 /* ＭＦＰ ◆ Multi-function peripheral */
 void v68_mfp_write_8(uint32_t addr, uint8_t value) {
-	verbose2("v68_mfp_write_8 0x%08x = 0x%02x\n", addr, value);
+	verbose2("v68_mfp_write_8 *STUB* 0x%08x = 0x%02x\n", addr, value);
 }
 
 uint8_t v68_mfp_read_8(uint32_t addr) {
-	verbose2("v68_mfp_read_8 %08x\n", addr);
+	verbose2("v68_mfp_read_8 *STUB* %08x\n", addr);
 	return 0x00;
 }
 
