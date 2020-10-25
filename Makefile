@@ -7,7 +7,10 @@ MUSASHIGENOBJS=$(patsubst %.c,musashi/%.o,$(MUSASHIGENCFILES))
 CC=gcc
 
 
-all: v68 xinfo sjis2utf8
+all: v68 xinfo x68ksjis/sjis2utf8
+
+x68ksjis/sjis2utf8:
+	(cd x68ksjis && make sjis2utf8)
 
 $(patsubst %.c,musashi/%.c,$(MUSASHIGENCFILES)): musashi/m68kmake musashi/m68k_in.c
 	(cd musashi && ./m68kmake)
@@ -15,7 +18,7 @@ $(patsubst %.c,musashi/%.c,$(MUSASHIGENCFILES)): musashi/m68kmake musashi/m68k_i
 musashi/m68kmake: musashi/m68kmake.o
 	gcc $^ -o $@
 
-CFLAGS=-ggdb -Wall -DHAVE_MEMCPY
+CFLAGS=-ggdb -Wall -DHAVE_MEMCPY -Ix68ksjis
 ifneq (,$(findstring MINGW,$(shell uname -s)))
 CFLAGS+=-I../portaudio/include -static-libgcc
 LDFLAGS=-lz -liconv -lws2_32 -static-libgcc
@@ -30,7 +33,7 @@ else
 LDFLAGS+=$(shell pkg-config portaudio-2.0 --libs)
 endif
 
-v68: main.o tools.o v68.o v68io.o v68human.o v68doscall.o v68iocscall.o v68fecall.o sjis.o sjis_unicode.o utf8.o ym2151.o dmac.o okim6258.o vgm.o v68periph.o v68ipl.o $(MUSASHIOBJS) $(MUSASHIGENOBJS)
+v68: main.o tools.o v68.o v68io.o v68human.o v68doscall.o v68iocscall.o v68fecall.o x68ksjis/sjis.o x68ksjis/sjis_unicode.o x68ksjis/utf8.o ym2151.o dmac.o okim6258.o vgm.o v68periph.o v68ipl.o $(MUSASHIOBJS) $(MUSASHIGENOBJS)
 	$(CC) $(filter %.o,$^) $(LDFLAGS) -o $@
 
 v68human.o: v68human.c fake_human.inc
@@ -65,20 +68,15 @@ xinfo: xinfo.o md5.o cmdline.o
 xdump: xdump.o tools.o
 	$(CC) $^ -o $@
 
-sjis2utf8: sjis2utf8.o sjis.o sjis_unicode.o utf8.o
-	$(CC) $^ -o $@
-
-sjisstat: sjisstat.o sjis.o sjis_unicode.o utf8.o
-	$(CC) $^ -o $@
-
-test-mem: test-mem.o v68.o v68human.o v68opm.o v68io.o v68doscall.o v68fecall.o v68iocscall.o okim6258.o ym2151.o vgm.o sjis.o sjis_unicode.o $(MUSASHIOBJS) $(MUSASHIGENOBJS)
+test-mem: test-mem.o v68.o v68human.o v68opm.o v68io.o v68doscall.o v68fecall.o v68iocscall.o okim6258.o ym2151.o vgm.o x68ksjis/sjis.o x68ksjis/sjis_unicode.o $(MUSASHIOBJS) $(MUSASHIGENOBJS)
 	$(CC) $^ -lao -lm -o $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f v68 v68.exe xinfo xinfo.exe xdump xdump.exe sjis2utf8 sjis2utf8.exe *.o musashi/*.o $(patsubst %.c,musashi/%.c,$(MUSASHIGENCFILES)) ay.js *.wasm *.map test
+	cd x68ksjis && make clean
+	rm -f v68 v68.exe xinfo xinfo.exe xdump xdump.exe *.o musashi/*.o $(patsubst %.c,musashi/%.c,$(MUSASHIGENCFILES)) ay.js *.wasm *.map test
 
 main.o: main.c v68.h okim6258.h mamedef.h ym2151.h v68io.h cmdline.h \
  tools.h
