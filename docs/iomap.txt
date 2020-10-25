@@ -519,7 +519,7 @@ The HD63450 has four channels, and at X680x0, channels #0, #1, and #3 are
 assigned to FD, HD, and ADPCM, respectively. Channel # 2 is released to the
 user, so REQ (DMA transfer request signal), ACK (response signal), PCL
 (general purpose input signal) etc. are wired in the expansion slot, so
-transfer between memory and memory or expansion board It is available.
+transfer between memory and memory or expansion board is available.
 
 Registers of the DMAC exist for each channel from $e84000 to $40 bytes
 at a time. However, GCR (General Control Register) is only in channel #3.
@@ -868,38 +868,38 @@ Xsimm 10 does not correspond to cost reduction.
   The allocation in X680x0 / Human68k is as follows.
 
         Timer   A       Interrupt by V-DISP (vertical display period) signal
-        〃      B       Serial port clock generation
-        〃      C       Cursor blink / FDD control interrupt
-        〃      D       Interrupt for BG process switching
+        "       B       Serial port clock generation
+        "       C       Cursor blink / FDD control interrupt
+        "       D       Interrupt for BG process switching
         Serial port keyboard I / O
         General purpose I / O port      Interruption by various signals
 
 
 address size    R/W
-$e88001 1.b     R       GPIP    General purpose I / O register  ┐
-$e88003 1.b     R/W     AER     Active edge register            │GPIP control
-$e88005 1.b     R/W     DDR     Data direction register         ┘
-$e88007 1.b     R/W     IERA    Interrupt enable register     A ┐
-$e88009 1.b     R/W     IERB    〃                            B │
-$e8800b 1.b     R/W     IPRA    Interrupt pending register    A │
-$e8800d 1.b     R/W     IPRB    〃                            B │
-$e8800f 1.b     R/W     ISRA    Interrupt in service register A │Interrupt control
-$e88011 1.b     R/W     ISRB    〃                            B │
-$e88013 1.b     R/W     IMRA    Interrupt mask register       A │
-$e88015 1.b     R/W     IMRB    〃                            B │
-$e88017 1.b     R/W     VR      Vector register                 ┘
-$e88019 1.b     R/W     TACR    Timer A control register        ┐
-$e8801b 1.b     R/W     TBCR    Timer B 〃                      │
-$e8801d 1.b     R/W     TCDCR   Timer C & D control register    │
-$e8801f 1.b     R/W     TADR    Timer A data register           │Timer control
-$e88021 1.b     R/W     TBDR    タイマ B 〃                     │
-$e88023 1.b     R/W     TCDR    タイマ C 〃                     │
-$e88025 1.b     R/W     TDDR    タイマ D 〃                     ┘
-$e88027 1.b     R/W     SCR     SYNC キャラクタレジスタ         ┐
-$e88029 1.b     R/W     UCR     USART コントロールレジスタ      │
-$e8802b 1.b     R/W     RSR     レシーバステータスレジスタ      │USART control
-$e8802d 1.b     R/W     TSR     トランスミッタステータスレジスタ│
-$e8802f 1.b     R/W     UDR     USART データレジスタ            ┘
+$e88001 1.b     R       GPIP    General purpose I / O register   ┐
+$e88003 1.b     R/W     AER     Active edge register             │ GPIP control
+$e88005 1.b     R/W     DDR     Data direction register          ┘
+$e88007 1.b     R/W     IERA    Interrupt enable register      A ┐
+$e88009 1.b     R/W     IERB    "                              B │
+$e8800b 1.b     R/W     IPRA    Interrupt pending register     A │
+$e8800d 1.b     R/W     IPRB    "                              B │
+$e8800f 1.b     R/W     ISRA    Interrupt in service register  A │ Interrupt control
+$e88011 1.b     R/W     ISRB    "                              B │
+$e88013 1.b     R/W     IMRA    Interrupt mask register        A │
+$e88015 1.b     R/W     IMRB    "                              B │
+$e88017 1.b     R/W     VR      Vector register                  ┘
+$e88019 1.b     R/W     TACR    Timer A control register         ┐
+$e8801b 1.b     R/W     TBCR    Timer B "                        │
+$e8801d 1.b     R/W     TCDCR   Timer C & D control register     │
+$e8801f 1.b     R/W     TADR    Timer A data register            │ Timer control
+$e88021 1.b     R/W     TBDR    Timer B "                        │
+$e88023 1.b     R/W     TCDR    Timer C "                        │
+$e88025 1.b     R/W     TDDR    Timer D "                        ┘
+$e88027 1.b     R/W     SCR     SYNC character register          ┐
+$e88029 1.b     R/W     UCR     USART control register           │
+$e8802b 1.b     R/W     RSR     Receiver status register         │ USART control
+$e8802d 1.b     R/W     TSR     Transmitter status register      │
+$e8802f 1.b     R/W     UDR     USART data register              ┘
 
 
 MFP GPIP($e88001):
@@ -912,7 +912,7 @@ MFP GPIP($e88001):
             │  │  │  │  │  └ POW SW
             │  │  │  │  └ FMIRQ
             │  │  │  └ V-DISP
-            │  │  └ 常に %1
+            │  │  └ Always %1
             │  └ CIRQ
             └ H-SYNC
 
@@ -1029,17 +1029,18 @@ MFP ISRB($e88011):
         (ISRA と同様)
 
 MFP IMRA($e88013):
-        (IERA と同様)
+        (Similar to IERA)
 
-          割り込みのマスク制御を設定する.
-        %0 : 割り込み要求をマスクする  (割り込み発生不可)
-        %1 : 〃                  しない(〃     可  )
-        ※IERA/IERB は割り込みの発生を抑制するが、IMRA/IMRB は割り込み要因が発
-          生しても割り込み要求を出力しないだけである.
+        Set interrupt mask control.
+        %0 : Mask interrupt requests  (Interrupt cannot be generated)
+        %1 : Do not "                 ( "        can "              )
+        * IERA / IERB suppresses the occurrence of interrupts,
+          but IMRA / IMRB only does not output an interrupt request
+          even if an interrupt factor occurs.
 
 MFP IMRB($e88015):
-        (IERB と同様)
-        (IMRA と同様)
+        (Similar to IERB)
+        (Similar to IMRA)
 
 MFP VR($e88017):
         bit  7   6   5   4   3   2   1   0
