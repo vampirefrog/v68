@@ -314,45 +314,46 @@ offset	size
 
 ==============================================================================
 
-$ff0b	_KEYSNS		キーの入力状態の検査
+$ff0b	_KEYSNS		Checking the key input status
 
-Ret	入力状態(0:入力なし、-1:入力あり)
+Ret	Input status (0: no input, -1: with input)
 
-	キーの入力状態を調べる. ^C、^P、^N について調べる.
+	Examine the key input status. Examine ^C, ^P, ^N.
 
 ==============================================================================
 
-$ff0c	_KFLUSH		バッファフラッシュ後キーボードから入力
+$ff0c	_KFLUSH		Input from keyboard after buffer flush
 
-Arg	MODE.w		モード
-	CODE.w		処理を撰択するコード
-	BUFFER.l	入力バッファのポインタ
+Arg	MODE.w		mode
+	CODE.w		Code to select the process
+	BUFFER.l	Input buffer pointer
 
 Ret	MODE = 1,7,8
-			入力されたキーコード
+			Entered key code
 	MODE = 6
 		CODE = $fe,$ff
-			入力されたキーコード(0 なら入力なし)
-		CODE = その他
+			Entered key code (0 is not entered)
+		CODE = Other
 			d0.l = 0
 	MODE = 10
-			入力文字数
+			Number of characters to enter
 
-	キー入力バッファを空にしてから、キーボードから入力する.
-	MODE の値は DOS コールの下位 1 バイトに対応し、以下の動作をする.
+	Empty the key input buffer and then input from the keyboard.
+	The value of MODE corresponds to the lower 1 byte of the DOS call and
+	has the following behavior.
 
 	MODE = 1
-		キー入力を待ち、入力されたコードを標準出力に出力する.
+		Wait for key input and output the input code to standard output.
 	MODE = 6
-		CODE = $ff	キー入力(入力がなくても待たない)を調べる.
-		CODE = $fe	キーの先読み入力を行う.
-		CODE = その他	標準出力に出力する.
+		CODE = $ff	Examine keystrokes (don't wait if there is no input).
+		CODE = $fe	Enter the key look-ahead.
+		CODE = Other	Output to standard output.
 	MODE = 7
-		キー入力を待つ(ブレークチェックなし).
+		Wait for keystrokes (no break check).
 	MODE = 8
-		キー入力を待つ(ブレークチェックあり).
+		Wait for key input (with break check).
 	MODE = 10
-		改行までに入力した文字列をバッファに書き込む.
+		Write the character string entered before the line break to the buffer.
 
 MODE = 1,7,8
 	move	MODE,-(sp)
@@ -388,7 +389,7 @@ Arg	DRIVE.w		Drive number (0: A 1: B ... 25: Z)
 
 Ret	Number of drives that can be specified (1 to 26)
 
-	Change the current drive. Retが指定したドライブ番号以下であれば失敗したことになる.
+	Change the current drive. Ret is the specified skill.
 
 	move	DRIVE,-(sp)
 	DOS	_CHGDRV
@@ -602,11 +603,11 @@ MD = 1,2,5,6,9,10
 
 ==============================================================================
 
-$ff19	_CURDRV		カレントドライブを得る
+$ff19	_CURDRV		Get the current drive
 
-Ret	カレントドライブの番号(0:A 1:B … 25:Z)
+Ret	Current drive number(0:A 1:B … 25:Z)
 
-	カレントドライブの値を調べる.
+	Check the value of the current drive.
 
 ==============================================================================
 
@@ -1235,38 +1236,36 @@ Arg	PRGLEN.l	Number of resident bytes
 
 ==============================================================================
 
-$ff32	_GETDPB		ドライブパラメータブロックの複写
+$ff32	_GETDPB		Copy drive parameter block
 
-Arg	DRIVE.w		ドライブ番号(0:カレント 1:A 2:B … 26:Z)
-	DPBPTR.l	バッファのポインタ
+Arg	DRIVE.w		Drive number(0:current 1:A 2:B … 26:Z)
+	DPBPTR.l	Buffer pointer
 
 Ret	Error code
 
-	DRIVE で指定したドライブのドライブパラメータブロックを、Human68k
-	version 1 互換の形式に変換して、DPBPTR で指定した 94 バイトのバッファ
-	に複写する.
-	Human68k version 1 互換形式 DPB の内容は以下の通り.
+	Converts the drive parameter block of the drive specified by DRIVE to a Human68k version 1 compatible format and copies it to the 94-byte buffer specified by DPBPTR.
+	The contents of Human68k version 1 compatible format DPB are as follows.
 
 offset	size
-0	1.b	ドライブ番号(0:A 1:B … 25:Z)
-1	1.b	デバイスドライバで使うユニット番号
-2	1.w	1 セクタ当りのバイト数
-4	1.b	1 クラスタ当りのセクタ数-1
-5	1.b	クラスタ→セクタのシフト数
-		bit 7 = 1 で MS-DOS 形式 FAT(16bit Intel 配列)
-6	1.w	FAT の先頭セクタ番号
-8	1.b	FAT 領域の個数
-9	1.b	FAT の占めるセクタ数(複写分を除く)
-10	1.w	ルートディレクトリに入るファイルの個数
-12	1.w	データ領域の先頭セクタ番号
-14	1.w	総クラスタ数+1
-16	1.w	ルートディレクトリの先頭セクタ番号
-18	1.l	デバイスドライバへのポインタ
-22	1.b	メディアバイト
-23	1.b	DPB 使用フラグ(-1 なら書き込みが行われた)
-24	1.l	次の DPB へのポインタ(-1 で末尾)
-28	1.w	カレントディレクトリのクラスタ番号(0 はルートを表す)
-30	64.b	カレントディレクトリの文字バッファ
+0	1.b	Drive number(0:A 1:B … 25:Z)
+1	1.b	Unit number used in the device driver
+2	1.w	Number of bytes per sector
+4	1.b	Number of sectors per cluster-1
+5	1.b	Number of cluster → sector shifts
+		MS-DOS format FAT (16bit Intel array) with bit 7 = 1
+6	1.w	First sector number of FAT
+8	1.b	Number of FAT areas
+9	1.b	Number of sectors occupied by FAT (excluding copies)
+10	1.w	Number of files in the root directory
+12	1.w	First sector number of the data area
+14	1.w	Total number of clusters +1
+16	1.w	First sector number of the root directory
+18	1.l	Pointer to device driver
+22	1.b	Media bytes
+23	1.b	DPB usage flag (if -1, writing was done)
+24	1.l	Pointer to next DPB (end with -1)
+28	1.w	Cluster number of the current directory (0 represents the root)
+30	64.b	Character buffer in the current directory
 
 	pea	(DPBPTR)
 	move	DRIVE,-(sp)

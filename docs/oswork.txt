@@ -352,7 +352,7 @@ $24(36)  12.b   File handler usage of process
 $30(48)   1.l   Start address of BSS
 $34(52)   1.l   Start address of heap (same as BSS)
 $38(56)   1.l   Initial stack address (end of heap + 1)
-$3c(60)   1.l   USP of the parent process
+$3c(60)   1.l   Parent process USP
 $40(64)   1.l   Parent process SSP
 $44(68)   1.w   Parent process SR
 $46(70)   1.w   SR at abort

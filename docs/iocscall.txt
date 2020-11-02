@@ -829,16 +829,16 @@ Ret	Cursor position after display
 
 ==============================================================================
 
-$21	_B_PRINT	文字列表示
+$21	_B_PRINT	Character string display
 
-Arg	a1.l	文字列のアドレス
+Arg	a1.l	String address
 
-Ret	d0.l	表示後のカーソル位置
-		d0.hw	桁位置
-		d0.w	行〃
-	a1.l	文字列終端の 0(NUL) の次のアドレス
+Ret	d0.l	Cursor position after display
+		d0.hw	column
+		d0.w	row
+	a1.l	Next address after 0 (NUL) at the end of the string
 
-	文字列を表示する.
+	Display a string.
 
 ==============================================================================
 
@@ -979,16 +979,16 @@ Ret	常に 0
 
 ==============================================================================
 
-$2d	_B_DEL		複数行削除
+$2d	_B_DEL		Delete multiple lines
 
-Arg	d1.b	削除行数(0 の時は 1 と見なします)
+Arg	d1.b	Number of deleted lines (when 0, it is considered as 1)
 
-Ret	常に 0
+Ret	always 0
 
-	カーソル位置から指定した行数だけ削除する. カーソル行以下の行はスクロー
-	ルする. 削除後、カーソルは左端に移動する.
-	ROM IOCS version 1.3 未満ではArgの d1.w の上位バイトを 0 にしておかな
-	いと正常に動作しないので注意すること.
+	Deletes the specified number of lines from the cursor position.
+	The lines below the cursor line scroll.
+	After deleting, the cursor moves to the far left.
+	Note that ROM IOCS version less than 1.3 will not work properly unless the high-order byte of d1.w of Arg is set to 0.
 
 ==============================================================================
 
@@ -1416,26 +1416,26 @@ Ret	SASI-HD	: ステータス(負数で異常終了)
 
 ==============================================================================
 
-$45	_B_WRITE	ディスクへの書き込み
+$45	_B_WRITE	Burn to disk
 
 Arg	d1.hb	PDA
-	d1.b	モード(SASI-HD の時は意味がありません)
-	d2.l	目的書き込み位置
-	d3.l	書き込むバイト数
-	a1.l	書き込むデータのアドレス
+	d1.b	Mode (meaningless in SASI-HD)
+	d2.l	Purpose writing position
+	d3.l	Number of bytes to write
+	a1.l	Address of data to write
 
-Ret	d2/d3/a1 は内容が保証されない.
-	SASI-HD	: ステータス(負数で異常終了)
-	2HD-FD	: FDC ステータス(-1 でパラメータが異常)
-		bit 31〜24	リザルトステータス 0(ST0)
-		bit 23〜16		〃	   1(ST1)
-		bit 15〜 8		〃	   2(ST2)
-		bit  7〜 0	シリンダ番号(C)
+Ret	The contents of d2 / d3 / a1 are not guaranteed.
+	SASI-HD	: Status (abnormal termination with negative number)
+	2HD-FD	: FDC status (-1 abnormal parameter)
+		bit 31〜24	Result status 0 (ST0)
+		bit 23〜16		"	   1(ST1)
+		bit 15〜 8		"	   2(ST2)
+		bit  7〜 0	Cylinder number (C)
 
-	ディスクにデータを書き込む.
-	注意:OS が行っているバッファリング処理とは無関係に動作するので、OS が
-	バッファ中にデータを保持している場合、ディスク上のデータは内容が保証さ
-	れない場合がある.
+	Write data to disk.
+	Note: The data on disk may not be guaranteed if the OS keeps the data in
+	the buffer, as it works independently of the buffering process that the
+	OS is doing.
 
 ==============================================================================
 
@@ -3658,20 +3658,20 @@ Arg	d1.l	機能番号
 
 ==============================================================================
 
-$fd	_ABORTRST	アボートする為に環境を再設定する
+$fd	_ABORTRST	Reconfigure the environment to abort
 
-	アボートするための環境を再設定する. OS で使用する.
-
-==============================================================================
-
-$fe	_IPLERR		再起動する
-
-	起動時のエラーで再起動する時に使用する. 通常は使用しない.
+	Reconfigure the environment for aborting. Use with OS.
 
 ==============================================================================
 
-$ff	_ABORTJOB	アボート
+$fe	_IPLERR		restart
 
-	アボートする. OS で使用する.
+	Used when restarting due to a startup error. Normally not used.
+
+==============================================================================
+
+$ff	_ABORTJOB	abort
+
+	Abort. Use with OS.
 
 ==============================================================================
