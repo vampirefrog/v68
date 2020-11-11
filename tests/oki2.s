@@ -7,6 +7,8 @@ STACK_SIZE: .equ 32*1024
 
 .text
 	lea		(16,a0),a0
+	move.l		a1, sp
+	adda.l		#STACK_SIZE, sp
 	suba.l		a0,a1
 	adda.l		#WORK_SIZE+STACK_SIZE,a1
 	move.l		a1,-(sp)
@@ -118,7 +120,6 @@ fileOpened:
 	move.l  (sampleBlock), a6
 	move.l a6, ($00E840CC.l)   ; Channel 3, MAR
 	move.w  (sampleSize+2),($00E840CA.l) * Length
-	move.b  #$88,($00E840C7.l) ; Channel 3, CCR
 	* OKI ADPCM: 1/512 divisor, pan LR
 	* Write to UPD8255
 	move.b  #$08, ($e9a005.l)
@@ -138,80 +139,20 @@ fileOpened:
 	* OKI ADPCM: play start
 	move.b  #$02, ($E92001.l)
 
-	* Check DMAC CER errors
-	move.b ($00E840C1), d2     ; Channel 3, CER
-	andi.b #$1f, d2
+	* Start DMA transfer
+	move.b  #$88,($00E840C7.l) ; Channel 3, CCR
 
-	cmp.b #$01, d2
-	bne @f
-	pea.l (cer00001,pc)
-	DOS _PRINT
-	addq.l #4, sp
+	* Check for DMA errors
+	bsr DMAErrCheck
+	tst.l d0
+	* If D0 is non zero, exit
+	beq @f
 	DOS _EXIT
-
-@@:
-	cmp #$02, d2
-	bne @f
-	pea.l (cer00010,pc)
-	DOS _PRINT
-	addq.l #4, sp
-	DOS _EXIT
-
-@@:
-	cmp #$03, d2
-	bne @f
-	pea.l (cer00011,pc)
-	DOS _PRINT
-	addq.l #4, sp
-	DOS _EXIT
-
-@@:
-	cmp #$10, d2
-	bne @f
-	pea.l (cer10000,pc)
-	DOS _PRINT
-	addq.l #4, sp
-	DOS _EXIT
-
-@@:
-	cmp #$11, d2
-	bne @f
-	pea.l (cer10001,pc)
-	DOS _PRINT
-	addq.l #4, sp
-	DOS _EXIT
-
-@@:
-	andi.b #$1c, d2
-	cmp #$04, d2
-	bne @f
-	pea.l (cer001rr,pc)
-	DOS _PRINT
-	addq.l #4, sp
-	DOS _EXIT
-
-@@:
-	cmp #$08, d2
-	bne @f
-	pea.l (cer010rr,pc)
-	DOS _PRINT
-	addq.l #4, sp
-	DOS _EXIT
-
-@@:
-	cmp #$0c, d2
-	bne @f
-	pea.l (cer011rr,pc)
-	DOS _PRINT
-	addq.l #4, sp
-	DOS _EXIT
-
-@@:
 
 	* Wait for DMA transfer
 @@:
-	tst.w ($e840ca) ; MTC
-	bne @b
+	tst.w (dmaDone)
+	beq @b
 
 	; OKI ADPCM: play stop
 	move.b  #$01, ($E92001.l)
@@ -250,10 +191,38 @@ DMAIntHandler:
 	DOS _PRINT
 	addq.l #4, sp
 
+	move.b ($e840c0), d0
+
+	* print out CSR
+	pea.l (buf2)
+	movem.l d0, -(sp)
+	bsr itoh
+	addq.l #8, sp
+
+
+	pea.l (dmaCsr)
+	DOS _PRINT
+	addq.l #4, sp
+	move.l #8,-(sp)
+	pea	(buf2)
+	move.l #1, d0
+	move.w d0,-(sp)
+	DOS	_WRITE
+	lea	(10,sp),sp
+	pea.l (crlf)
+	DOS _PRINT
+	addq.l #4, sp
+
+	* Print errors, if any
+	bsr DMAErrCheck
+
 	* Enable all interrupts
 	move.w (sp)+, sr
 	movem.l	(sp)+,d0-d7/a0-a6
 	ori.b	#$08,($00e88015)
+
+	move.b #1, (dmaDone)
+
 	rte
 
 DMAErrIntHandler:
@@ -270,7 +239,91 @@ DMAErrIntHandler:
 	move.w (sp)+, sr
 	movem.l	(sp)+,d0-d7/a0-a6
 	ori.b	#$08,($00e88015)
+
+	move.b #1, (dmaDone)
+
 	rte
+
+DMAErrCheck:
+	* Check DMAC CER errors
+	move.b ($00E840C1), d2     ; Channel 3, CER
+	andi.b #$1f, d2
+
+	cmp.b #$01, d2
+	bne @f
+	pea.l (cer00001,pc)
+	DOS _PRINT
+	addq.l #4, sp
+	move.l #1, d0
+	rts
+
+@@:
+	cmp #$02, d2
+	bne @f
+	pea.l (cer00010,pc)
+	DOS _PRINT
+	addq.l #4, sp
+	move.l #1, d0
+	rts
+
+@@:
+	cmp #$03, d2
+	bne @f
+	pea.l (cer00011,pc)
+	DOS _PRINT
+	addq.l #4, sp
+	move.l #1, d0
+	rts
+
+@@:
+	cmp #$10, d2
+	bne @f
+	pea.l (cer10000,pc)
+	DOS _PRINT
+	addq.l #4, sp
+	move.l #1, d0
+	rts
+
+@@:
+	cmp #$11, d2
+	bne @f
+	pea.l (cer10001,pc)
+	DOS _PRINT
+	addq.l #4, sp
+	move.l #1, d0
+	rts
+
+@@:
+	andi.b #$1c, d2
+	cmp #$04, d2
+	bne @f
+	pea.l (cer001rr,pc)
+	DOS _PRINT
+	addq.l #4, sp
+	move.l #1, d0
+	rts
+
+@@:
+	cmp #$08, d2
+	bne @f
+	pea.l (cer010rr,pc)
+	DOS _PRINT
+	addq.l #4, sp
+	move.l #1, d0
+	rts
+
+@@:
+	cmp #$0c, d2
+	bne @f
+	pea.l (cer011rr,pc)
+	DOS _PRINT
+	addq.l #4, sp
+	move.l #1, d0
+	rts
+
+@@:
+	move.l #0, d0
+	rts
 
 include itoh.s
 
@@ -295,6 +348,8 @@ dmaIntHandlerStr:
 .dc.b 'DMA Interrupt Handler', $0d, $0a, $00
 dmaErrIntHandlerStr:
 .dc.b 'DMA Error Interrupt Handler', $0d, $0a, $00
+dmaCsr:
+.dc.b 'CSR=', $00
 crlf:
 .dc.b $0d, $0a, $00
 
@@ -314,6 +369,8 @@ cer10001: .dc.b 'software forced stop', $0d, $0a, $00
 
 buf:
 .ds.b 32
+buf2:
+.ds.b 100
 adpFd:
 .ds.w 1
 sampleOffset:
@@ -327,6 +384,9 @@ oldDMACInt:
 .ds.l 1
 oldDMACErrInt:
 .ds.l 1
+
+dmaDone:
+.dc.b 1
 
 WORK_SIZE:
 
