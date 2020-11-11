@@ -1851,7 +1851,7 @@ $15〜$17 ---
 $18             LFO 周波数設定レジスタ
 $19             PMD/AMD 設定レジスタ
 $1a             ---
-$1b             汎用出力/LFO 出力波形制御レジスタ
+$1b             General-purpose output / LFO output waveform control register
 $1c〜$1f ---
 $20〜$27 チャンネル構成/出力制御レジスタ        ┐
 $28〜$2f KC(キーコード)レジスタ           │1 チャンネルごとに設定
@@ -2003,24 +2003,24 @@ $19(PMD/AMD 設定レジスタ):
         bit 6〜0 PMD/AMD
                         LFO の出力レベル設定
 
-$1b(汎用出力/LFO 出力波形制御レジスタ):
+$1b(General-purpose output / LFO output waveform control register):
         bit  7   6   5           2   1   0
           ┌─┬─┬───────┬───┐
           │  │  │              │   W  │
           └─┴─┴───────┴───┘
             CT1 CT2
 
-        bit 7    CT1    ADPCM クロック切り替え
+        bit 7    CT1    ADPCM clock switching
                         %0 : 8MHz
-                        %1 : 4〃
-        bit 6    CT2    FDC READY 端子制御
-                        %0 : 通常動作
-                        %1 : 強制的に READY 状態にする
-        bit 1〜0 W       LFO 出力波形選択
-                        %00 : 鋸波
-                        %01 : 矩形波
-                        %10 : 三角波
-                        %11 : ノイズ
+                        %1 : 4 "
+        bit 6    CT2    FDC READY terminal control
+                        %0 : Normal operation
+                        %1 : Force to READY state
+        bit 1〜0 W      LFO output waveform selection
+                        %00 : Sawtooth wave
+                        %01 : Square wave
+                        %10 : Triangle wave
+                        %11 : noise
         * OPM registers can not be read, so partial changes to ADPCM / FDC / LFO are saved in IOCS work $9da.b.
         The setting that does not change is to use the work value, and if you change the value, update the work as well.
 
@@ -2233,14 +2233,14 @@ ADPCM command ($e92001):
                                 └ REC ST
 
         bit 2   REC ST
-                %0 : 通常動作
-                %1 : ADPCM 録音開始
+                %0 : Normal operation
+                %1 : Start ADPCM recording
         bit 1   PLAY ST
-                %0 : 通常動作
+                %0 : Normal operation
                 %1 : ADPCM playback start
         bit 0   SP
-                %0 : 通常動作
-                %1 : 録音/再生動作停止
+                %0 : Normal operation
+                %1 : Recording / playback operation stopped
 
 Data input / output ($e92003):
         bit  7           4   3           0
@@ -3625,7 +3625,8 @@ Control word bit set / reset ($e9a007):
                         Specify the bit position (7 to 0) to be manipulated.
         bit 0    DATA
                         Specify the data to be set.
-        ※ If the most significant bit writes a value of %0, it manipulates any bit of port C (not a bit of the control word).
+        ※ If the most significant bit writes a value of %0, it manipulates
+           any bit of port C (not a bit of the control word).
 
 Control word mode setting ($e9a007):
         bit  7   6   5   4   3   2   1   0
@@ -3661,7 +3662,8 @@ Control word mode setting ($e9a007):
         bit 0    PORT C(Low) IN/OUT
                         %0 : Port C (lower order) is output
                         %1 : 〃                      input
-        ※ When the most significant bit writes the value of %1, it sets the operation mode.
+        ※ When the most significant bit writes the value of %1,
+           it sets the operation mode.
 
 ==============================================================================
 

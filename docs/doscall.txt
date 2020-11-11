@@ -378,8 +378,8 @@ $ff0d	_FFLUSH		Resetting the disk
 
 Ret	always 0
 
-	Initialize the contents of the disk buffer and the line input buffer from standard input. ファ
-	イルのクローズはしない. fflush = off であれば何もしない.
+	Initialize the contents of the disk buffer and the line input buffer from
+	standard input. Do not close the file. Do nothing if fflush = off.
 
 ==============================================================================
 
@@ -1903,14 +1903,19 @@ Arg	MEMPTR.l	Pointer to memory block
 	LEN.l		Number of bytes
 
 Ret	Error code
-		d0.l = $81??????	変更不可能
-					($00?????? は変更可能なバイト数)
-		d0.l = $8200000?	完全に変更不可能($? は不定)
+		d0.l = $81??????	Unchangeable
+					($00?????? Is the number of bytes that can be changed)
+		d0.l = $8200000?	Completely immutable($? Is indefinite)
 
-	MEMPTR で指定したメモリブロックを、LEN で指定した大きさに変更する.
-	LEN が $1000000 以上の場合は必ずエラーになり、変更可能な最大バイト数を調べる事が出来る.
-	プロセス自体のメモリブロックを指定する時は LEN に PSP のサイズも含めなければならない(メモリ管理ポインタのサイズは除く).
-	よって、DOS _KEEPPRで指定するサイズと同じ大きさに変更したい場合は、_KEEPPR で指定する値より 240 大きい値にする.
+	Change the memory block specified by MEMPTR to the size specified by LEN.
+	If the LEN is $1000000 or more, an error will always occur and you can
+	check the maximum number of bytes that can be changed.
+	When specifying the memory block of the process itself, the LEN must
+	also include the size of the PSP (excluding the size of the memory
+	management pointer).
+	Therefore, if you want to change it to the same size as the size
+	specified by DOS _KEEPPR, set it to a value 240 larger than the value
+	specified by _KEEPPR.
 
 	move.l	LEN,-(sp)
 	pea	(MEMPTR)
@@ -1919,71 +1924,70 @@ Ret	Error code
 
 ==============================================================================
 
-$ff4b	_EXEC		プログラムのロード/実行
+$ff4b	_EXEC		Load / run program
 
-Arg	MD.w		モジュール番号及びモード(MODULE.b×256+MODE.w)
-	FILE.l		ファイル名のポインタ
-	CMDLINE.l	コマンドラインのポインタ
-	LOADADR.l	ロードアドレス
-	EXECADR.l	実行アドレス
-	FILE2.l		オーバーレイ X ファイル中のファイル名
-	ENVPTR.l	環境のポインタ
-	LIMIT.l		リミットアドレス
-	TYPE.b		ファイルタイプ(FILE の上位 8bit)
+Arg	MD.w		Module number and mode (MODULE.b x 256 + MODE.w)
+	FILE.l		Filename pointer
+	CMDLINE.l	Command line pointer
+	LOADADR.l	Load address
+	EXECADR.l	Execution address
+	FILE2.l		Filename in the overlay X file
+	ENVPTR.l	Environment pointer
+	LIMIT.l		Limit address
+	TYPE.b		File type (upper 8 bits of FILE)
 
 Ret	MODE = 0,4
-		プロセス終了コード(負数ならError code)
-		プロセスが終了した時 d1-d7/a1-a6 は不定.
+		Process exit code (Error code if negative)
+		When the process ends d1-d7 / a1-a6 is undefined.
 	MODE = 1
-		d0.l	プログラムの実行アドレス(負数ならError code)
-		a0.l	メモリ管理ポインタ
-		a1.l	プログラムの終わり
-		a2.l	コマンドライン
-		a3.l	環境のポインタ
-		a4.l	実行アドレス
+		d0.l	Program execution address (Error code if negative)
+		a0.l	Memory management pointer
+		a1.l	End of program
+		a2.l	Command line
+		a3.l	Environment pointer
+		a4.l	Execution address
 	MODE = 2
 		Error code
 	MODE = 3
-		プログラムの長さ(負数ならError code)
+		Program length (Error code if negative)
 	MODE = 5
-		モジュール番号×256(負数ならError code)
+		Module number x 256 (Error code if negative)
 
-	モード MODE の値に従って FILE で指定したファイルをロード/実行する.
+	Load / execute the file specified by FILE according to the value of mode MODE.
 
 	MODE = 0
-		CMDLINE でコマンドラインを、ENVPTR で環境を指定して、FILE で指
-		定したファイルをロードし、実行する.
+		Load and execute the file specified by FILE, specifying the
+		command line with CMDLINE and the environment with ENVPTR.
 	MODE = 1
-		CMDLINE でコマンドラインを、ENVPTR で環境を指定して、FILE で指
-		定したファイルをロードする. 正常終了した場合は必ず MODE = 4 を
-		実行すること.
+		Load the command line with CMDLINE, the environment with ENVPTR,
+		and the file specified with FILE. Always execute MODE = 4 if successful.
 	MODE = 2
-		ENVPTR で指定した環境から path を検索して、FILE で指定したコマ
-		ンド行をフルパスのファイル名とコマンドラインに分け、FILE と
-		CMDLINE の各ポインタに設定する.
-		ファイル名バッファ FILE は 90 バイト以上、コマンドラインバッフ
-		ァ CMDLINE は 256 バイト以上必要.
+		Search for path from the environment specified by ENVPTR, divide
+		the command line specified by FILE into the full path file name and
+		command line, and set it to each pointer of FILE and CMDLINE.
+		The file name buffer FILE must be 90 bytes or more, and the command
+		line buffer CMDLINE must be 256 bytes or more.
 	MODE = 3
-		LOADADR でロードアドレスを、LIMIT でリミットアドレスを指定して、
-		FILE で指定したファイルをロードする.
+		Load the file specified by FILE by specifying the load address
+		with LOADADR and the limit address with LIMIT.
 	MODE = 4
-		EXECADR で指定したアドレスからプログラムを実行する.
-		MD = 1 でロードした後、実行する時に使用する.
+		Execute the program from the address specified by EXECADR.
+		Used when executing after loading with MD = 1.
 	MODE = 5
-		FILE で指定したオーバーレイ X ファイル中の、FILE2 で指定したフ
-		ァイルのモジュール番号を調べる.
-		バインドリスト先頭からのオフセットが $fffff00 より大きいファイ
-		ルは、オフセット値をビット反転した数をモジュール番号として返す.
-		ただし、このようなオフセット値が負数のファイルはロード出来ない.
-		Human68k version 3.02 では正常に動作しない(FILE2 で指定したフ
-		ァイル名の拡張子 1 バイト目を X に変更したファイル名で検索され
-		る).
+		Find out the module number of the file specified by FILE2 in the
+		overlay X file specified by FILE.
+		For files whose offset from the beginning of the bind list is
+		greater than $ fffff00, the number of bit-inverted offset values
+		is returned as the module number.
+		However, files with negative offset values like this cannot be loaded.
+		Does not work properly with Human68k version 3.02 (searched for
+		the file name with the extension 1 byte specified in FILE2 changed to X).
 
-	MODE = 0〜2 の時、ENVPTR に 0 を指定した場合は自分の環境を使用する.
-	MODE = 0,1,3 の時、MODULE でオーバーレイ X ファイル中の各ファイルのモ
-	ジュール番号(0〜255)を指定することが可能. また、実行ファイル名の拡張子
-	が .X .Z .R のいずれでもない場合は、FILE の上位 8bit でファイルタイプ
-	TYPE を指定し、それによってファイルの形式を指定する.
+	When MODE = 0 to 2, if 0 is specified for ENVPTR, the own environment is used.
+	When MODE = 0,1,3, MODULE can specify the module number (0 to 255) of each file
+	in the overlay X file. Also, the extension of the execution file name is .X .Z .R.
+	If neither is the case, specify the file type TYPE in the upper 8 bits of FILE,
+	thereby specifying the file format.
 
 	TYPE = 1	.R
 	TYPE = 2	.Z
@@ -2039,12 +2043,12 @@ Arg	CODE.w		Exit code
 
 ==============================================================================
 
-$ff4d	_WAIT		プロセスの終了コードを得る
+$ff4d	_WAIT		Get the exit code of the process
 
-Ret	終了コード
+Ret	Exit code
 
-	実行したプロセスの終了コードを調べる.
-	DOS _EXEC(MODE = 0,4) のRetと同じ.
+	Examine the exit code of the executed process.
+	Same as Ret in DOS _EXEC (MODE = 0,4).
 
 ==============================================================================
 
@@ -2200,15 +2204,15 @@ Ret	Error code
 
 ==============================================================================
 
-$ff84	_VERIFYG	ベリファイフラグを得る
+$ff84	_VERIFYG	Get the verify flag
 
-Ret	設定状況(0:ベリファイしない 1:ベリファイする)
+Ret	Setting status (0: Do not verify 1: Verify)
 
-	ベリファイフラグを調べる.
+	Examine the verify flag.
 
 ==============================================================================
 
-$ff85	_COMMON		common 領域の制御
+$ff85	_COMMON		Control of common area
 
 Arg	MD.w		コントロールモード
 	NAME.l		common 領域名のポインタ
@@ -2275,7 +2279,7 @@ MD = 3,4
 
 ==============================================================================
 
-$ff86	_RENAME		ファイル名の変更/移動
+$ff86	_RENAME		Rename / move file
 
 Arg	OLD.l		ファイル名のポインタ
 	NEW.l		新ファイル名のポインタ
@@ -2713,7 +2717,7 @@ Ret	先頭のメモリブロック(サイズはI_LEN)のポインタ
 
 ==============================================================================
 
-$fff0	_EXITVC		(プログラム終了時の実行アドレス)
+$fff0	_EXITVC		(Execution address at the end of the program)
 
 	これは DOS コールではなく、INTVCS でこのベクタに処理アドレスを設定して
 	おくことにより、プログラム終了時にそのアドレスを呼び出すことが出来る.
@@ -2878,7 +2882,7 @@ offset	size
 
 ==============================================================================
 
-$fff6	_SUPER_JSR	スーパーバイザモードでのプログラムのサブルーチンコール
+$fff6	_SUPER_JSR	Program subroutine call in supervisor mode
 
 Arg	JOBADR.l	処理アドレス
 	d0-d7/a0-a6	処理に依存
@@ -2899,7 +2903,7 @@ Ret	d0-d7/a0-a6	処理に依存
 
 ==============================================================================
 
-$fff7	_BUS_ERR	バスエラーが発生するかの検査
+$fff7	_BUS_ERR	Check for bus errors
 
 Arg	SIZE.w		アクセスサイズ(1:バイト 2:ワード 4:ロングワード)
 	P1.l		読み込みポインタ
