@@ -18,6 +18,7 @@ all: \
 	idiv.x \
 	ioctrl.x \
 	iusing.x \
+	joystick.x \
 	nameck.x \
 	oki1.x \
 	oki2.x \
@@ -48,6 +49,7 @@ fwritetsr.x: fwritetsr.o
 idiv.x: idiv.o
 ioctrl.x: ioctrl.o
 iusing.x: iusing.o
+joystick.x: joystick.o
 mxdrv17.x: mxdrv17.o
 nameck.x: nameck.o
 ontime.x: ontime.o
