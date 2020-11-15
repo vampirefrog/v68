@@ -9,6 +9,7 @@ STACK_SIZE: .equ 32*1024
 	lea		(16,a0),a0
 	suba.l		a0,a1
 	adda.l		#WORK_SIZE+STACK_SIZE,a1
+	add.l		a1, sp
 	move.l		a1,-(sp)
 	move.l		a0,-(sp)
 	DOS		_SETBLOCK
@@ -147,13 +148,25 @@ fileOpened:
 	andi.b #$7f, d2 * 8MHz
 	bsr WriteOPM
 
+	pea.l (str8M512,pc)
+	DOS _PRINT
+	addq.l #4, sp
+
 	move.w #$08, -(sp)
 	bsr playSample
 	addq.l #2, sp
 
+	pea.l (str8M768,pc)
+	DOS _PRINT
+	addq.l #4, sp
+
 	move.w #$04, -(sp)
 	bsr playSample
 	addq.l #2, sp
+
+	pea.l (str8M1024,pc)
+	DOS _PRINT
+	addq.l #4, sp
 
 	move.w #$00, -(sp)
 	bsr playSample
@@ -165,18 +178,33 @@ fileOpened:
 	ori.b #$80, d2 * 4MHz
 	bsr WriteOPM
 
+	pea.l (str4M512,pc)
+	DOS _PRINT
+	addq.l #4, sp
+
 	move.w #$08, -(sp)
 	bsr playSample
 	addq.l #2, sp
+
+	pea.l (str4M768,pc)
+	DOS _PRINT
+	addq.l #4, sp
 
 	move.w #$04, -(sp)
 	bsr playSample
 	addq.l #2, sp
 
+	pea.l (str4M1024,pc)
+	DOS _PRINT
+	addq.l #4, sp
+
 	move.w #$00, -(sp)
 	bsr playSample
 	addq.l #2, sp
 
+	pea.l (strDone,pc)
+	DOS _PRINT
+	addq.l #4, sp
 
 	* Free sample mem block
 	pea	(sampleBlock)
@@ -308,9 +336,24 @@ adpcmFileStr:
 couldNotOpenStr:
 .dc.b 'Could not open PDX file', $0d, $0a, $00
 openedFileStr:
-.dc.b 'Opened PDX file', $0d, $0a, $00
+.dc.b 'Opened PDX file' ; reuse the crlf below
 crlf:
 .dc.b $0d, $0a, $00
+
+str8M512:
+.dc.b 'Playing at 15.6kHz, 8MHz OKI clock, divide by 512', $0d, $0a, $00
+str8M768:
+.dc.b 'Playing at 10.4kHz, 8MHz OKI clock, divide by 768', $0d, $0a, $00
+str8M1024:
+.dc.b 'Playing at  7.8kHz, 8MHz OKI clock, divide by 1024', $0d, $0a, $00
+str4M512:
+.dc.b 'Playing at  7.8kHz, 4MHz OKI clock, divide by 512', $0d, $0a, $00
+str4M768:
+.dc.b 'Playing at  5.2kHz, 4MHz OKI clock, divide by 768', $0d, $0a, $00
+str4M1024:
+.dc.b 'Playing at  3.9kHz, 4MHz OKI clock, divide by 1024', $0d, $0a, $00
+strDone:
+.dc.b 'Done.', $0d, $0a, $00
 
 freq8: .dc.b '8MHz', $00
 freq4: .dc.b '4MHz', $00
