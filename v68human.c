@@ -330,6 +330,8 @@ int v68_env_set(char *var, char *value) {
 }
 
 uint32_t v68_mem_alloc(int size, uint32_t parent_addr) {
+	verbose2("v68_mem_alloc size=%d parent_addr=%08x\n", size, parent_addr);
+
 	/* Align to 4 bytes */
 	size = (size + 3) & 0xfffffc;
 
@@ -373,6 +375,9 @@ uint32_t v68_mem_alloc(int size, uint32_t parent_addr) {
 	m68k_write_memory_32(next + 0x08, next + 16 + size);
 	m68k_write_memory_32(next + 0x0c, 0);
 	v68.heap_top += 16 + size;
+
+	v68_mem_dump();
+
 	return next + 16;
 }
 
@@ -420,6 +425,8 @@ int v68_mem_free(uint32_t addr, uint32_t parent_addr) {
 	verbose2("v68_mem_free addr=%08x parent_addr=%08x\n", addr, parent_addr);
 	uint32_t first = m68k_read_memory_32(HUMAN_HEAD - 0x04);
 
+	v68_mem_dump();
+
 	addr -= 16;
 
 	if(first) {
@@ -441,7 +448,7 @@ int v68_mem_free(uint32_t addr, uint32_t parent_addr) {
 					uint32_t end = m68k_read_memory_32(cur + 0x08);
 					uint32_t prev = m68k_read_memory_32(cur);
 					uint32_t next = m68k_read_memory_32(cur + 0x0c);
-					verbose3("v68_mem_free  end=%08x prev=%08x next=%08x\n", end, prev, next);
+					verbose3("v68_mem_free  end=%08x prev=%08x next=%08x  %08x %08x %08x %08x\n", end, prev, next, m68k_read_memory_32(cur + 0x00), m68k_read_memory_32(cur + 0x04), m68k_read_memory_32(cur + 0x08), m68k_read_memory_32(cur + 0x0c));
 
 					if(prev != HUMAN_HEAD) {
 						// Previous block is also freed
@@ -456,7 +463,6 @@ int v68_mem_free(uint32_t addr, uint32_t parent_addr) {
 							m68k_write_memory_32(end, cur);
 						}
 					}
-
 					m68k_write_memory_32(cur + 0x04, 0xffffffff);
 					m68k_write_memory_32(cur + 0x08, end);
 					m68k_write_memory_32(cur + 0x0c, end);
