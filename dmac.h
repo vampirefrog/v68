@@ -1,36 +1,88 @@
-#pragma once
+#ifndef DMAC_H_
+#define DMAC_H_
 
 #include <stdint.h>
 
 struct dmac_channel {
-	uint8_t  csr; /* 0x00 R/W Channel Status Register    */
-	uint8_t  cer; /* 0x01 R   Channel Error Register     */
-	uint8_t  dcr; /* 0x04 R/W Device Control Register    */
-	uint8_t  ocr; /* 0x05 R/W Operation control register */
-	uint8_t  scr; /* 0x06 R/W Sequence control register  */
-	uint8_t  ccr; /* 0x07 R/W Channel control register   */
-	uint16_t mtc; /* 0x0a R/W Memory transfer counter    */
-	uint32_t mar; /* 0x0c R/W Memory address register    */
-	uint32_t dar; /* 0x14 R/W Device address register    */
-	uint16_t btc; /* 0x1a R/W Base transfer counter      */
-	uint32_t bar; /* 0x1c R/W Base address register      */
-	uint8_t  niv; /* 0x25 R/W Normal interrupt vector    */
-	uint8_t  eiv; /* 0x27 R/W Error interrupt vector     */
-	uint8_t  mfc; /* 0x29 R/W Memory function code       */
-	uint8_t  cpr; /* 0x2d R/W Channel priority register  */
-	uint8_t  dfc; /* 0x31 R/W Device function code       */
-	uint8_t  bfc; /* 0x39 R/W Base function code         */
-	uint8_t  gcr; /* 0x3f R/W General control register   */
+	uint32_t xrm;      // リクエストモード
+	uint32_t dtyp;     // デバイスタイプ
+	unsigned dps:1;    // ポートサイズ (TRUEで16bit)
+	uint32_t pcl;      // PCLセレクタ
+	unsigned dir:1;    // 方向 (TRUEでDAR→メモリ)
+	unsigned btd:1;    // DONEで次ブロックへ
+	uint32_t size;     // オペランドサイズ
+	uint32_t chain;    // チェイン動作
+	uint32_t reqg;     // REQ生成モード
+	uint32_t mac;      // メモリアドレス更新モード
+	uint32_t dac;      // デバイスアドレス更新モード
+
+	// 制御フラグ
+	unsigned str:1;    // スタートフラグ
+	unsigned cnt:1;    // コンティニューフラグ
+	unsigned hlt:1;    // HALTフラグ
+	unsigned sab:1;    // ソフトウェアアボートフラグ
+	unsigned intr:1;           // 割り込み可能フラグ
+	unsigned coc:1;    // チャンネル動作完了フラグ
+	unsigned boc:1;    // ブロック動作完了フラグ
+	unsigned ndt:1;    // 正常終了フラグ
+	unsigned err:1;    // エラーフラグ
+	unsigned act:1;    // アクティブフラグ
+	unsigned dit:1;    // DONE入力フラグ
+	unsigned pct:1;    // PCL negedge検出フラグ
+	unsigned pcs:1;    // PCLの状態 (TRUEでHレベル)
+	uint32_t ecode;    // エラーコード
+
+	// アドレス、レングス
+	uint32_t mar;      // メモリアドレスカウンタ
+	uint32_t dar;      // デバイスアドレスレジスタ
+	uint32_t bar;      // ベースアドレスレジスタ
+	uint32_t mtc;      // メモリトランスファカウンタ
+	uint32_t btc;      // ベーストランスファカウンタ
+	uint32_t mfc;      // メモリファンクションコード
+	uint32_t dfc;      // デバイスファンクションコード
+	uint32_t bfc;      // ベースファンクションコード
+	uint32_t niv;      // ノーマルインタラプトベクタ
+	uint32_t eiv;      // エラーインタラプトベクタ
+
+	// バースト転送
+	uint32_t cp;       // プライオリティ
+	uint32_t bt;       // バースト転送タイム
+	uint32_t br;       // バンド幅
+	uint8_t type;      // 転送タイプ
+
+	// 動作カウンタ(デバッグ向け)
+	uint32_t startcnt; // スタートカウンタ
+	uint32_t errorcnt; // エラーカウンタ
+};
+
+struct dmac_control {
+	int transfer;      // 転送中フラグ(チャネル兼用)
+	int load;          // チェインロードフラグ(チャネル兼用)
+	unsigned exec:1;   // オートリクエスト有無フラグ
+	int current_ch;    // オートリクエスト処理チャネル
+	int cpu_cycle;     // CPUサイクルカウンタ
+	int vector;        // 割り込み要求中ベクタ
 };
 
 struct dmac {
 	struct dmac_channel channels[4];
-	int halted[4];
-	int16_t transfer_size[4];
-	int drq_state[4];
+	struct dmac_control control;
 };
 
-void dmac_init(void);
-void dmac_write_16(uint32_t addr, uint16_t data, uint16_t mem_mask);
-uint16_t dmac_read_16(uint32_t addr, uint16_t mem_mask);
-void dmac_tick(int chan);
+int      dmac_init(struct dmac *dmac);
+void     dmac_cleanup(struct dmac *dmac);
+void     dmac_deinit(struct dmac *dmac);
+void     dmac_reset(struct dmac *dmac);
+uint32_t dmac_read_8(struct dmac *dmac, uint32_t addr);
+uint32_t dmac_read_16(struct dmac *dmac, uint32_t addr);
+void     dmac_write_8(struct dmac *dmac, uint32_t addr, uint32_t data);
+void     dmac_write_16(struct dmac *dmac, uint32_t addr, uint32_t data);
+uint32_t dmac_channel_auto(struct dmac *dmac, uint32_t cycle);
+int      dmac_channel_request(struct dmac *dmac, int ch);
+uint32_t dmac_get_vector(struct dmac *dmac, int type);
+void     dmac_bus_err(struct dmac *dmac, uint32_t addr, int read);
+void     dmac_addr_err(struct dmac *dmac, uint32_t addr, int read);
+void     dmac_int_ack(struct dmac *dmac);
+int      dmac_is_act(struct dmac *dmac, int ch);
+
+#endif /* DMAC_H_ */
