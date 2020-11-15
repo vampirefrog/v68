@@ -37,26 +37,21 @@ struct dosfile dosfiles[96];
 
 int v68_io_init() {
 	memset(drives, 0, sizeof(drives));
-	// Init Z: as unix /
-	curdrive = 'Z' - 'A';
+
 #if __linux__
-	strncpy(drives[curdrive].vpath, "/", PATH_MAX);
-#else
-	strncpy(drives[curdrive].vpath, "C:", PATH_MAX);
-#endif
+	// Init Z: as unix /
 	char buf[PATH_MAX];
 	buf[0] = 0;
 	getcwd(buf, PATH_MAX);
 	int l = strlen(buf);
+	curdrive = 'Z' - 'A';
+	strncpy(drives[curdrive].vpath, "/", PATH_MAX);
+
 	if(l > 0) {
-#if __linux__
 		for(int i = 1; i < l; i++)
 			drives[curdrive].cwd[i-1] = buf[i] == '/' ? '\\' : buf[i];
-#else
-		for(int i = 2; i < l; i++)
-			drives[curdrive].cwd[i-2] = buf[i] == '/' ? '\\' : buf[i];
-#endif
 	}
+#endif
 
 	dosfiles[0].fd = 0;
 	dosfiles[0].mode = 0;
@@ -84,13 +79,13 @@ uint8_t v68_io_unused_drive() {
 }
 
 int v68_io_autodetect_drives() {
+#if __linux__
 	char *home = getenv("HOME");
-	if(home) {
+	if(home && *home) {
 		strncpy(drives['H' - 'A'].vpath, home, PATH_MAX);
 		drives['H' - 'A'].cwd[0] = 0;
 	}
 
-#if __linux__
 	static char *ignore_fstypes[] = {
 		"sysfs", "proc", "devtmpfs", "devpts", "tmpfs", "securityfs", "swap", 0
 	};
@@ -111,7 +106,30 @@ int v68_io_autodetect_drives() {
 	}
 	fclose(f);
 #else
-	v68_io_add_drive(v68_io_unused_drive(), "C:/");
+	DWORD dw = GetLogicalDrives();
+	for(int i = 'A', j = 1; i <= 'Z'; i++, j <<= 1) {
+		if(dw & j) {
+			char buf[10];
+			snprintf(buf, sizeof(buf), "%c:\\", i);
+			v68_io_add_drive(i - 'A', buf);
+		}
+	}
+
+	char buf[PATH_MAX];
+	buf[0] = 0;
+	getcwd(buf, PATH_MAX);
+	curdrive = toupper(buf[0]) - 'A';
+	strncpy(drives[curdrive].cwd, buf + 3, sizeof(buf) / sizeof(buf[0]));
+
+	for(int i = 'A'; i <= 'B'; i++) {
+		if(!drives[i - 'A'].vpath[0]) {
+			char buf2[PATH_MAX];
+			snprintf(buf2, sizeof(buf2) / sizeof(buf2[0]), "%c:\\", i);
+			v68_io_add_drive(i - 'A', buf2);
+			strncpy(drives[i = 'A'].cwd, buf + 3, sizeof(buf) / sizeof(buf[0]));
+		}
+	}
+
 #endif
 
 	return 0;
@@ -122,6 +140,8 @@ int v68_io_open(char *filename, int mode) {
 	v68_io_xlate_dos_path(filename, xlated, sizeof(xlated));
 	char resolved[PATH_MAX];
 	v68_io_resolve_path(xlated, resolved, sizeof(resolved));
+
+	verbose1("v68_io_open filename=\"%s\" mode=%04x xlated=\"%s\" resolved=\"%s\"\n", filename, mode, xlated, resolved);
 
 	switch(mode & 0x03) {
 		case 0x00:
@@ -256,6 +276,17 @@ int v68_io_chgdrv(uint8_t drv) {
 	return 0;
 }
 
+int v68_io_num_drives() {
+	int ret = 0;
+
+	for(int i = 0; i < MAX_DRIVES; i++) {
+		if(drives[i].vpath[0])
+			ret++;
+	}
+
+	return ret;
+}
+
 int v68_io_getcwd(uint8_t drv, char *buf, size_t size) {
 	if(drv == 0) drv = curdrive;
 	if(drv > MAX_DRIVES) return -1;
@@ -286,7 +317,7 @@ int v68_io_add_drive(uint8_t drive, char *path) {
 }
 
 char *v68_io_xlate_path(char *filename, char *out, int len) {
-	int longest = -1, max_length = -1;;
+	int longest = -1, max_length = -1;
 	for(int i = 0; i < MAX_DRIVES; i++) {
 		int l = strlen(drives[i].vpath);
 		if(!strncasecmp(filename, drives[i].vpath, l)) {
@@ -317,34 +348,30 @@ char *v68_io_xlate_dos_path(char *filename, char *out, int len) {
 		if(drv < 0 || drv >= 26) return 0;
 		if(!drives[drv].vpath[0]) return 0;
 		if(l > 2) {
-			if(drives[drv].vpath[0] == '/' && drives[drv].vpath[1] == 0)
-				snprintf(out, len, "/%s", filename + 3);
+			if(drives[drv].vpath[0] == DIR_SEP_CHR && drives[drv].vpath[1] == 0)
+				snprintf(out, len, DIR_SEP "%s", filename + 3);
 			else
-				snprintf(out, len, "%s/%s", drives[drv].vpath, filename + 3);
+				snprintf(out, len, "%s" DIR_SEP "%s", drives[drv].vpath, filename + 3);
 		} else {
 			snprintf(out, len, "%s", drives[drv].vpath);
 		}
-	} else if(l >= 1 && (filename[0] == '/' || filename[0] == '\\')) {
+	} else if(l >= 1 && (filename[0] == UNIX_DIR_SEP_CHR || filename[0] == DOS_DIR_SEP_CHR)) {
 		// Start with root of drive
-		if(drives[curdrive].vpath[0] == '/' && drives[curdrive].vpath[1] == 0)
-			snprintf(out, len, "/%s", filename + 1);
+		if(drives[curdrive].vpath[0] == DIR_SEP_CHR && drives[curdrive].vpath[1] == 0)
+			snprintf(out, len, DIR_SEP "%s", filename + 1);
 		else
-			snprintf(out, len, "%s/%s", drives[curdrive].vpath, filename + 1);
+			snprintf(out, len, "%s" DIR_SEP "%s", drives[curdrive].vpath, filename + 1);
 	} else {
 		// Start with current dir
-		if(drives[curdrive].vpath[0] == '/' && drives[curdrive].vpath[1] == 0)
-			snprintf(out, len, "/%s/%s", drives[curdrive].cwd, filename);
+		if(drives[curdrive].vpath[0] == DIR_SEP_CHR && drives[curdrive].vpath[1] == 0)
+			snprintf(out, len, DIR_SEP "%s" DIR_SEP "%s", drives[curdrive].cwd, filename);
 		else {
-#if __linux__
-			snprintf(out, len, "%s/%s/%s", drives[curdrive].vpath, drives[curdrive].cwd, filename);
-#else
-			snprintf(out, len, "%s\\%s\\%s", drives[curdrive].vpath, drives[curdrive].cwd, filename);
-#endif
+			snprintf(out, len, "%s" DIR_SEP "%s" DIR_SEP "%s", drives[curdrive].vpath, drives[curdrive].cwd, filename);
 		}
 	}
 
 	for(char *c = out; *c; c++) {
-		if(*c == '\\') *c = '/';
+		if(*c == '\\') *c = DIR_SEP_CHR;
 	}
 
 	return out;
@@ -399,6 +426,7 @@ static int urldecode(char *in, char *out, int len) {
 #undef APPEND_CHAR
 
 static int find_ci(char *from, char *to, int to_len) {
+#if WIN32
 	to[0] = 0;
 
 	char buf[PATH_MAX];
@@ -429,6 +457,10 @@ static int find_ci(char *from, char *to, int to_len) {
 		strncpy(to, buf, to_len);
 	}
 
+#else
+	strncpy(to, to_len, from);
+#endif
+
 	return 0;
 }
 
@@ -437,10 +469,10 @@ char *v68_io_resolve_path(char *filename, char *out, int len) {
 
 	if(urldecode(filename, buf, sizeof(buf)) < 0) return 0;
 	// only deal with absolute paths
-#if __linux__
-	if(buf[0] != '/') return 0;
-#else
+#if WIN32
 	if(buf[1] != ':') return 0;
+#else
+	if(buf[0] != '/') return 0;
 #endif
 
 	struct stat st;
@@ -449,11 +481,7 @@ char *v68_io_resolve_path(char *filename, char *out, int len) {
 		return out;
 	}
 
-#if __linux__
 	if(find_ci(buf, out, len)) return 0;
-#else
-	strncpy(out, buf, len);
-#endif
 
 	return out;
 }
@@ -462,6 +490,6 @@ void v68_dump_drives() {
 	for(int i = 0; i < MAX_DRIVES; i++) {
 		if(!drives[i].vpath[0]) continue;
 
-		verbose1("%c:\\%s = %s\n", 'A' + i, drives[i].cwd, drives[i].vpath);
+		verbose1("drive=\"%c:\" cwd=\"%s\" vpath=\"%s\"\n", 'A' + i, drives[i].cwd, drives[i].vpath);
 	}
 }

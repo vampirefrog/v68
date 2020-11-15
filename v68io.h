@@ -2,6 +2,19 @@
 
 #include"v68.h"
 
+#define DOS_DIR_SEP "\\"
+#define DOS_DIR_SEP_CHR '\\'
+#define UNIX_DIR_SEP "/"
+#define UNIX_DIR_SEP_CHR '/'
+
+#ifdef WIN32
+#define DIR_SEP_CHR DOS_DIR_SEP_CHR
+#define DIR_SEP DOS_DIR_SEP
+#else
+#define DIR_SEP_CHR UNIX_DIR_SEP_CHR
+#define DIR_SEP UNIX_DIR_SEP
+#endif
+
 int v68_io_init(void);
 int v68_io_autodetect_drives(void);
 
@@ -17,6 +30,7 @@ int v68_io_chmod(char *pathname, mode_t mode);
 
 int v68_io_curdrv(void);
 int v68_io_chgdrv(uint8_t drv);
+int v68_io_num_drives(void);
 int v68_io_getcwd(uint8_t drv, char *buf, size_t size);
 int v68_io_chdir(char *buf);
 
