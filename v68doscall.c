@@ -752,6 +752,21 @@ int v68_dos_call(uint16_t instr) {
 				m68k_set_reg(M68K_REG_D0, v68.cur_prog_addr - 0x10);
 			}
 			break;
+		case DOS_CALL_CURDRV: {
+				int drive = v68_io_curdrv();
+				m68k_set_reg(M68K_REG_D0, drive);
+				logcall("drive=%d (%c)\n", drive, 'A' + drive);
+			}
+			break;
+		case DOS_CALL_CHGDRV: {
+				uint16_t drive = m68k_read_memory_16(m68k_get_reg(0, M68K_REG_A7));
+				int curdrive = v68_io_curdrv();
+				v68_io_chgdrv(drive);
+				int num_drives = v68_io_num_drives();
+				m68k_set_reg(M68K_REG_D0, num_drives);
+				logcall("drive=%d (%c) curdrive=%d (%c) num_drives=%d\n", drive, 'A' + drive, curdrive, 'A' + curdrive, num_drives);
+			}
+			break;
 		default:
 			logcall("V68 DOS CALL %04x %s\n", instr, dos_call_names[call]);
 			break;
