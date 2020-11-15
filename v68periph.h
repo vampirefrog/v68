@@ -7,6 +7,8 @@
 #include "dmac.h"
 
 void v68_periph_init(void);
+void v68_periph_deinit(void);
+void v68_periph_reset(void);
 void v68_periph_render_sample(int16_t *l, int16_t *r);
 void v68_periph_advance(uint32_t cycles);
 

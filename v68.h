@@ -68,7 +68,8 @@ struct v68 {
 	int16_t oki_prev_sample[2];
 
 	/* 8255 PPI */
-	uint8_t ppi_regs[4];
+	uint8_t ppi_ctrl;
+	uint8_t ppi_port_c;
 
 	/* DMAC */
 	struct dmac dmac;

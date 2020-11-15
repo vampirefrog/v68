@@ -46,10 +46,12 @@ void v68_boot() {
 
 void v68_cpu_reset_instr_cb(void) {
 	verbose2("RESET peripherals\n");
-	v68.reset_pulsed = 1;
+	v68_periph_reset();
 }
 
 int v68_shutdown() {
+	v68_periph_deinit();
+
 	free(v68.ram);
 
 	return 0;
@@ -75,7 +77,7 @@ void v68_run() {
 		v68_run_sample();
 	}
 
-	int extra_samples = 100;
+	int extra_samples = 0;
 	for(int i = 0; i < extra_samples; i++) {
 		v68_run_sample();
 	}
