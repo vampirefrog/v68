@@ -62,15 +62,53 @@ BootLineFVec:
 	.dc.l	$00000000
 
 EntryPoint:	             ; Boot entry point
-	move.w	#$2700,sr
-	lea.l	(DefaultStackAddr),a7
+	move.w  #$2700,sr
+	lea.l   (DefaultStackAddr),a7
 	reset
+
+	bsr     SetupDevices
 	bsr     SetupExceptions
 	bsr     SetupTraps
 	bsr     SetupInterrupts
 	bsr     SetupIOCSCalls
 
 	jmp	    HumanStart            ; Go to DOS
+
+;
+; Devices
+;
+
+SetupDevices:
+	; DMAC
+	move.w #$00e9, ($e840d4)
+	move.w #$2003, ($e840d6)
+	move.w #$0400, ($e840c6)
+	; DMAC vectors
+	; Channel 0
+		move.b #$0f, ($e84025)
+		move.b #$0f, ($e84027)
+	; Channel #1
+		move.b #$0f, ($e84065)
+		move.b #$0f, ($e84067)
+	; Channel #2
+		move.b #$68, ($e840a5)
+		move.b #$69, ($e840a7)
+	; Channel #3
+		move.b #$6a, ($e840e5)
+		move.b #$6b, ($e840e7)
+		; DMA default interrupts
+	lea.l (DMA3Interrupt), a1
+	move.l a1, (DMA3IntVecAddr)
+	lea.l (DMA3Interrupt), a1
+	move.l a1, (DMA3ErrIntVecAddr)
+
+	; ADPCM
+	move.b #$00, ($c32) ; playback mode
+
+	; OPM
+	move.b #$00, ($9da) ; register $1b cache
+
+	rts
 
 ;
 ; Exceptions
@@ -164,10 +202,6 @@ SetupInterrupts:
 	move.l a1, (VdispVecAddr)
 	lea.l (DefaultIntHandler), a1
 	move.l a1, (CrtcVecAddr)
-	lea.l (DMA3Interrupt), a1
-	move.l a1, (DMA3IntVecAddr)
-	lea.l (DMA3Interrupt), a1
-	move.l a1, (DMA3ErrIntVecAddr)
 	rts
 
 DefaultIntHandler:
