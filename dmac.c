@@ -413,7 +413,6 @@ static void dmac_channel_set_dcr(struct dmac *dmac, int ch, uint32_t data) {
 
 	// ACTが上がっていればタイミングエラー
 	if (dmac->channels[ch].act) {
-		printf("setting error 0x02\n");
 		dmac_channel_set_error(dmac, ch, 0x02);
 		return;
 	}
@@ -469,7 +468,6 @@ static void dmac_channel_set_ocr(struct dmac *dmac, int ch, uint32_t data) {
 
 	// ACTが上がっていればタイミングエラー
 	if (dmac->channels[ch].act) {
-		printf("ocr setting error 0x02 on ch %d\n", ch);
 		dmac_channel_set_error(dmac, ch, 0x02);
 		return;
 	}
@@ -973,8 +971,6 @@ static void dmac_channel_set_error(struct dmac *dmac, int ch, uint32_t code) {
 	ASSERT(dmac);
 	ASSERT((ch >= 0) && (ch <= 3));
 	ASSERT((code >= 0x01) && (code <= 17));
-
-	printf("setting error %02x on channel %d\n", code, ch);
 
 	// ACTを降ろす(ファランクス ADPCM)
 	dmac->channels[ch].act = 0;
