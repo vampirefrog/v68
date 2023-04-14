@@ -23,3 +23,7 @@ From [PCM8 0.48](https://nfggames.com/X68000/Mirrors/x68pub/x68tools/SOUND/ADPCM
 Some notes:
 
 Hex values are usually in the format `$1234abcd`.
+
+More docs:
+
+https://epromfoundry.com/inside-x68000-interactive-translator/
