@@ -1,0 +1,17 @@
+name: Build & Tests
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install wine
+      run: sudo apt install -y wine
+    - uses: actions/checkout@v4
+    - name: make
+      run: make
