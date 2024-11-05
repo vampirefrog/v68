@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Install wine
-      run: sudo apt install -y wine
+      run: sudo apt install -y wine portaudio19-dev
     - uses: actions/checkout@v4
     - name: make
       run: make
