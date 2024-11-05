@@ -10,8 +10,10 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
-    - name: Install wine
-      run: sudo apt install -y wine portaudio19-dev
+    - name: Install deps
+      run: sudo apt install -y portaudio19-dev
+    - name: Install wine32
+      run: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install -y wine32
     - uses: actions/checkout@v4
     - name: make
       run: make
