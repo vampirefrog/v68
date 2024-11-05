@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Install deps
-      run: sudo apt install -y portaudio19-dev
+      run: sudo apt install -y portaudio19-dev libportaudio2
     - name: Install wine32
       run: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install -y wine32
     - uses: actions/checkout@v4
