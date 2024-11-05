@@ -16,17 +16,18 @@ First, have some required packages ready:
 
 ```sh
 sudo apt-get install git build-essential portaudio19-dev zlib1g-dev
+git clone --recursive https://github.com/vampirefrog/v68.git
 # if we don't touch these, you'll need wine to build them with run68.exe
 touch fake_ipl.inc fake_human.inc
 make
 ```
 
-Install wine
-------------
+For modifying the fake IPL you'll need wine to run run68:
 
 ```sh
 sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install wine32
 ```
+
 
 Building the tests:
 
