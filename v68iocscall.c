@@ -3,6 +3,8 @@
 #include <string.h>
 #if __linux__
 #include <sys/sysinfo.h>
+#elif __APPLE__
+#include <sys/sysctl.h>
 #endif
 #include "v68.h"
 #include "v68iocscall.h"
@@ -507,8 +509,18 @@ int v68_iocs_call(uint16_t instr) {
 				sysinfo(&si);
 				m68k_set_reg(M68K_REG_D0, (si.uptime % (24 * 60 * 60)) * 100);
 				m68k_set_reg(M68K_REG_D1, si.uptime / (24 * 60 * 60));
-#endif
-#ifdef WIN32
+#elif __APPLE__
+				struct timeval boottime;
+				size_t len = sizeof(boottime);
+				int mib[2] = { CTL_KERN, KERN_BOOTTIME };
+				if ( sysctl(mib, 2, &boottime, &len, NULL, 0) < 0 ) {
+					break;
+				}
+				time_t bsec = boottime.tv_sec, csec = time(NULL);
+				long uptime = difftime(csec, bsec);
+				m68k_set_reg(M68K_REG_D0, (uptime % (24 * 60 * 60)) * 100);
+				m68k_set_reg(M68K_REG_D1, uptime / (24 * 60 * 60));
+#elif WIN32
 				DWORD u = GetTickCount();
 				u /= 1000;
 				m68k_set_reg(M68K_REG_D0, (u % (24 * 60 * 60)) * 100);

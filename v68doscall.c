@@ -487,7 +487,7 @@ int v68_dos_call(uint16_t instr) {
 			}
 			break;
 		case DOS_CALL_GETDATE: {
-#if __linux__
+#if __linux__ || __APPLE__
 				time_t t = time(NULL);
 				struct tm result;
 				localtime_r(&t, &result);
@@ -497,7 +497,7 @@ int v68_dos_call(uint16_t instr) {
 			}
 			break;
 		case DOS_CALL_GETTIME: {
-#if __linux__
+#if __linux__ || __APPLE__
 				time_t t = time(NULL);
 				struct tm result;
 				localtime_r(&t, &result);
@@ -507,7 +507,7 @@ int v68_dos_call(uint16_t instr) {
 			}
 			break;
 		case DOS_CALL_GETTIM2: {
-#if __linux__
+#if __linux__ || __APPLE__
 				time_t t = time(NULL);
 				struct tm result;
 				localtime_r(&t, &result);
