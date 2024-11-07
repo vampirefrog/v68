@@ -3,6 +3,8 @@
 #include <limits.h>
 #if __linux__
 #include <mntent.h>
+#elif __APPLE__
+#include <sys/mount.h>
 #endif
 #include <string.h>
 #include <sys/types.h>
@@ -38,7 +40,7 @@ struct dosfile dosfiles[96];
 int v68_io_init() {
 	memset(drives, 0, sizeof(drives));
 
-#if __linux__
+#if __linux__ || __APPLE__
 	// Init Z: as unix /
 	char buf[PATH_MAX];
 	buf[0] = 0;
@@ -105,6 +107,18 @@ int v68_io_autodetect_drives() {
 		}
 	}
 	fclose(f);
+#elif __APPLE__
+	char *home = getenv("HOME");
+	if(home && *home) {
+		strncpy(drives['H' - 'A'].vpath, home, PATH_MAX);
+		drives['H' - 'A'].cwd[0] = 0;
+	}
+
+	struct statfs *mounts;
+	int num_mounts = getmntinfo(&mounts, MNT_WAIT);
+	for (int i = 0; i < num_mounts; i++) {
+		v68_io_add_drive(v68_io_unused_drive(), mounts[i].f_mntonname);
+	}
 #else
 	DWORD dw = GetLogicalDrives();
 	for(int i = 'A', j = 1; i <= 'Z'; i++, j <<= 1) {
@@ -458,7 +472,7 @@ static int find_ci(char *from, char *to, int to_len) {
 	}
 
 #else
-	strncpy(to, to_len, from);
+	strncpy(to, from, to_len);
 #endif
 
 	return 0;
