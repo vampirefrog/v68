@@ -3,7 +3,7 @@ v68
 
 [![MSYS2 MINGW64 Build](https://github.com/vampirefrog/v68/actions/workflows/msys2-mingw64.yml/badge.svg)](https://github.com/vampirefrog/v68/actions/workflows/msys2-mingw64.yml)
 [![Linux Build](https://github.com/vampirefrog/v68/actions/workflows/build-linux.yml/badge.svg)](https://github.com/vampirefrog/v68/actions/workflows/build-linux.yml)
-[![macOS Build](https://github.com/vampirefrog/v68/actions/workflows/build-macos.yml/badge.svg)](https://github.com/vampirefrog/v68/actions/workflows/build-macos.yml)
+[![macOS Build](https://github.com/vampirefrog/v68/actions/workflows/build-macos.yml/badge.svg)](https://github.com/vampirefrog/v68/actions/workflows/build-macos.yml) [![GitHub Release](https://img.shields.io/github/v/release/vampirefrog/v68?label=Latest+Release)](https://github.com/vampirefrog/v68/releases/latest)
 
 A Human68k X68000 CUI emulator. Very similar to [run68](https://github.com/rururutan/run68), it is written from scratch and emulates, besides the OS calls and the CPU, the sound hardware.
 
