@@ -32,4 +32,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: v68-${{steps.vars.outputs.sha_short}}
-          path: "v68.exe libportaudio.dll"
+          path: |
+            v68.exe
+            libportaudio.dll
