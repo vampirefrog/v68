@@ -1,0 +1,35 @@
+name: MSYS2 MINGW64 Build
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  msys2-mingw64:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: git make pkg-config mingw64/mingw-w64-x86_64-gcc mingw64/mingw-w64-x86_64-portaudio mingw64/mingw-w64-x86_64-nsis
+      - name: Build with make
+        run: make
+      - name: Copy DLLs over
+        run: cp $MSYSTEM_PREFIX/bin/libportaudio.dll .
+      - name: Set outputs
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: v68-${{steps.vars.outputs.sha_short}}
+          path: "v68.exe libportaudio.dll"
