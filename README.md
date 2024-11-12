@@ -1,6 +1,7 @@
 v68
 ===
 
+[![MSYS2 MINGW64 Build](https://github.com/vampirefrog/v68/actions/workflows/msys2-mingw64.yml/badge.svg)](https://github.com/vampirefrog/v68/actions/workflows/msys2-mingw64.yml)
 [![Linux Build](https://github.com/vampirefrog/v68/actions/workflows/build-linux.yml/badge.svg)](https://github.com/vampirefrog/v68/actions/workflows/build-linux.yml)
 [![macOS Build](https://github.com/vampirefrog/v68/actions/workflows/build-macos.yml/badge.svg)](https://github.com/vampirefrog/v68/actions/workflows/build-macos.yml)
 
