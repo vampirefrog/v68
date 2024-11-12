@@ -22,13 +22,9 @@ CFLAGS=-ggdb -Wall -DHAVE_MEMCPY -Ix68ksjis $(shell pkg-config portaudio-2.0 --c
 LDFLAGS=-lz $(shell pkg-config portaudio-2.0 --libs)
 ifneq (,$(findstring MINGW,$(shell uname -s)))
 CFLAGS+=-static-libgcc
-LDFLAGS=-liconv -lws2_32 -static-libgcc
+LDFLAGS+=-liconv -lws2_32 -static-libgcc -lwinmm
 else
 LDFLAGS=-lm
-endif
-
-ifneq (,$(findstring MINGW,$(shell uname -s)))
-LDFLAGS+=-lwinmm
 endif
 
 v68: main.o tools.o v68.o v68io.o v68human.o v68doscall.o v68iocscall.o v68fecall.o x68ksjis/sjis.o x68ksjis/sjis_unicode.o x68ksjis/utf8.o ym2151.o dmac.o okim6258.o vgm.o v68periph.o v68ipl.o $(MUSASHIOBJS) $(MUSASHIGENOBJS)
